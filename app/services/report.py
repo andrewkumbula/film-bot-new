@@ -20,10 +20,12 @@ async def build_flow_log_csv(hours: int = 24) -> tuple[bytes, str]:
         db.row_factory = aiosqlite.Row
         cursor = await db.execute(
             """
-            SELECT user_id, session_id, step, value, created_at
-            FROM flow_log
-            WHERE datetime(created_at) >= datetime('now', '-' || ? || ' hours')
-            ORDER BY created_at
+            SELECT f.user_id, u.username, u.first_name, u.last_name,
+                   f.session_id, f.step, f.value, f.created_at
+            FROM flow_log f
+            LEFT JOIN users u ON f.user_id = u.user_id
+            WHERE datetime(f.created_at) >= datetime('now', '-' || ? || ' hours')
+            ORDER BY f.created_at
             """,
             (hours,),
         )
@@ -31,10 +33,13 @@ async def build_flow_log_csv(hours: int = 24) -> tuple[bytes, str]:
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["user_id", "session_id", "step", "value", "created_at"])
+    writer.writerow(["user_id", "username", "first_name", "last_name", "session_id", "step", "value", "created_at"])
     for row in rows:
         writer.writerow([
             row["user_id"],
+            row["username"] or "",
+            row["first_name"] or "",
+            row["last_name"] or "",
             row["session_id"],
             row["step"],
             row["value"] or "",

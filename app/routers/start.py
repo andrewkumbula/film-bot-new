@@ -6,6 +6,7 @@ from aiogram.types import Message
 
 from ..config import Settings
 from ..keyboards.main_menu import main_menu_keyboard
+from ..services.users import ensure_user
 
 
 def get_router(settings: Settings) -> Router:
@@ -13,6 +14,13 @@ def get_router(settings: Settings) -> Router:
 
     @router.message(CommandStart())
     async def cmd_start(message: Message) -> None:
+        if message.from_user:
+            await ensure_user(
+                message.from_user.id,
+                username=message.from_user.username,
+                first_name=message.from_user.first_name,
+                last_name=message.from_user.last_name,
+            )
         text = (
             "👋 Привет! Я бот <b>«Фильм на вечер»</b>.\n\n"
             "Помогу за пару минут подобрать крутой фильм под твоё настроение. "

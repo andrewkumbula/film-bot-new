@@ -24,6 +24,7 @@ from ..llm.service import get_recommendations_from_llm, LlmError
 from ..services.favorites import add_favorite_for_user, add_watched_for_user, is_favorite, is_watched
 from ..services.flow_log import log_flow_step
 from ..services.kinopoisk import get_movie_info, KinopoiskMovieInfo
+from ..services.users import ensure_user
 
 
 class MovieFlow(StatesGroup):
@@ -42,6 +43,13 @@ def get_router(settings: Settings) -> Router:
     # Старт флоу: только кнопка «Подобрать фильм» (остальные пункты убраны из меню)
     @router.message(F.text.endswith("Подобрать фильм"))
     async def start_flow(message: Message, state: FSMContext) -> None:
+        if message.from_user:
+            await ensure_user(
+                message.from_user.id,
+                username=message.from_user.username,
+                first_name=message.from_user.first_name,
+                last_name=message.from_user.last_name,
+            )
         await state.clear()
         session_id = uuid.uuid4().hex
         await state.set_state(MovieFlow.mood)
