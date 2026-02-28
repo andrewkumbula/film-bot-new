@@ -31,6 +31,17 @@ def get_router(settings: Settings) -> Router:
             if rec.get("year"):
                 title_line += f" ({rec['year']})"
             parts.append(title_line)
+            # Возрастное ограничение и рейтинг Кинопоиска
+            line_parts = []
+            if rec.get("age_rating"):
+                line_parts.append(f"🔞 {rec['age_rating']}+")
+            if rec.get("rating_kp") is not None:
+                try:
+                    line_parts.append(f"⭐ Кинопоиск: {float(rec['rating_kp']):.1f}")
+                except (TypeError, ValueError):
+                    pass
+            if line_parts:
+                parts.append("  ".join(line_parts))
 
             if rec.get("genres"):
                 parts.append("🎭 Жанры: " + ", ".join(rec["genres"]))

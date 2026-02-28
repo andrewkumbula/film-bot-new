@@ -20,6 +20,12 @@ class Settings:
     model: str = "xiaomi/mimo-v2-flash"
     debug: bool = False
     db_path: Path = BASE_DIR / "app_data" / "bot.db"
+    # API Кинопоиска (poiskkino.dev) для проверки возрастного рейтинга
+    kinopoisk_api_key: str = ""
+    kinopoisk_base_url: str = "https://api.poiskkino.dev"
+    # Ежедневный отчёт по flow_log: куда слать и в какое время (HH:MM, локальное время сервера)
+    report_chat_id: str = ""
+    report_time: str = "09:00"
 
 
 def load_settings() -> Settings:
@@ -41,6 +47,11 @@ def load_settings() -> Settings:
     db_path = Path(os.getenv("DB_PATH", str(BASE_DIR / "app_data" / "bot.db")))
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
+    kinopoisk_api_key = os.getenv("KINOPOISK_API_KEY", "").strip()
+    kinopoisk_base_url = os.getenv("KINOPOISK_BASE_URL", "https://api.poiskkino.dev").strip()
+    report_chat_id = os.getenv("REPORT_CHAT_ID", "").strip()
+    report_time = os.getenv("REPORT_TIME", "09:00").strip() or "09:00"
+
     return Settings(
         bot_token=bot_token,
         openrouter_api_key=openrouter_api_key,
@@ -48,5 +59,9 @@ def load_settings() -> Settings:
         model=model,
         debug=debug,
         db_path=db_path,
+        kinopoisk_api_key=kinopoisk_api_key,
+        kinopoisk_base_url=kinopoisk_base_url,
+        report_chat_id=report_chat_id,
+        report_time=report_time,
     )
 

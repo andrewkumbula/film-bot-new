@@ -24,6 +24,11 @@ pip install -r requirements.txt
 
 - `BOT_TOKEN` — токен Telegram-бота
 - `OPENROUTER_API_KEY` — API-ключ OpenRouter
+- `KINOPOISK_API_KEY` — (опционально) токен API Кинопоиска для отображения возрастного рейтинга в рекомендациях. Получить: Telegram-бот [@poiskkinodev_bot](https://t.me/poiskkinodev_bot)
+- `REPORT_CHAT_ID` — (опционально) ваш Telegram chat_id для ежедневной рассылки отчёта по логам флоу за сутки (CSV). Узнать chat_id: напишите боту [@userinfobot](https://t.me/userinfobot).
+- `REPORT_TIME` — (опционально) время отправки отчёта в формате `HH:MM` (по умолчанию `09:00`, локальное время сервера).
+
+Команда `/daily_report` формирует и отправляет тот же отчёт (за последние 24 часа) в чат того, кто вызвал команду. Если задан `REPORT_CHAT_ID`, выполнять команду может только пользователь с этим id.
 
 ### Запуск
 

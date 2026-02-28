@@ -40,6 +40,11 @@ async def start_polling(settings: Settings) -> None:
     dp = await create_bot_and_dispatcher(settings)
     bot: Bot = dp["bot"]
 
+    # Запуск ежедневной отправки отчёта по расписанию (если задан REPORT_CHAT_ID)
+    import asyncio
+    from .scheduler import daily_report_scheduler
+    asyncio.create_task(daily_report_scheduler(bot, settings))
+
     logger.info("Starting bot polling...")
     # Long polling
     await dp.start_polling(bot)

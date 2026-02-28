@@ -36,6 +36,7 @@ def _build_prompt(preferences: Dict[str, Any], negative: str) -> str:
     }
     age_map = {
         "0": "0+",
+        "6": "6+",
         "12": "12+",
         "16": "16+",
         "18": "18+",
@@ -49,7 +50,7 @@ def _build_prompt(preferences: Dict[str, Any], negative: str) -> str:
 
     lines = []
     mood = preferences.get("mood")
-    if mood:
+    if mood and mood != "any":
         lines.append(f"- Настроение: {mood_map.get(mood, mood)}")
 
     genres = preferences.get("genres") or []
@@ -57,16 +58,18 @@ def _build_prompt(preferences: Dict[str, Any], negative: str) -> str:
         lines.append(f"- Жанры: {', '.join(genres)}")
 
     duration = preferences.get("duration")
-    if duration:
+    if duration and duration != "any":
         lines.append(f"- Длительность: {duration_map.get(duration, duration)}")
 
     age = preferences.get("age")
-    if age:
+    if age and age != "any":
         lines.append(f"- Возрастной рейтинг: {age_map.get(age, age)}")
 
     company = preferences.get("company")
-    if company:
+    if company and company != "any":
         lines.append(f"- С кем смотрим: {company_map.get(company, company)}")
+        if company == "family":
+            lines.append("- Важно: смотрят с детьми — не предлагай фильмы с рейтингом 18+.")
 
     if negative:
         lines.append(f"- Чего избегать: {negative}")
@@ -94,7 +97,7 @@ def _build_prompt(preferences: Dict[str, Any], negative: str) -> str:
         "  \"followup_questions\": [\"вопрос при необходимости\"]\n"
         "}\n\n"
         "Требования:\n"
-        "- Дай от 3 до 7 фильмов.\n"
+        "- Дай ровно 5 фильмов за один раз.\n"
         "- Используй реальные фильмы.\n"
         "- Не добавляй комментарии вне JSON, без пояснений, без Markdown, без ```.\n"
         "- Все поля должны быть заполнены корректными типами.\n"

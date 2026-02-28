@@ -18,3 +18,6 @@ venv/
 
 # node (если вдруг есть фронт)
 node_modules/
+
+# локальная БД бота
+app_data/
