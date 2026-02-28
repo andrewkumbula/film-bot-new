@@ -1,0 +1,20 @@
+# env
+.env
+.env.*
+
+# python
+__pycache__/
+*.py[cod]
+
+# venv
+.venv/
+venv/
+
+# logs
+*.log
+
+# macOS
+.DS_Store
+
+# node (если вдруг есть фронт)
+node_modules/
