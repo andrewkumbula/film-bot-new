@@ -274,6 +274,55 @@ def _build_top250_prompt(
     return prompt
 
 
+async def shorten_description_for_card(
+    settings: Settings, long_description: str, title: str = ""
+) -> str | None:
+    """
+    Генерирует краткое яркое описание для карточки фильма (до 120 символов).
+    Возвращает None при ошибке или пустом вводе.
+    """
+    long_description = (long_description or "").strip()
+    if not long_description or len(long_description) < 20:
+        return None
+    prompt = (
+        "Дай одно короткое яркое описание фильма для карточки в мессенджере.\n"
+        "Исходный текст описания:\n"
+        f"{long_description[:1500]}\n\n"
+        "Требования: строго до 120 символов, один предложение, живой язык, без кавычек. "
+        "Ответь только этим текстом, без пояснений."
+    )
+    if title:
+        prompt = f"Фильм: {title}\n\n" + prompt
+    url = f"{settings.openrouter_base_url.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": settings.model,
+        "messages": [
+            {"role": "user", "content": prompt},
+        ],
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
+    except httpx.RequestError:
+        return None
+    if response.status_code >= 400:
+        return None
+    try:
+        content = response.json()["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError):
+        return None
+    text = (content or "").strip().strip('"').strip("'")
+    if not text:
+        return None
+    if len(text) > 120:
+        text = text[:117].rstrip() + "…"
+    return text
+
+
 async def get_top250_picks_from_llm(
     settings: Settings,
     mood: str,

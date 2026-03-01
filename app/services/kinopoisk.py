@@ -24,6 +24,7 @@ class KinopoiskMovieInfo:
     votes: Optional[int] = None
     poster_url: Optional[str] = None
     poster_urls: Optional[List[str]] = None  # все URL постеров от API (1–3 и более)
+    short_description: Optional[str] = None  # краткое описание для карточки (генерируется ИИ ночью)
 
 
 async def get_movie_from_db(
@@ -45,12 +46,12 @@ async def get_movie_from_db(
         db.row_factory = aiosqlite.Row
         if kinopoisk_id is not None:
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls FROM movies WHERE kinopoisk_id = ? LIMIT 1",
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description FROM movies WHERE kinopoisk_id = ? LIMIT 1",
                 (kinopoisk_id,),
             )
         else:
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
                 (title, year, year),
             )
         row = await cursor.fetchone()
@@ -65,6 +66,11 @@ async def get_movie_from_db(
                 poster_urls = None
     except (json.JSONDecodeError, TypeError, KeyError, IndexError):
         pass
+    short_desc = None
+    try:
+        short_desc = row["short_description"] if row["short_description"] else None
+    except (KeyError, IndexError):
+        pass
     return KinopoiskMovieInfo(
         kinopoisk_id=row["kinopoisk_id"],
         age_rating=row["age_rating"],
@@ -72,6 +78,7 @@ async def get_movie_from_db(
         votes=row["votes"],
         poster_url=row["poster_url"] or None,
         poster_urls=poster_urls,
+        short_description=short_desc,
     )
 
 
@@ -214,6 +221,29 @@ async def _fetch_movie_doc_by_id(settings: Settings, kinopoisk_id: int) -> Optio
             return response.json()
     except (httpx.RequestError, ValueError):
         return None
+
+
+async def ensure_movie_details_by_id(
+    settings: Settings, kinopoisk_id: int
+) -> Optional[Dict[str, Any]]:
+    """
+    Если по фильму нет возрастного рейтинга/описания — запрашивает полные данные с poiskkino по ID,
+    сохраняет в movies и возвращает {age_rating, rating_kp, description} для подстановки в карточку.
+    Возвращает None при ошибке или отсутствии API-ключа.
+    """
+    if not settings.kinopoisk_api_key:
+        return None
+    doc = await _fetch_movie_doc_by_id(settings, kinopoisk_id)
+    if not doc:
+        return None
+    await save_movie_from_api_doc(settings, doc)
+    row = _parse_doc_to_row(doc)
+    _id, _title, _year, age_rating, rating_kp, _poster, _poster_urls, description, _g, _c, _v, _raw = row
+    return {
+        "age_rating": age_rating,
+        "rating_kp": rating_kp,
+        "description": description,
+    }
 
 
 def _normalize_title(s: str) -> str:

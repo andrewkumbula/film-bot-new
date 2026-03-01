@@ -52,8 +52,9 @@ async def start_polling(settings: Settings) -> None:
 
     # Запуск ежедневной отправки отчёта по расписанию (если задан REPORT_CHAT_ID)
     import asyncio
-    from .scheduler import daily_report_scheduler, top250_refresh_scheduler
+    from .scheduler import daily_report_scheduler, short_descriptions_backfill_scheduler, top250_refresh_scheduler
     asyncio.create_task(daily_report_scheduler(bot, settings))
+    asyncio.create_task(short_descriptions_backfill_scheduler(settings))
     asyncio.create_task(top250_refresh_scheduler(settings))
 
     logger.info("Starting bot polling...")

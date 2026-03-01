@@ -72,6 +72,8 @@ def _unofficial_item_to_doc(item: Dict[str, Any]) -> Dict[str, Any]:
     age_rating = item.get("ratingAgeLimits") or item.get("ageRating")
     if age_rating is not None:
         age_rating = str(age_rating).strip() or None
+    if age_rating and age_rating.lower().startswith("age") and age_rating[3:].isdigit():
+        age_rating = age_rating[3:]  # "age18" → "18"
     return {
         "id": film_id,
         "name": name,
@@ -409,7 +411,7 @@ def _row_to_filtered_item(row, has_poster: bool = True, use_index: bool = False)
         year = None
     poster_urls = None
     try:
-        raw = _row_get(row, "poster_urls", "m.poster_urls", 8)
+        raw = _row_get(row, "poster_urls", "m.poster_urls", 7)
         if raw and isinstance(raw, str):
             parsed = json.loads(raw)
             if isinstance(parsed, list):
@@ -423,9 +425,11 @@ def _row_to_filtered_item(row, has_poster: bool = True, use_index: bool = False)
         "genres": _row_get(row, "genres", "m.genres", 3),
         "rating_kp": _row_get(row, "rating_kp", "m.rating_kp", 4),
         "age_rating": _row_get(row, "age_rating", "m.age_rating", 6),
-        "poster_url": (_row_get(row, "poster_url", "m.poster_url", 7) or None) if has_poster else None,
+        "poster_url": (_row_get(row, "poster_url", "m.poster_url", 6) or None) if has_poster else None,
         "poster_urls": poster_urls,
-        "position": _row_get(row, "position", "t.position", 8),
+        "description": _row_get(row, "description", "m.description", 8),
+        "short_description": _row_get(row, "short_description", "m.short_description", 9),
+        "position": _row_get(row, "position", "t.position", 10),
     }
 
 
@@ -458,6 +462,8 @@ async def get_filtered_top250(
                     COALESCE(m.age_rating, t.age_rating) AS age_rating,
                     COALESCE(NULLIF(TRIM(m.poster_url), ''), t.poster_url) AS poster_url,
                     m.poster_urls AS poster_urls,
+                    m.description AS description,
+                    m.short_description AS short_description,
                     t.position AS position
                 FROM kinopoisk_top250 t
                 JOIN movies m ON t.movie_id = m.id

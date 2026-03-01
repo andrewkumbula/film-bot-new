@@ -11,12 +11,15 @@ from aiogram import Bot
 
 from .config import Settings
 from .routers.report import send_daily_report_to_chat
+from .services.short_descriptions import backfill_short_descriptions
 from .services.top250 import refresh_top250
 
 logger = logging.getLogger(__name__)
 
 # Топ 250: обновление раз в месяц (1-е число в 04:00, локальное время)
 TOP250_REFRESH_TIME = time(4, 0)
+# Краткие описания для карточек: ночной бэкфилл в 03:00
+SHORT_DESC_BACKFILL_TIME = time(3, 0)
 
 
 def _parse_report_time(report_time: str) -> time:
@@ -83,6 +86,30 @@ def _seconds_until_first_of_month(at_time: time) -> float:
         else:
             next_first = next_first.replace(month=next_first.month + 1)
     return (next_first - now).total_seconds()
+
+
+async def short_descriptions_backfill_scheduler(settings: Settings) -> None:
+    """
+    Раз в сутки в SHORT_DESC_BACKFILL_TIME запускает бэкфилл кратких описаний:
+    для фильмов с description, но без short_description, ИИ генерирует краткое описание.
+    """
+    if not settings.openrouter_api_key:
+        logger.info("OPENROUTER_API_KEY not set, short descriptions backfill disabled")
+        return
+    logger.info("Short descriptions backfill scheduler started, will run daily at %s", SHORT_DESC_BACKFILL_TIME)
+    while True:
+        delay = _seconds_until(SHORT_DESC_BACKFILL_TIME)
+        if delay < 0:
+            delay = 0
+        if delay > 0:
+            await asyncio.sleep(delay)
+        try:
+            n = await backfill_short_descriptions(settings)
+            if n:
+                logger.info("Short descriptions backfill: %s movies updated", n)
+        except Exception as e:
+            logger.exception("Short descriptions backfill failed: %s", e)
+        await asyncio.sleep(60)
 
 
 async def top250_refresh_scheduler(settings: Settings) -> None:

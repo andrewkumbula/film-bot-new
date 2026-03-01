@@ -110,6 +110,7 @@ async def init_db(settings: Settings) -> None:
         await _ensure_top250_movie_id(db)
         await _ensure_movies_extra_columns(db)
         await _ensure_movies_poster_urls(db)
+        await _ensure_movies_short_description(db)
         await _ensure_movies_unique_title_year(db)
         await _ensure_not_interested_table(db)
 
@@ -211,6 +212,16 @@ async def _ensure_movies_poster_urls(db: aiosqlite.Connection) -> None:
     columns = [r[1] for r in rows] if rows else []
     if "poster_urls" not in columns:
         await db.execute("ALTER TABLE movies ADD COLUMN poster_urls TEXT")
+    await db.commit()
+
+
+async def _ensure_movies_short_description(db: aiosqlite.Connection) -> None:
+    """Добавляет колонку short_description (краткое описание для карточки, генерируется ИИ ночью)."""
+    cursor = await db.execute("PRAGMA table_info(movies)")
+    rows = await cursor.fetchall()
+    columns = [r[1] for r in rows] if rows else []
+    if "short_description" not in columns:
+        await db.execute("ALTER TABLE movies ADD COLUMN short_description TEXT")
     await db.commit()
 
 

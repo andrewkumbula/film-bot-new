@@ -45,7 +45,7 @@ from ..services.not_interested import (
     get_not_interested_movie_ids,
 )
 from ..services.flow_log import log_flow_step
-from ..services.kinopoisk import get_movie_info, KinopoiskMovieInfo
+from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_info, KinopoiskMovieInfo
 from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
 from ..services.users import ensure_user
 
@@ -298,10 +298,24 @@ def get_router(settings: Settings) -> Router:
         await state.update_data(recommendations=films)
         await callback.message.edit_text(header_msg)
         for idx, rec in enumerate(films):
+            if not (rec.get("age_rating") or "").strip() and rec.get("kinopoisk_id") and settings.kinopoisk_api_key:
+                try:
+                    extra = await ensure_movie_details_by_id(settings, int(rec["kinopoisk_id"]))
+                    if extra:
+                        rec.update(extra)
+                except (TypeError, ValueError) as e:
+                    logger.debug("Top250 ensure_movie_details_by_id %s: %s", rec.get("kinopoisk_id"), e)
             parts = [
                 f"{idx + 1}. <b>{rec.get('title') or '—'}</b>",
-                f"🔞 {rec.get('age_rating') or '—'}+   ⭐ Кинопоиск: {rec.get('rating_kp') or '—'}",
             ]
+            age_raw = (rec.get("age_rating") or "").strip()
+            age_str = f"{age_raw}+" if age_raw and not str(age_raw).endswith("+") else (age_raw or "—")
+            rating_str = rec.get("rating_kp")
+            if rating_str is not None and isinstance(rating_str, (int, float)):
+                rating_str = f"{float(rating_str):.1f}"
+            else:
+                rating_str = "—"
+            parts.append(f"🔞 {age_str}   ⭐ Кинопоиск: {rating_str}")
             pos = rec.get("position")
             if pos is not None:
                 parts.append(f"🏆 № {pos} в Топ 250 Кинопоиска")
@@ -309,6 +323,9 @@ def get_router(settings: Settings) -> Router:
                 parts[0] += f" ({rec['year']})"
             if rec.get("genres"):
                 parts.append("🎭 " + (rec["genres"][:80] + "…" if len(rec.get("genres", "")) > 80 else rec["genres"]))
+            short_desc = (rec.get("short_description") or "").strip()
+            if short_desc:
+                parts.append("📝 " + short_desc)
             text = "\n".join(parts)
             in_fav = await is_favorite(callback.from_user.id, rec)
             in_watched = await is_watched(callback.from_user.id, rec)
@@ -701,6 +718,8 @@ def get_router(settings: Settings) -> Router:
             parts.append(f"{age_str}   {rating_str}")
             if info and info.kinopoisk_id is not None and info.kinopoisk_id in top250_positions:
                 parts.append(f"🏆 № {top250_positions[info.kinopoisk_id]} в Топ 250 Кинопоиска")
+            if info and (info.short_description or "").strip():
+                parts.append("📝 " + (info.short_description or "").strip())
             if rec.genres:
                 parts.append("🎭 Жанры: " + ", ".join(rec.genres))
             if rec.mood_tags:
