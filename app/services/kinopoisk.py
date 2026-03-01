@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import aiosqlite
 import httpx
@@ -23,6 +23,7 @@ class KinopoiskMovieInfo:
     rating_kp: Optional[float] = None
     votes: Optional[int] = None
     poster_url: Optional[str] = None
+    poster_urls: Optional[List[str]] = None  # все URL постеров от API (1–3 и более)
 
 
 async def get_movie_from_db(
@@ -44,33 +45,72 @@ async def get_movie_from_db(
         db.row_factory = aiosqlite.Row
         if kinopoisk_id is not None:
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url FROM movies WHERE kinopoisk_id = ? LIMIT 1",
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls FROM movies WHERE kinopoisk_id = ? LIMIT 1",
                 (kinopoisk_id,),
             )
         else:
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
                 (title, year, year),
             )
         row = await cursor.fetchone()
     if not row:
         return None
+    poster_urls = None
+    try:
+        raw = row["poster_urls"]
+        if raw and isinstance(raw, str):
+            poster_urls = json.loads(raw)
+            if not isinstance(poster_urls, list):
+                poster_urls = None
+    except (json.JSONDecodeError, TypeError, KeyError, IndexError):
+        pass
     return KinopoiskMovieInfo(
         kinopoisk_id=row["kinopoisk_id"],
         age_rating=row["age_rating"],
         rating_kp=row["rating_kp"],
         votes=row["votes"],
         poster_url=row["poster_url"] or None,
+        poster_urls=poster_urls,
     )
 
 
+# Порядок полей постера в ответе API (приоритет для «главного» постера)
+_POSTER_KEYS = ("url", "previewUrl", "preview")
+
+
 def _parse_poster(doc: Dict[str, Any]) -> Optional[str]:
+    """Возвращает один URL постера (приоритет: url → previewUrl → preview)."""
+    urls = _parse_poster_urls(doc)
+    return urls[0] if urls else None
+
+
+def _parse_poster_urls(doc: Dict[str, Any]) -> List[str]:
+    """Собирает все URL постеров из doc (без дублей, порядок: url, previewUrl, preview)."""
+    seen: set = set()
+    out: List[str] = []
     poster = doc.get("poster")
     if isinstance(poster, dict):
-        return poster.get("url") or poster.get("previewUrl") or poster.get("preview") or None
-    if isinstance(poster, str) and poster.strip().startswith("http"):
-        return poster.strip()
-    return None
+        for key in _POSTER_KEYS:
+            val = poster.get(key)
+            if isinstance(val, str) and val.strip().startswith("http"):
+                u = val.strip()[:500]
+                if u not in seen:
+                    seen.add(u)
+                    out.append(u)
+        for key, val in poster.items():
+            if key in _POSTER_KEYS:
+                continue
+            if isinstance(val, str) and val.strip().startswith("http"):
+                u = val.strip()[:500]
+                if u not in seen:
+                    seen.add(u)
+                    out.append(u)
+    elif isinstance(poster, str) and poster.strip().startswith("http"):
+        u = poster.strip()[:500]
+        if u not in seen:
+            out.append(u)
+    return out
 
 
 def _parse_doc_to_row(doc: Dict[str, Any]) -> tuple:
@@ -109,6 +149,8 @@ def _parse_doc_to_row(doc: Dict[str, Any]) -> tuple:
         except (TypeError, ValueError):
             votes = None
     poster_url = _parse_poster(doc)
+    poster_urls = _parse_poster_urls(doc)
+    poster_urls_json = json.dumps(poster_urls, ensure_ascii=False)[:2000] if poster_urls else None
     description = (doc.get("description") or "").strip() or None
     if description and len(description) > 5000:
         description = description[:5000]
@@ -119,7 +161,7 @@ def _parse_doc_to_row(doc: Dict[str, Any]) -> tuple:
     country_names = [c.get("name") or "" for c in countries_raw if isinstance(c, dict)]
     countries = ",".join(c.strip() for c in country_names if c.strip()) or None
     raw_json = json.dumps(doc, ensure_ascii=False)[:100000] if doc else None  # лимит размера
-    return (kinopoisk_id, name, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json)
+    return (kinopoisk_id, name, year, age_rating, rating_kp, poster_url, poster_urls_json, description, genres, countries, votes, raw_json)
 
 
 async def save_movie_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> None:
@@ -127,7 +169,7 @@ async def save_movie_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> No
     Сохраняет в movies все данные из ответа API Кинопоиска. Если запись есть (по kinopoisk_id или title+year) — обновляет.
     """
     row = _parse_doc_to_row(doc)
-    kinopoisk_id, title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json = row
+    kinopoisk_id, title, year, age_rating, rating_kp, poster_url, poster_urls_json, description, genres, countries, votes, raw_json = row
     if not title and not kinopoisk_id:
         return
 
@@ -144,16 +186,16 @@ async def save_movie_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> No
 
         if existing:
             await db.execute(
-                """UPDATE movies SET title = ?, year = ?, age_rating = ?, rating_kp = ?, poster_url = ?, description = ?, genres = ?, countries = ?, votes = ?, raw_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
-                (title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json, existing[0]),
+                """UPDATE movies SET title = ?, year = ?, age_rating = ?, rating_kp = ?, poster_url = ?, poster_urls = ?, description = ?, genres = ?, countries = ?, votes = ?, raw_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
+                (title, year, age_rating, rating_kp, poster_url, poster_urls_json, description, genres, countries, votes, raw_json, existing[0]),
             )
             if kinopoisk_id is not None:
                 await db.execute("UPDATE movies SET kinopoisk_id = ? WHERE id = ?", (kinopoisk_id, existing[0]))
         else:
             await db.execute(
-                """INSERT INTO movies (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json, updated_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)""",
-                (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json),
+                """INSERT INTO movies (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, poster_urls, description, genres, countries, votes, raw_json, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)""",
+                (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, poster_urls_json, description, genres, countries, votes, raw_json),
             )
         await db.commit()
 
@@ -304,13 +346,17 @@ async def get_movie_info(
     await save_movie_from_api_doc(settings, doc)
 
     row = _parse_doc_to_row(doc)
-    kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _d, _g, _c, votes, _raw = row
+    kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _poster_urls, _d, _g, _c, votes, _raw = row
+    poster_urls = json.loads(_poster_urls) if _poster_urls and isinstance(_poster_urls, str) else None
+    if not isinstance(poster_urls, list):
+        poster_urls = None
     return KinopoiskMovieInfo(
         kinopoisk_id=kinopoisk_id,
         age_rating=age_rating,
         rating_kp=rating_kp,
         votes=votes,
         poster_url=poster_url,
+        poster_urls=poster_urls,
     )
 
 

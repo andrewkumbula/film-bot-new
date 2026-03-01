@@ -31,6 +31,8 @@ class Settings:
     # Ежедневный отчёт по flow_log: куда слать и в какое время (HH:MM, локальное время сервера)
     report_chat_id: str = ""
     report_time: str = "09:00"
+    # Сколько постеров показывать в карточке фильма: 1 или 3 (если API отдал несколько)
+    show_posters_count: int = 1
 
 
 def load_settings() -> Settings:
@@ -58,6 +60,8 @@ def load_settings() -> Settings:
     kinopoisk_unofficial_api_key = os.getenv("KINOPOISK_UNOFFICIAL_API_KEY", "").strip()
     report_chat_id = os.getenv("REPORT_CHAT_ID", "").strip()
     report_time = os.getenv("REPORT_TIME", "09:00").strip() or "09:00"
+    show_posters_raw = os.getenv("SHOW_POSTERS_COUNT", "1").strip()
+    show_posters_count = 3 if show_posters_raw == "3" else 1
 
     return Settings(
         bot_token=bot_token,
@@ -72,5 +76,6 @@ def load_settings() -> Settings:
         kinopoisk_unofficial_api_key=kinopoisk_unofficial_api_key,
         report_chat_id=report_chat_id,
         report_time=report_time,
+        show_posters_count=show_posters_count,
     )
 

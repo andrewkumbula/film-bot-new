@@ -27,6 +27,7 @@ pip install -r requirements.txt
 - `KINOPOISK_API_KEY` — (опционально) токен для poiskkino.dev (поиск фильмов, постеры). Получить: Telegram-бот [@poiskkinodev_bot](https://t.me/poiskkinodev_bot).
 - `KINOPOISK_TOP250_BASE_URL` — (опционально) для корректных позиций в Топ 250 без дублей: `https://kinopoiskapiunofficial.tech`. Тогда используется `GET /api/v2.2/films/top?type=TOP_250_BEST_FILMS`.
 - `KINOPOISK_UNOFFICIAL_API_KEY` — (нужен, если задан TOP250_BASE_URL) ключ с сайта [kinopoiskapiunofficial.tech](https://kinopoiskapiunofficial.tech); у неофициального API свой ключ, не от poiskkino.dev.
+- `SHOW_POSTERS_COUNT` — (опционально) сколько постеров показывать в карточке: `1` (по умолчанию) или `3`. Если API отдал несколько URL (url, previewUrl, preview), все сохраняются в БД; отображается 1 или 3.
 - `REPORT_CHAT_ID` — (опционально) ваш Telegram chat_id для ежедневной рассылки отчёта по логам флоу за сутки (CSV). Узнать chat_id: напишите боту [@userinfobot](https://t.me/userinfobot).
 - `REPORT_TIME` — (опционально) время отправки отчёта в формате `HH:MM` (по умолчанию `09:00`, локальное время сервера).
 

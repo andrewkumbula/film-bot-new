@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import json
 import logging
 import random
 from typing import Any, Dict, List, Optional, Set
@@ -14,7 +15,7 @@ from typing import Any, Dict, List, Optional, Set
 import aiosqlite
 import httpx
 
-from ..config import Settings, load_settings
+from ..config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -406,6 +407,15 @@ def _row_to_filtered_item(row, has_poster: bool = True, use_index: bool = False)
         year = int(year_raw) if year_raw is not None else None
     except (TypeError, ValueError):
         year = None
+    poster_urls = None
+    try:
+        raw = _row_get(row, "poster_urls", "m.poster_urls", 8)
+        if raw and isinstance(raw, str):
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                poster_urls = parsed
+    except (json.JSONDecodeError, TypeError, KeyError):
+        pass
     return {
         "kinopoisk_id": _row_get(row, "kinopoisk_id", "m.kinopoisk_id", 0),
         "title": (_row_get(row, "title", "m.title", 1) or ""),
@@ -414,7 +424,8 @@ def _row_to_filtered_item(row, has_poster: bool = True, use_index: bool = False)
         "rating_kp": _row_get(row, "rating_kp", "m.rating_kp", 4),
         "age_rating": _row_get(row, "age_rating", "m.age_rating", 6),
         "poster_url": (_row_get(row, "poster_url", "m.poster_url", 7) or None) if has_poster else None,
-        "position": _row_get(row, "position", "t.position", 5),
+        "poster_urls": poster_urls,
+        "position": _row_get(row, "position", "t.position", 8),
     }
 
 
@@ -446,6 +457,7 @@ async def get_filtered_top250(
                     COALESCE(m.rating_kp, t.rating_kp) AS rating_kp,
                     COALESCE(m.age_rating, t.age_rating) AS age_rating,
                     COALESCE(NULLIF(TRIM(m.poster_url), ''), t.poster_url) AS poster_url,
+                    m.poster_urls AS poster_urls,
                     t.position AS position
                 FROM kinopoisk_top250 t
                 JOIN movies m ON t.movie_id = m.id

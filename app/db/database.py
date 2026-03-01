@@ -109,6 +109,7 @@ async def init_db(settings: Settings) -> None:
         await _ensure_top250_poster_column(db)
         await _ensure_top250_movie_id(db)
         await _ensure_movies_extra_columns(db)
+        await _ensure_movies_poster_urls(db)
         await _ensure_movies_unique_title_year(db)
         await _ensure_not_interested_table(db)
 
@@ -200,7 +201,17 @@ async def _ensure_movies_extra_columns(db: aiosqlite.Connection) -> None:
     for col, typ in extras:
         if col not in columns:
             await db.execute("ALTER TABLE movies ADD COLUMN " + col + " " + typ)
-            await db.commit()
+    await db.commit()
+
+
+async def _ensure_movies_poster_urls(db: aiosqlite.Connection) -> None:
+    """Добавляет колонку poster_urls (JSON-массив URL постеров) в movies, если её ещё нет."""
+    cursor = await db.execute("PRAGMA table_info(movies)")
+    rows = await cursor.fetchall()
+    columns = [r[1] for r in rows] if rows else []
+    if "poster_urls" not in columns:
+        await db.execute("ALTER TABLE movies ADD COLUMN poster_urls TEXT")
+    await db.commit()
 
 
 async def _ensure_movies_unique_title_year(db: aiosqlite.Connection) -> None:

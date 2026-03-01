@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import aiosqlite
 
@@ -51,8 +51,60 @@ async def is_favorite(user_id: int, rec: Dict[str, Any]) -> bool:
         return (await cursor.fetchone()) is not None
 
 
+async def get_watched_movie_ids(user_id: int) -> Set[int]:
+    """Возвращает множество movie_id из списка «Смотрел» пользователя."""
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute(
+            "SELECT movie_id FROM watched WHERE user_id = ?",
+            (user_id,),
+        )
+        rows = await cursor.fetchall()
+    return {row[0] for row in rows}
+
+
+async def get_watched_kinopoisk_ids(user_id: int) -> Set[int]:
+    """Возвращает множество kinopoisk_id фильмов из списка «Смотрел» пользователя (через JOIN с movies)."""
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute(
+            """
+            SELECT m.kinopoisk_id FROM watched w
+            JOIN movies m ON w.movie_id = m.id
+            WHERE w.user_id = ? AND m.kinopoisk_id IS NOT NULL
+            """,
+            (user_id,),
+        )
+        rows = await cursor.fetchall()
+    return {row[0] for row in rows}
+
+
+async def rec_in_watched(
+    rec: Dict[str, Any],
+    *,
+    watched_kinopoisk_ids: Set[int] | None = None,
+    watched_movie_ids: Set[int] | None = None,
+) -> bool:
+    """
+    Проверяет, входит ли рекомендация rec в список «Смотрел» пользователя.
+    Передаются заранее полученные множества watched_kinopoisk_ids и watched_movie_ids.
+    """
+    kp = rec.get("kinopoisk_id")
+    if kp is not None and watched_kinopoisk_ids and kp in watched_kinopoisk_ids:
+        return True
+    if watched_movie_ids:
+        movie_id = await _get_movie_id(
+            kinopoisk_id=rec.get("kinopoisk_id"),
+            title=(rec.get("title") or "").strip(),
+            year=rec.get("year"),
+        )
+        if movie_id is not None and movie_id in watched_movie_ids:
+            return True
+    return False
+
+
 async def is_watched(user_id: int, rec: Dict[str, Any]) -> bool:
-    """Проверяет, есть ли фильм уже в списке «Посмотрел» у пользователя."""
+    """Проверяет, есть ли фильм уже в списке «Смотрел» у пользователя."""
     movie_id = await _get_movie_id(
         kinopoisk_id=rec.get("kinopoisk_id"),
         title=(rec.get("title") or "").strip(),
@@ -234,7 +286,7 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
 
 async def add_watched_for_user(user_id: int, rec: Dict[str, Any]) -> bool:
     """
-    Добавляет фильм в список «Посмотрел». Использует movies (get_or_create).
+    Добавляет фильм в список «Смотрел». Использует movies (get_or_create).
     Если фильма нет в БД и есть API Кинопоиска — сначала забирает полные данные и пишет в movies.
     Возвращает True, если добавлено, False — если уже был в списке.
     """

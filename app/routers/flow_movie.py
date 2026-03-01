@@ -12,9 +12,9 @@ from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 
-from ..config import Settings
+from ..config import Settings, load_settings
 from ..keyboards.flow import (
     source_keyboard,
     mood_keyboard,
@@ -28,7 +28,15 @@ from ..keyboards.flow import (
 )
 from ..keyboards.main_menu import main_menu_keyboard
 from ..llm.service import get_recommendations_from_llm, get_top250_picks_from_llm, LlmError
-from ..services.favorites import add_favorite_for_user, add_watched_for_user, is_favorite, is_watched
+from ..services.favorites import (
+    add_favorite_for_user,
+    add_watched_for_user,
+    get_watched_kinopoisk_ids,
+    get_watched_movie_ids,
+    is_favorite,
+    is_watched,
+    rec_in_watched,
+)
 from ..services.not_interested import (
     add_not_interested,
     is_not_interested,
@@ -40,6 +48,29 @@ from ..services.flow_log import log_flow_step
 from ..services.kinopoisk import get_movie_info, KinopoiskMovieInfo
 from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
 from ..services.users import ensure_user
+
+
+async def _send_movie_card(
+    responder: Message,
+    poster_urls: List[str],
+    text: str,
+    kb: InlineKeyboardMarkup,
+    settings: Settings,
+) -> None:
+    """Отправляет карточку фильма: 1 постер или до 3 постеров (media group) + кнопки."""
+    valid = [u for u in (poster_urls or []) if u and str(u).strip().startswith("http")]
+    count = min(settings.show_posters_count, 3)
+    count = max(1, count)
+    to_show = valid[:count] if valid else []
+    if len(to_show) == 1:
+        await responder.answer_photo(photo=to_show[0], caption=text, reply_markup=kb)
+    elif len(to_show) > 1:
+        media = [InputMediaPhoto(media=url) for url in to_show]
+        media[0].caption = text
+        await responder.bot.send_media_group(chat_id=responder.chat.id, media=media)
+        await responder.answer("👇", reply_markup=kb)
+    else:
+        await responder.answer(text, reply_markup=kb)
 
 
 class MovieFlow(StatesGroup):
@@ -205,9 +236,13 @@ def get_router(settings: Settings) -> Router:
         try:
             # Кандидаты по жанру и эпохе (до 50), затем ИИ выбирает 5 по настроению и предпочтениям
             candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=50)
-            # Исключить фильмы, отмеченные пользователем как «Не интересно»
+            # Исключить «Не интересно» и «Смотрел»
             ni_kp = await get_not_interested_kinopoisk_ids(callback.from_user.id)
-            candidates = [c for c in candidates if c.get("kinopoisk_id") not in ni_kp]
+            watched_kp = await get_watched_kinopoisk_ids(callback.from_user.id)
+            candidates = [
+                c for c in candidates
+                if c.get("kinopoisk_id") not in ni_kp and c.get("kinopoisk_id") not in watched_kp
+            ]
             await state.set_state(Top250Flow.recommendations)
 
             if not candidates:
@@ -218,7 +253,10 @@ def get_router(settings: Settings) -> Router:
                         "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
                     )
                 else:
-                    text = "По твоим фильтрам ничего не нашлось в Топ 250 😅\nПопробуй ослабить жанр или эпоху."
+                    text = (
+                        "По твоим фильтрам ничего не нашлось в Топ 250 — всё уже в «Не интересно» или ты это смотрел 🎬\n"
+                        "Попробуй ослабить жанр/эпоху или нажми «Подобрать ещё»."
+                    )
                 await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
                 return
 
@@ -264,7 +302,7 @@ def get_router(settings: Settings) -> Router:
             in_watched = await is_watched(callback.from_user.id, rec)
             in_ni = await is_not_interested(callback.from_user.id, rec)
             fav_l = "✅ В избранном" if in_fav else "⭐️ В избранное"
-            watched_l = "✅ Посмотрел" if in_watched else "🎬 Посмотрел"
+            watched_l = "✅ Смотрел" if in_watched else "🎬 Смотрел"
             not_int_l = "✅ Не интересно" if in_ni else "👎 Не интересно"
             kb = InlineKeyboardMarkup(
                 inline_keyboard=[
@@ -276,11 +314,9 @@ def get_router(settings: Settings) -> Router:
                 ]
             )
             try:
-                poster_url = rec.get("poster_url")
-                if poster_url and str(poster_url).strip().startswith("http"):
-                    await callback.message.answer_photo(photo=poster_url, caption=text, reply_markup=kb)
-                else:
-                    await callback.message.answer(text, reply_markup=kb)
+                urls = rec.get("poster_urls") or ([rec.get("poster_url")] if rec.get("poster_url") else [])
+                settings = load_settings()
+                await _send_movie_card(callback.message, urls, text, kb, settings)
             except Exception as e:
                 logger.warning("Top250: не удалось отправить карточку фильма %s: %s", rec.get("title"), e)
                 await callback.message.answer(text, reply_markup=kb)
@@ -312,7 +348,7 @@ def get_router(settings: Settings) -> Router:
                 [
                     InlineKeyboardButton(text="✅ В избранном", callback_data=f"t250_fav:{idx}"),
                     InlineKeyboardButton(
-                        text="✅ Посмотрел" if in_watched else "🎬 Посмотрел",
+                        text="✅ Смотрел" if in_watched else "🎬 Смотрел",
                         callback_data=f"t250_watched:{idx}",
                     ),
                 ],
@@ -338,7 +374,7 @@ def get_router(settings: Settings) -> Router:
             return
         rec = recs[idx]
         added = await add_watched_for_user(callback.from_user.id, rec)
-        await callback.answer("Добавлено в «Посмотрел» 🎬" if added else "Уже в списке 👍")
+        await callback.answer("Добавлено в «Смотрел» 🎬" if added else "Уже в списке 👍")
         in_fav = await is_favorite(callback.from_user.id, rec)
         in_ni = await is_not_interested(callback.from_user.id, rec)
         not_int_l = "✅ Не интересно" if in_ni else "👎 Не интересно"
@@ -349,7 +385,7 @@ def get_router(settings: Settings) -> Router:
                         text="✅ В избранном" if in_fav else "⭐️ В избранное",
                         callback_data=f"t250_fav:{idx}",
                     ),
-                    InlineKeyboardButton(text="✅ Посмотрел", callback_data=f"t250_watched:{idx}"),
+                    InlineKeyboardButton(text="✅ Смотрел", callback_data=f"t250_watched:{idx}"),
                 ],
                 [InlineKeyboardButton(text=not_int_l, callback_data=f"t250_not_interested:{idx}")],
             ]
@@ -380,7 +416,7 @@ def get_router(settings: Settings) -> Router:
             inline_keyboard=[
                 [
                     InlineKeyboardButton(text="✅ В избранном" if in_fav else "⭐️ В избранное", callback_data=f"t250_fav:{idx}"),
-                    InlineKeyboardButton(text="✅ Посмотрел" if in_watched else "🎬 Посмотрел", callback_data=f"t250_watched:{idx}"),
+                    InlineKeyboardButton(text="✅ Смотрел" if in_watched else "🎬 Смотрел", callback_data=f"t250_watched:{idx}"),
                 ],
                 [InlineKeyboardButton(text="✅ Не интересно", callback_data=f"t250_not_interested:{idx}")],
             ]
@@ -587,25 +623,29 @@ def get_router(settings: Settings) -> Router:
                 continue
             filtered_pairs.append((rec, info))
 
-        # Исключить фильмы, отмеченные пользователем как «Не интересно»
+        # Исключить фильмы «Не интересно» и «Смотрел»
         ni_kp = await get_not_interested_kinopoisk_ids(user_id)
         ni_movies = await get_not_interested_movie_ids(user_id)
-        n_before_ni = len(filtered_pairs)
-        pairs_no_ni: List[tuple] = []
+        watched_kp = await get_watched_kinopoisk_ids(user_id)
+        watched_movies = await get_watched_movie_ids(user_id)
+        n_before_filter = len(filtered_pairs)
+        pairs_filtered: List[tuple] = []
         for rec, info in filtered_pairs:
             rec_d = {**rec.model_dump(), "kinopoisk_id": (info.kinopoisk_id if info else None) or rec.model_dump().get("kinopoisk_id")}
             if await rec_in_not_interested(user_id, rec_d, ni_kinopoisk_ids=ni_kp, ni_movie_ids=ni_movies):
                 continue
-            pairs_no_ni.append((rec, info))
-        filtered_pairs = pairs_no_ni
+            if await rec_in_watched(rec_d, watched_kinopoisk_ids=watched_kp, watched_movie_ids=watched_movies):
+                continue
+            pairs_filtered.append((rec, info))
+        filtered_pairs = pairs_filtered
 
         if not filtered_pairs:
             data = await state.get_data()
             session_id = data.get("session_id") or uuid.uuid4().hex
             await log_flow_step(user_id, session_id, "recommendations", "0")
-            if n_before_ni > 0:
+            if n_before_filter > 0:
                 await responder.answer(
-                    "Все эти варианты ты уже отметил как неинтересные 👎\nНажми «Подобрать ещё» — подберу другие фильмы.",
+                    "Все эти варианты ты уже отметил как неинтересные 👎 или смотрел 🎬\nНажми «Подобрать ещё» — подберу другие фильмы.",
                     reply_markup=recommendations_control_keyboard(),
                 )
             else:
@@ -665,7 +705,7 @@ def get_router(settings: Settings) -> Router:
             in_watched = await is_watched(user_id, rec_dict)
             in_ni = await is_not_interested(user_id, rec_dict)
             fav_label = "✅ В избранном" if in_fav else "⭐️ В избранное"
-            watched_label = "✅ Посмотрел" if in_watched else "🎬 Посмотрел"
+            watched_label = "✅ Смотрел" if in_watched else "🎬 Смотрел"
             not_int_label = "✅ Не интересно" if in_ni else "👎 Не интересно"
             kb = InlineKeyboardMarkup(
                 inline_keyboard=[
@@ -676,11 +716,9 @@ def get_router(settings: Settings) -> Router:
                     [InlineKeyboardButton(text=not_int_label, callback_data=f"not_interested:{idx}")],
                 ]
             )
-            poster_url = info.poster_url if info else None
-            if poster_url and str(poster_url).strip().startswith("http"):
-                await responder.answer_photo(photo=poster_url, caption=text, reply_markup=kb)
-            else:
-                await responder.answer(text, reply_markup=kb)
+            urls = (info.poster_urls or ([info.poster_url] if info and info.poster_url else [])) if info else []
+            settings = load_settings()
+            await _send_movie_card(responder, urls, text, kb, settings)
 
         await responder.answer(
             "Если хочешь — можем подобрать ещё варианты или вернуться в меню 👇",
@@ -751,7 +789,7 @@ def get_router(settings: Settings) -> Router:
             await callback.answer("Добавлено в избранное ⭐️", show_alert=False)
         else:
             await callback.answer("Этот фильм уже в избранном 👍", show_alert=False)
-        # Обновляем кнопки: показываем ✅ В избранном и актуальный статус «Посмотрел» и «Не интересно»
+        # Обновляем кнопки: показываем ✅ В избранном и актуальный статус «Смотрел» и «Не интересно»
         in_watched = await is_watched(callback.from_user.id, rec)
         in_ni = await is_not_interested(callback.from_user.id, rec)
         not_int_label = "✅ Не интересно" if in_ni else "👎 Не интересно"
@@ -760,7 +798,7 @@ def get_router(settings: Settings) -> Router:
                 [
                     InlineKeyboardButton(text="✅ В избранном", callback_data=f"fav:{index}"),
                     InlineKeyboardButton(
-                        text="✅ Посмотрел" if in_watched else "🎬 Посмотрел",
+                        text="✅ Смотрел" if in_watched else "🎬 Смотрел",
                         callback_data=f"watched:{index}",
                     ),
                 ],
@@ -789,10 +827,10 @@ def get_router(settings: Settings) -> Router:
         rec = recs[index]
         added = await add_watched_for_user(callback.from_user.id, rec)
         if added:
-            await callback.answer("Добавлено в «Посмотрел» 🎬", show_alert=False)
+            await callback.answer("Добавлено в «Смотрел» 🎬", show_alert=False)
         else:
-            await callback.answer("Уже в списке «Посмотрел» 👍", show_alert=False)
-        # Обновляем кнопки: показываем ✅ Посмотрел и актуальный статус избранного и «Не интересно»
+            await callback.answer("Уже в списке «Смотрел» 👍", show_alert=False)
+        # Обновляем кнопки: показываем ✅ Смотрел и актуальный статус избранного и «Не интересно»
         in_fav = await is_favorite(callback.from_user.id, rec)
         in_ni = await is_not_interested(callback.from_user.id, rec)
         not_int_label = "✅ Не интересно" if in_ni else "👎 Не интересно"
@@ -803,7 +841,7 @@ def get_router(settings: Settings) -> Router:
                         text="✅ В избранном" if in_fav else "⭐️ В избранное",
                         callback_data=f"fav:{index}",
                     ),
-                    InlineKeyboardButton(text="✅ Посмотрел", callback_data=f"watched:{index}"),
+                    InlineKeyboardButton(text="✅ Смотрел", callback_data=f"watched:{index}"),
                 ],
                 [InlineKeyboardButton(text=not_int_label, callback_data=f"not_interested:{index}")],
             ]
@@ -840,7 +878,7 @@ def get_router(settings: Settings) -> Router:
             inline_keyboard=[
                 [
                     InlineKeyboardButton(text="✅ В избранном" if in_fav else "⭐️ В избранное", callback_data=f"fav:{index}"),
-                    InlineKeyboardButton(text="✅ Посмотрел" if in_watched else "🎬 Посмотрел", callback_data=f"watched:{index}"),
+                    InlineKeyboardButton(text="✅ Смотрел" if in_watched else "🎬 Смотрел", callback_data=f"watched:{index}"),
                 ],
                 [InlineKeyboardButton(text="✅ Не интересно", callback_data=f"not_interested:{index}")],
             ]
