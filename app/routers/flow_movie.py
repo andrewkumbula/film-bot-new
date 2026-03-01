@@ -143,12 +143,17 @@ def get_router(settings: Settings) -> Router:
                 reply_markup=mood_keyboard(prefix="t250_"),
             )
             return
-        # Оскар, фестивали — заглушка
-        await state.clear()
-        await callback.message.edit_text(
-            "Этот режим ещё в разработке 🚧\nПока используй <b>Обычный подбор</b> или <b>Кинопоиск Топ 250</b>."
+        # Оскар, кинофестивали — заглушка (режим пока не реализован)
+        await state.set_state(MovieFlow.source)
+        stub_text = (
+            "🚧 <b>Оскар и кинофестивали</b> пока в разработке.\n\n"
+            "Скоро здесь появятся номинанты и победители Оскара, Канна, Венеции и других фестивалей. "
+            "Пока выбери другой способ подбора 👇"
         )
-        await callback.message.answer("Выбери действие:", reply_markup=main_menu_keyboard())
+        try:
+            await callback.message.edit_text(stub_text, reply_markup=source_keyboard())
+        except Exception:
+            await callback.message.answer(stub_text, reply_markup=source_keyboard())
 
     # --- Ветка Топ 250 ---
     @router.callback_query(Top250Flow.mood, F.data.startswith("t250_mood:"))
