@@ -33,8 +33,8 @@ async def get_movie_from_db(
     year: Optional[int] = None,
 ) -> Optional[KinopoiskMovieInfo]:
     """
-    Возвращает данные из таблицы movies, если запись есть. Сначала поиск по kinopoisk_id, иначе по (title, year).
-    В API не ходит.
+    Возвращает данные из таблицы movies, если запись есть. Поиск по kinopoisk_id или по точному совпадению (title, year).
+    В API не ходит. По названию — только точное совпадение, так что по запросу «Летающие ножи» не вернётся «Летающие звери».
     """
     title = (title or "").strip() if title else None
     if not title and kinopoisk_id is None:
@@ -273,14 +273,18 @@ async def refresh_movie_from_api(
     return True
 
 
+# Минимальный балл совпадения названия, чтобы не подставлять постер от другого фильма (например «Летающие звери» при запросе «Летающие ножи»).
+_MIN_TITLE_MATCH_SCORE_TO_USE = 40
+
+
 async def get_movie_info(
     settings: Settings, title: str, year: Optional[int] = None
 ) -> Optional[KinopoiskMovieInfo]:
     """
-    Возвращает данные по фильму. Сначала проверяет таблицу movies; если запись есть — возвращает из кэша (в API не ходит).
-    Если нет — запрашивает API, сохраняет все данные в movies и возвращает результат.
+    Возвращает данные по фильму. Сначала проверяет таблицу movies (точное совпадение title+year); если запись есть — из кэша.
+    Если нет — запрашивает API, проверяет, что выбранный документ действительно совпадает с запросом, сохраняет и возвращает.
     """
-    # Сначала из БД
+    # Сначала из БД — только точное совпадение title и year, «Летающие звери» не вернётся по запросу «Летающие ножи»
     cached = await get_movie_from_db(settings, title=title, year=year)
     if cached is not None:
         return cached
@@ -291,6 +295,11 @@ async def get_movie_info(
     doc = await _fetch_movie_doc_by_search(settings, title, year)
     if not doc:
         return None
+
+    # Защита: если API вернул документ с другим названием (например только год совпал) — не сохраняем и не подставляем его данные
+    score = _doc_title_match_score(doc, (title or "").strip(), year)
+    if score < _MIN_TITLE_MATCH_SCORE_TO_USE:
+        return None  # карточка покажется без постера и рейтинга Кинопоиска, но не с данными другого фильма
 
     await save_movie_from_api_doc(settings, doc)
 

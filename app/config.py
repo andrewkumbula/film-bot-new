@@ -20,9 +20,14 @@ class Settings:
     model: str = "xiaomi/mimo-v2-flash"
     debug: bool = False
     db_path: Path = BASE_DIR / "app_data" / "bot.db"
-    # API Кинопоиска (poiskkino.dev) для проверки возрастного рейтинга
+    # API Кинопоиска (poiskkino.dev) для поиска фильмов и постеров
     kinopoisk_api_key: str = ""
     kinopoisk_base_url: str = "https://api.poiskkino.dev"
+    # Топ 250: если задан URL неофициального API (kinopoiskapiunofficial.tech), используется
+    # GET /api/v2.2/films/top?type=TOP_250_BEST_FILMS — порядок в ответе = позиция 1–250.
+    # Ключ для неофициального API — отдельный (KINOPOISK_UNOFFICIAL_API_KEY), с сайта kinopoiskapiunofficial.tech
+    kinopoisk_top250_base_url: str = ""
+    kinopoisk_unofficial_api_key: str = ""
     # Ежедневный отчёт по flow_log: куда слать и в какое время (HH:MM, локальное время сервера)
     report_chat_id: str = ""
     report_time: str = "09:00"
@@ -49,6 +54,8 @@ def load_settings() -> Settings:
 
     kinopoisk_api_key = os.getenv("KINOPOISK_API_KEY", "").strip()
     kinopoisk_base_url = os.getenv("KINOPOISK_BASE_URL", "https://api.poiskkino.dev").strip()
+    kinopoisk_top250_base_url = os.getenv("KINOPOISK_TOP250_BASE_URL", "").strip()
+    kinopoisk_unofficial_api_key = os.getenv("KINOPOISK_UNOFFICIAL_API_KEY", "").strip()
     report_chat_id = os.getenv("REPORT_CHAT_ID", "").strip()
     report_time = os.getenv("REPORT_TIME", "09:00").strip() or "09:00"
 
@@ -61,6 +68,8 @@ def load_settings() -> Settings:
         db_path=db_path,
         kinopoisk_api_key=kinopoisk_api_key,
         kinopoisk_base_url=kinopoisk_base_url,
+        kinopoisk_top250_base_url=kinopoisk_top250_base_url,
+        kinopoisk_unofficial_api_key=kinopoisk_unofficial_api_key,
         report_chat_id=report_chat_id,
         report_time=report_time,
     )

@@ -17,6 +17,7 @@ from ..services.report import (
     delete_movie_from_cache,
     run_movies_backfill,
 )
+from ..services.top250 import get_top250_count, refresh_top250
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +187,39 @@ def get_router(settings: Settings) -> Router:
             await message.answer(f"Ошибка: {e}")
             return
         await message.answer(msg)
+
+    @router.message(Command("refresh_top250"))
+    async def cmd_refresh_top250(message: Message) -> None:
+        """
+        Принудительно обновляет список Кинопоиск Топ 250 с API (загрузка в БД).
+        Только для админа (REPORT_CHAT_ID). Обычно список обновляется 1-го числа каждого месяца.
+        """
+        if settings.report_chat_id:
+            try:
+                allowed_id = int(settings.report_chat_id)
+            except ValueError:
+                allowed_id = None
+            if allowed_id is not None and message.from_user and message.from_user.id != allowed_id:
+                await message.answer("У вас нет доступа к этой команде.")
+                return
+
+        if not settings.kinopoisk_api_key:
+            await message.answer("KINOPOISK_API_KEY не задан. Добавь ключ в .env и перезапусти бота.")
+            return
+
+        await message.answer("Обновляю список Топ 250 с Кинопоиска… (до ~30 сек)")
+        try:
+            await refresh_top250(settings)
+            count = await get_top250_count(settings)
+            if count > 0:
+                await message.answer(f"✅ Готово. В Топ 250 загружено {count} фильмов.")
+            else:
+                await message.answer(
+                    "Не удалось загрузить данные. Проверь KINOPOISK_API_KEY и лимиты API (например 200 запросов/день)."
+                )
+        except Exception as e:
+            logger.exception("refresh_top250 failed")
+            await message.answer(f"Ошибка при обновлении: {e}")
 
     return router
 

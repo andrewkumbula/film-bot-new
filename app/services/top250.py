@@ -35,14 +35,124 @@ GENRE_CODE_TO_NAMES = {
 }
 
 
+def _unofficial_item_to_doc(item: Dict[str, Any]) -> Dict[str, Any]:
+    """Преобразует элемент ответа API Unofficial (v2.2/films/top) в формат doc для _doc_to_top250_row и save_movie_from_api_doc."""
+    film_id = item.get("filmId") or item.get("kinopoiskId") or item.get("id")
+    if film_id is not None:
+        try:
+            film_id = int(film_id)
+        except (TypeError, ValueError):
+            film_id = None
+    if film_id is None:
+        return {}
+    name_ru = (item.get("nameRu") or "").strip()
+    name_en = (item.get("nameEn") or item.get("nameOriginal") or "").strip()
+    name = name_ru or name_en or str(film_id)
+    year = item.get("year")
+    if year is not None:
+        try:
+            year = int(year)
+        except (TypeError, ValueError):
+            year = None
+    rating = item.get("ratingKinopoisk") or item.get("rating")
+    if rating is not None and not isinstance(rating, (int, float)):
+        rating = None
+    genres_raw = item.get("genres") or []
+    genres = []
+    for g in genres_raw:
+        if isinstance(g, dict):
+            genre_name = g.get("genre") or g.get("name") or ""
+        else:
+            genre_name = str(g) if g else ""
+        if genre_name:
+            genres.append({"name": genre_name.strip()})
+    poster_url = (item.get("posterUrl") or item.get("posterUrlPreview") or "").strip()
+    poster = {"url": poster_url} if poster_url.startswith("http") else None
+    age_rating = item.get("ratingAgeLimits") or item.get("ageRating")
+    if age_rating is not None:
+        age_rating = str(age_rating).strip() or None
+    return {
+        "id": film_id,
+        "name": name,
+        "alternativeName": name_en or name_ru,
+        "year": year,
+        "rating": float(rating) if rating is not None else None,
+        "genres": genres,
+        "poster": poster,
+        "ageRating": age_rating,
+    }
+
+
+async def _fetch_top250_unofficial(settings: Settings) -> List[tuple]:
+    """
+    Загружает Топ 250 через неофициальный API Кинопоиска:
+    GET /api/v2.2/films/top?type=TOP_250_BEST_FILMS
+    Порядок в ответе = позиция 1–250 (один запрос или по страницам).
+    Возвращает список пар (doc, position); position уникален и равен месту в списке.
+    """
+    base = (settings.kinopoisk_top250_base_url or "").rstrip("/")
+    if not base or "kinopoiskapiunofficial" not in base.lower():
+        return []
+    api_key = (settings.kinopoisk_unofficial_api_key or "").strip()
+    if not api_key:
+        logger.warning("KINOPOISK_UNOFFICIAL_API_KEY не задан, загрузка Топ 250 (Unofficial) пропущена")
+        return []
+
+    url = f"{base}/api/v2.2/films/top"
+    # pageSize=50 — по 50 на страницу, 5 страниц = 250 (если API игнорирует — по умолчанию бывает 20, тогда нужно до 13 страниц)
+    params: Dict[str, Any] = {"type": "TOP_250_BEST_FILMS", "pageSize": 50}
+    headers = {"X-API-KEY": api_key}
+    result: List[tuple] = []
+    page = 1
+    page_size = 50
+    while page <= 13:  # 5 при pageSize=50, до 13 если по 20
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                resp = await client.get(url, headers=headers, params={**params, "page": page})
+                if resp.status_code != 200:
+                    logger.warning("Top250 Unofficial API page %s: status %s", page, resp.status_code)
+                    break
+                data = resp.json()
+        except (httpx.RequestError, ValueError) as e:
+            logger.warning("Top250 Unofficial API request failed: %s", e)
+            break
+
+        items = data.get("items") or data.get("films") or (data if isinstance(data, list) else [])
+        if not items:
+            # пустая страница — дальше страниц нет
+            break
+        for i, item in enumerate(items):
+            doc = _unofficial_item_to_doc(item) if isinstance(item, dict) else {}
+            if not doc or doc.get("id") is None:
+                continue
+            position = len(result) + 1
+            if position > 250:
+                break
+            result.append((doc, position))
+        if len(result) >= 250:
+            break
+        # следующая страница только если получили полную страницу (значит, может быть ещё)
+        if len(items) < page_size:
+            break
+        page += 1
+    return result[:250]
+
+
 async def fetch_top250_from_api(settings: Settings) -> List[tuple]:
     """
-    Загружает список топ-фильмов с API Кинопоиска.
-    Возвращает список пар (doc, position), где doc — сырой ответ API по фильму (для сохранения в movies).
+    Загружает официальный список «Топ 250 Кинопоиска» с API.
+    Если задан KINOPOISK_TOP250_BASE_URL с kinopoiskapiunofficial.tech — используется
+    неофициальный API (GET /api/v2.2/films/top?type=TOP_250_BEST_FILMS), порядок в ответе = позиция 1–250.
+    Иначе — poiskkino.dev (v1.4/movie с lists=top250); там позиция могла дублироваться, поэтому
+    при использовании poiskkino позиции присваиваются по порядку (1, 2, 3, ...) для уникальности.
+    Возвращает список пар (doc, position).
     """
     if not settings.kinopoisk_api_key:
         logger.warning("KINOPOISK_API_KEY не задан, загрузка Топ 250 пропущена")
         return []
+
+    if settings.kinopoisk_top250_base_url and "kinopoiskapiunofficial" in settings.kinopoisk_top250_base_url.lower():
+        return await _fetch_top250_unofficial(settings)
 
     base = settings.kinopoisk_base_url.rstrip("/")
     headers = {"X-API-KEY": settings.kinopoisk_api_key}
@@ -50,10 +160,11 @@ async def fetch_top250_from_api(settings: Settings) -> List[tuple]:
     for page in range(1, 6):  # 5 * 50 = 250
         url = f"{base}/v1.4/movie"
         params = {
+            "lists": "top250",
             "limit": 50,
             "page": page,
-            "sortField": "votes.kp",
-            "sortType": "-1",
+            "sortField": "top250",
+            "sortType": "1",
         }
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
@@ -77,7 +188,10 @@ async def fetch_top250_from_api(settings: Settings) -> List[tuple]:
                 int(kinopoisk_id)
             except (TypeError, ValueError):
                 continue
-            position = (page - 1) * 50 + i + 1
+            # Уникальная позиция по порядку (1, 2, 3, ...), т.к. у poiskkino поле top250 может дублироваться
+            position = len(result) + 1
+            if position > 250:
+                break
             result.append((doc, position))
         if len(docs) < 50:
             break
@@ -102,7 +216,11 @@ def _doc_to_top250_row(doc: Dict[str, Any], position: int) -> Optional[tuple]:
         except (TypeError, ValueError):
             year = None
     genres_raw = doc.get("genres") or []
-    genre_names = [g.get("name") or "" for g in genres_raw if isinstance(g, dict) and g.get("name")]
+    genre_names = [
+        (g.get("name") or g.get("genre") or "").strip()
+        for g in genres_raw
+        if isinstance(g, dict) and (g.get("name") or g.get("genre"))
+    ]
     genres_str = ",".join(g.strip().lower() for g in genre_names if g.strip())
     rating = doc.get("rating")
     if isinstance(rating, dict):
@@ -128,15 +246,21 @@ async def save_top250_to_db(settings: Settings, items: List[tuple]) -> None:
     """
     Сохраняет Топ 250: для каждого фильма пишет полные данные в movies, затем ссылку в kinopoisk_top250.
     items — список пар (doc, position), где doc — сырой ответ API Кинопоиска.
+    Сначала все фильмы пишутся в movies (каждый вызов — своё соединение), затем в одном соединении
+    очищается kinopoisk_top250 и заполняется заново, чтобы избежать «database is locked».
     """
     if not items:
         return
     from .kinopoisk import save_movie_from_api_doc
 
-    async with aiosqlite.connect(settings.db_path) as db:
+    # Сначала сохраняем все фильмы в movies (каждый вызов открывает/закрывает своё соединение)
+    for doc, position in items:
+        await save_movie_from_api_doc(settings, doc)
+
+    # Затем в одном соединении очищаем top250 и вставляем строки (без вложенных обращений к БД)
+    async with aiosqlite.connect(settings.db_path, timeout=30.0) as db:
         await db.execute("DELETE FROM kinopoisk_top250")
         for doc, position in items:
-            await save_movie_from_api_doc(settings, doc)
             row_data = _doc_to_top250_row(doc, position)
             if not row_data:
                 continue

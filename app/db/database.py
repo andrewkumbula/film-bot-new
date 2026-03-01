@@ -59,6 +59,16 @@ async def init_db(settings: Settings) -> None:
             );
             CREATE INDEX IF NOT EXISTS idx_watched_user ON watched(user_id);
 
+            CREATE TABLE IF NOT EXISTS not_interested (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                movie_id INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (movie_id) REFERENCES movies(id),
+                UNIQUE(user_id, movie_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_not_interested_user ON not_interested(user_id);
+
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
                 username TEXT,
@@ -100,8 +110,34 @@ async def init_db(settings: Settings) -> None:
         await _ensure_top250_movie_id(db)
         await _ensure_movies_extra_columns(db)
         await _ensure_movies_unique_title_year(db)
+        await _ensure_not_interested_table(db)
 
     await _migrate_old_favorites_if_needed(settings)
+
+
+async def _ensure_not_interested_table(db: aiosqlite.Connection) -> None:
+    """Создаёт таблицу not_interested, если её ещё нет (миграция для старых БД)."""
+    cursor = await db.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='not_interested'"
+    )
+    if await cursor.fetchone():
+        return
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS not_interested (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            movie_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (movie_id) REFERENCES movies(id),
+            UNIQUE(user_id, movie_id)
+        )
+        """
+    )
+    await db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_not_interested_user ON not_interested(user_id)"
+    )
+    await db.commit()
 
 
 async def _ensure_top250_poster_column(db: aiosqlite.Connection) -> None:

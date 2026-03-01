@@ -145,16 +145,24 @@ async def build_top250_csv() -> tuple[bytes, str, int]:
         "kinopoisk_id", "title", "year", "genres", "rating_kp", "position", "age_rating", "poster_url", "updated_at",
     ])
     for row in rows:
+        # Row не поддерживает .get(), используем индексацию; для отсутствующих колонок — пустая строка
+        def _r(key, default=""):
+            try:
+                v = row[key]
+                return v if v is not None else default
+            except (KeyError, IndexError):
+                return default
+
         writer.writerow([
-            row["kinopoisk_id"],
-            row["title"] or "",
-            row["year"] or "",
-            row["genres"] or "",
-            row["rating_kp"] if row.get("rating_kp") is not None else "",
-            row.get("position") or "",
-            row["age_rating"] or "",
-            row["poster_url"] or "",
-            row["updated_at"] or "",
+            _r("kinopoisk_id"),
+            _r("title"),
+            _r("year"),
+            _r("genres"),
+            _r("rating_kp"),
+            _r("position"),
+            _r("age_rating"),
+            _r("poster_url"),
+            _r("updated_at"),
         ])
 
     csv_str = output.getvalue()

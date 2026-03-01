@@ -24,11 +24,13 @@ pip install -r requirements.txt
 
 - `BOT_TOKEN` — токен Telegram-бота
 - `OPENROUTER_API_KEY` — API-ключ OpenRouter
-- `KINOPOISK_API_KEY` — (опционально) токен API Кинопоиска для отображения возрастного рейтинга в рекомендациях. Получить: Telegram-бот [@poiskkinodev_bot](https://t.me/poiskkinodev_bot)
+- `KINOPOISK_API_KEY` — (опционально) токен для poiskkino.dev (поиск фильмов, постеры). Получить: Telegram-бот [@poiskkinodev_bot](https://t.me/poiskkinodev_bot).
+- `KINOPOISK_TOP250_BASE_URL` — (опционально) для корректных позиций в Топ 250 без дублей: `https://kinopoiskapiunofficial.tech`. Тогда используется `GET /api/v2.2/films/top?type=TOP_250_BEST_FILMS`.
+- `KINOPOISK_UNOFFICIAL_API_KEY` — (нужен, если задан TOP250_BASE_URL) ключ с сайта [kinopoiskapiunofficial.tech](https://kinopoiskapiunofficial.tech); у неофициального API свой ключ, не от poiskkino.dev.
 - `REPORT_CHAT_ID` — (опционально) ваш Telegram chat_id для ежедневной рассылки отчёта по логам флоу за сутки (CSV). Узнать chat_id: напишите боту [@userinfobot](https://t.me/userinfobot).
 - `REPORT_TIME` — (опционально) время отправки отчёта в формате `HH:MM` (по умолчанию `09:00`, локальное время сервера).
 
-Команда `/daily_report` формирует и отправляет тот же отчёт (за последние 24 часа) в чат того, кто вызвал команду. Если задан `REPORT_CHAT_ID`, выполнять команду может только пользователь с этим id. Тот же админ может использовать `/delete_film <название> [год]` — удаление фильма из кэша (movies), чтобы при следующем запросе данные подтянулись из Кинопоиска заново (например, если подставился неверный постер).
+Команда `/daily_report` формирует и отправляет тот же отчёт (за последние 24 часа) в чат того, кто вызвал команду. Если задан `REPORT_CHAT_ID`, выполнять команду может только пользователь с этим id. Тот же админ может использовать: `/delete_film <название> [год]` — удаление фильма из кэша (movies); `/refresh_top250` — принудительное обновление списка «Кинопоиск Топ 250» с API (иначе список обновляется 1-го числа каждого месяца).
 
 ### Запуск
 
