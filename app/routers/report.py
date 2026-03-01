@@ -10,7 +10,13 @@ from aiogram.filters import Command
 from aiogram.types import BufferedInputFile, Message
 
 from ..config import Settings
-from ..services.report import build_flow_log_csv, build_movies_csv, build_top250_csv, run_movies_backfill
+from ..services.report import (
+    build_flow_log_csv,
+    build_movies_csv,
+    build_top250_csv,
+    delete_movie_from_cache,
+    run_movies_backfill,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +137,55 @@ def get_router(settings: Settings) -> Router:
         caption = f"⭐ Кинопоиск Топ 250 — {count} фильмов"
         doc = BufferedInputFile(csv_bytes, filename=filename)
         await message.answer_document(doc, caption=caption)
+
+    @router.message(Command("delete_film"))
+    async def cmd_delete_film(message: Message) -> None:
+        """
+        Удаляет фильм из кэша (movies), чтобы при следующем запросе данные подтянулись заново из Кинопоиска.
+        Только для админа (REPORT_CHAT_ID). Примеры: /delete_film Достать ножи  или  /delete_film Достать ножи 2019
+        """
+        if settings.report_chat_id:
+            try:
+                allowed_id = int(settings.report_chat_id)
+            except ValueError:
+                allowed_id = None
+            if allowed_id is not None and message.from_user and message.from_user.id != allowed_id:
+                await message.answer("У вас нет доступа к этой команде.")
+                return
+
+        text = (message.text or "").strip()
+        parts = text.split(maxsplit=1)
+        if len(parts) < 2:
+            await message.answer(
+                "Использование: /delete_film <название> [год]\n"
+                "Пример: /delete_film Достать ножи  или  /delete_film Достать ножи 2019\n"
+                "Удаляет запись из кэша — при следующем запросе фильм подтянется из Кинопоиска заново."
+            )
+            return
+
+        args = parts[1].strip()
+        year = None
+        title = args
+        if args:
+            tokens = args.split()
+            if len(tokens) >= 2 and tokens[-1].isdigit() and len(tokens[-1]) == 4:
+                try:
+                    year = int(tokens[-1])
+                    title = " ".join(tokens[:-1]).strip()
+                except ValueError:
+                    pass
+
+        if not title:
+            await message.answer("Укажи название фильма после команды.")
+            return
+
+        try:
+            deleted, msg = await delete_movie_from_cache(title, year)
+        except Exception as e:
+            logger.exception("delete_film failed")
+            await message.answer(f"Ошибка: {e}")
+            return
+        await message.answer(msg)
 
     return router
 

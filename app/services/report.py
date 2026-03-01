@@ -204,3 +204,49 @@ async def run_movies_backfill(limit: int = 15) -> tuple[int, str]:
         except Exception as e:
             logger.warning("Backfill movie id=%s: %s", row["id"], e)
     return updated, ""
+
+
+async def delete_movie_from_cache(title: str, year: int | None = None) -> tuple[int, str]:
+    """
+    Удаляет фильм(ы) из кэша (таблица movies) по названию и опционально году.
+    Также удаляет связи: избранное, просмотренные; в Топ 250 обнуляет movie_id.
+    Возвращает (число удалённых записей, сообщение для пользователя).
+    """
+    title = (title or "").strip()
+    if not title:
+        return 0, "Укажи название фильма, например: /delete_film Достать ножи"
+
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        db.row_factory = aiosqlite.Row
+        pattern = f"%{title}%"
+        if year is not None:
+            cursor = await db.execute(
+                "SELECT id, title, year FROM movies WHERE LOWER(TRIM(title)) LIKE LOWER(?) AND year = ?",
+                (pattern, year),
+            )
+        else:
+            cursor = await db.execute(
+                "SELECT id, title, year FROM movies WHERE LOWER(TRIM(title)) LIKE LOWER(?)",
+                (pattern,),
+            )
+        rows = await cursor.fetchall()
+
+        if not rows:
+            return 0, f"В кэше нет фильмов по запросу «{title}»" + (f" ({year})" if year is not None else "")
+
+        ids = [r[0] for r in rows]
+        placeholders = ",".join("?" * len(ids))
+
+        await db.execute(f"DELETE FROM favorites WHERE movie_id IN ({placeholders})", ids)
+        await db.execute(f"DELETE FROM watched WHERE movie_id IN ({placeholders})", ids)
+        try:
+            await db.execute(f"UPDATE kinopoisk_top250 SET movie_id = NULL WHERE movie_id IN ({placeholders})", ids)
+        except Exception:
+            pass
+        await db.execute(f"DELETE FROM movies WHERE id IN ({placeholders})", ids)
+        await db.commit()
+
+    deleted_titles = [f"«{r[1]}» ({r[2]})" if r[2] else f"«{r[1]}»" for r in rows]
+    msg = f"Удалил из кэша {len(ids)} записей: {', '.join(deleted_titles)}. При следующем запросе данные подтянутся из Кинопоиска."
+    return len(ids), msg
