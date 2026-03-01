@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
 from ..config import Settings
 from ..keyboards.main_menu import main_menu_keyboard
-from ..services.favorites import list_favorites_for_user
+from ..services.favorites import list_favorites_for_user, remove_favorite_for_user
 
 
 def get_router(settings: Settings) -> Router:
@@ -54,7 +54,35 @@ def get_router(settings: Settings) -> Router:
             if rec.get("similar_if_liked"):
                 parts.append("🎞 Понравится, если любишь: " + ", ".join(rec["similar_if_liked"]))
 
-            await message.answer("\n".join(parts))
+            movie_id = rec.get("movie_id")
+            kb = None
+            if movie_id is not None:
+                kb = InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [InlineKeyboardButton(text="🗑 Удалить из избранного", callback_data=f"fav_remove:{movie_id}")],
+                    ]
+                )
+            await message.answer("\n".join(parts), reply_markup=kb)
+
+    @router.callback_query(F.data.startswith("fav_remove:"))
+    async def remove_from_favorites(callback: CallbackQuery) -> None:
+        try:
+            movie_id = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        removed = await remove_favorite_for_user(callback.from_user.id, movie_id)
+        if removed:
+            await callback.answer("Удалено из избранного")
+            try:
+                await callback.message.edit_reply_markup(reply_markup=None)
+                await callback.message.edit_text(
+                    callback.message.text + "\n\n✅ Удалено из избранного.",
+                )
+            except Exception:
+                pass
+        else:
+            await callback.answer("Уже удалён или не найден")
 
     return router
 

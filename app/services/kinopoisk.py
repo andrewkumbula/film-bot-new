@@ -1,12 +1,15 @@
 """
 Сервис для получения данных о фильмах/сериалах через API Кинопоиска (poiskkino.dev).
+Сначала проверяем таблицу movies; в API ходим только если фильма ещё нет. Все данные сохраняем.
 Токен можно получить в Telegram-боте @poiskkinodev_bot.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Dict, Optional
 
+import aiosqlite
 import httpx
 
 from ..config import Settings
@@ -14,30 +17,174 @@ from ..config import Settings
 
 @dataclass
 class KinopoiskMovieInfo:
-    """Данные по фильму/сериалу из API Кинопоиска."""
-    kinopoisk_id: Optional[int] = None  # id в API Кинопоиска (уникальный идентификатор)
-    age_rating: Optional[str] = None  # "0", "6", "12", "16", "18"
-    rating_kp: Optional[float] = None  # рейтинг Кинопоиска (например 8.5)
+    """Данные по фильму/сериалу из API Кинопоиска или из кэша (movies)."""
+    kinopoisk_id: Optional[int] = None
+    age_rating: Optional[str] = None
+    rating_kp: Optional[float] = None
     votes: Optional[int] = None
+    poster_url: Optional[str] = None
 
 
-async def get_movie_info(
-    settings: Settings, title: str, year: Optional[int] = None
+async def get_movie_from_db(
+    settings: Settings,
+    *,
+    kinopoisk_id: Optional[int] = None,
+    title: Optional[str] = None,
+    year: Optional[int] = None,
 ) -> Optional[KinopoiskMovieInfo]:
     """
-    Ищет фильм или сериал по названию (и опционально году) в API Кинопоиска
-    и возвращает возрастной рейтинг, рейтинг КП и число голосов. Один запрос — все поля.
-    Если KINOPOISK_API_KEY не задан, возвращает None.
+    Возвращает данные из таблицы movies, если запись есть. Сначала поиск по kinopoisk_id, иначе по (title, year).
+    В API не ходит.
     """
-    if not settings.kinopoisk_api_key:
+    title = (title or "").strip() if title else None
+    if not title and kinopoisk_id is None:
         return None
 
+    async with aiosqlite.connect(settings.db_path) as db:
+        db.row_factory = aiosqlite.Row
+        if kinopoisk_id is not None:
+            cursor = await db.execute(
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url FROM movies WHERE kinopoisk_id = ? LIMIT 1",
+                (kinopoisk_id,),
+            )
+        else:
+            cursor = await db.execute(
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                (title, year, year),
+            )
+        row = await cursor.fetchone()
+    if not row:
+        return None
+    return KinopoiskMovieInfo(
+        kinopoisk_id=row["kinopoisk_id"],
+        age_rating=row["age_rating"],
+        rating_kp=row["rating_kp"],
+        votes=row["votes"],
+        poster_url=row["poster_url"] or None,
+    )
+
+
+def _parse_poster(doc: Dict[str, Any]) -> Optional[str]:
+    poster = doc.get("poster")
+    if isinstance(poster, dict):
+        return poster.get("url") or poster.get("previewUrl") or poster.get("preview") or None
+    if isinstance(poster, str) and poster.strip().startswith("http"):
+        return poster.strip()
+    return None
+
+
+def _parse_doc_to_row(doc: Dict[str, Any]) -> tuple:
+    """Из ответа API собирает кортеж для INSERT/UPDATE movies."""
+    kinopoisk_id = doc.get("id")
+    if kinopoisk_id is not None:
+        try:
+            kinopoisk_id = int(kinopoisk_id)
+        except (TypeError, ValueError):
+            kinopoisk_id = None
+    name = (doc.get("name") or doc.get("alternativeName") or "").strip() or (str(kinopoisk_id) if kinopoisk_id else "")
+    year = doc.get("year")
+    if year is not None:
+        try:
+            year = int(year)
+        except (TypeError, ValueError):
+            year = None
+    raw_age = doc.get("ageRating")
+    age_rating = str(raw_age).strip() if raw_age is not None else None
+    if not age_rating and doc.get("ratingMpaa"):
+        age_rating = _mpaa_to_age(str(doc.get("ratingMpaa")))
+    r = doc.get("rating")
+    rating_kp = None
+    if r is not None:
+        if isinstance(r, (int, float)):
+            rating_kp = float(r)
+        elif isinstance(r, dict) and r.get("kp") is not None:
+            try:
+                rating_kp = float(r["kp"])
+            except (TypeError, ValueError):
+                pass
+    votes = doc.get("votes")
+    if votes is not None:
+        try:
+            votes = int(votes)
+        except (TypeError, ValueError):
+            votes = None
+    poster_url = _parse_poster(doc)
+    description = (doc.get("description") or "").strip() or None
+    if description and len(description) > 5000:
+        description = description[:5000]
+    genres_raw = doc.get("genres") or []
+    genre_names = [g.get("name") or "" for g in genres_raw if isinstance(g, dict)]
+    genres = ",".join(g.strip() for g in genre_names if g.strip()) or None
+    countries_raw = doc.get("countries") or []
+    country_names = [c.get("name") or "" for c in countries_raw if isinstance(c, dict)]
+    countries = ",".join(c.strip() for c in country_names if c.strip()) or None
+    raw_json = json.dumps(doc, ensure_ascii=False)[:100000] if doc else None  # лимит размера
+    return (kinopoisk_id, name, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json)
+
+
+async def save_movie_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> None:
+    """
+    Сохраняет в movies все данные из ответа API Кинопоиска. Если запись есть (по kinopoisk_id или title+year) — обновляет.
+    """
+    row = _parse_doc_to_row(doc)
+    kinopoisk_id, title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json = row
+    if not title and not kinopoisk_id:
+        return
+
+    async with aiosqlite.connect(settings.db_path) as db:
+        if kinopoisk_id is not None:
+            cursor = await db.execute("SELECT id FROM movies WHERE kinopoisk_id = ? LIMIT 1", (kinopoisk_id,))
+            existing = await cursor.fetchone()
+        else:
+            cursor = await db.execute(
+                "SELECT id FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                (title, year, year),
+            )
+            existing = await cursor.fetchone()
+
+        if existing:
+            await db.execute(
+                """UPDATE movies SET title = ?, year = ?, age_rating = ?, rating_kp = ?, poster_url = ?, description = ?, genres = ?, countries = ?, votes = ?, raw_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
+                (title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json, existing[0]),
+            )
+            if kinopoisk_id is not None:
+                await db.execute("UPDATE movies SET kinopoisk_id = ? WHERE id = ?", (kinopoisk_id, existing[0]))
+        else:
+            await db.execute(
+                """INSERT INTO movies (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)""",
+                (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, description, genres, countries, votes, raw_json),
+            )
+        await db.commit()
+
+
+async def _fetch_movie_doc_by_id(settings: Settings, kinopoisk_id: int) -> Optional[Dict[str, Any]]:
+    """Запрос к API: полные данные по фильму по ID. Не пишет в БД."""
+    if not settings.kinopoisk_api_key:
+        return None
+    url = f"{settings.kinopoisk_base_url.rstrip('/')}/v1.4/movie/{kinopoisk_id}"
+    headers = {"X-API-KEY": settings.kinopoisk_api_key}
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url, headers=headers)
+            if response.status_code != 200:
+                return None
+            return response.json()
+    except (httpx.RequestError, ValueError):
+        return None
+
+
+async def _fetch_movie_doc_by_search(
+    settings: Settings, title: str, year: Optional[int] = None
+) -> Optional[Dict[str, Any]]:
+    """Запрос к API: поиск по названию (и году). Возвращает первый подходящий doc, не пишет в БД."""
+    if not settings.kinopoisk_api_key:
+        return None
     url = f"{settings.kinopoisk_base_url.rstrip('/')}/v1.4/movie/search"
     headers = {"X-API-KEY": settings.kinopoisk_api_key}
     params = {"query": title.strip(), "limit": 5}
     if year:
         params["query"] = f"{title.strip()} {year}"
-
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
             response = await client.get(url, headers=headers, params=params)
@@ -46,67 +193,75 @@ async def get_movie_info(
             data = response.json()
     except (httpx.RequestError, ValueError):
         return None
-
     docs = data.get("docs") or []
     if not docs:
         return None
-
-    # Выбираем лучший результат (по году при наличии)
-    doc = None
     for d in docs:
         doc_year = d.get("year")
         if year and doc_year and int(doc_year) != year:
             continue
-        doc = d
-        break
-    if doc is None:
-        doc = docs[0]
+        return d
+    return docs[0]
 
-    age_rating = None
-    raw_age = doc.get("ageRating")
-    if raw_age is not None:
-        age_rating = str(raw_age).strip() or None
-    elif doc.get("ratingMpaa"):
-        age_rating = _mpaa_to_age(str(doc.get("ratingMpaa")))
 
-    rating_kp = None
-    r = doc.get("rating")
-    if r is not None:
-        if isinstance(r, (int, float)):
-            rating_kp = float(r)
-        elif isinstance(r, dict):
-            kp = r.get("kp")
-            if kp is not None:
-                try:
-                    rating_kp = float(kp)
-                except (TypeError, ValueError):
-                    pass
-    votes = doc.get("votes")
-    if votes is not None:
-        try:
-            votes = int(votes)
-        except (TypeError, ValueError):
-            votes = None
-
-    kinopoisk_id = doc.get("id")
+async def refresh_movie_from_api(
+    settings: Settings,
+    *,
+    kinopoisk_id: Optional[int] = None,
+    title: Optional[str] = None,
+    year: Optional[int] = None,
+) -> bool:
+    """
+    Дозаполняет запись в movies из API: по kinopoisk_id или по (title, year).
+    Возвращает True, если данные успешно получены и сохранены.
+    """
+    doc = None
     if kinopoisk_id is not None:
-        try:
-            kinopoisk_id = int(kinopoisk_id)
-        except (TypeError, ValueError):
-            kinopoisk_id = None
+        doc = await _fetch_movie_doc_by_id(settings, kinopoisk_id)
+    elif title:
+        title = (title or "").strip()
+        if title:
+            doc = await _fetch_movie_doc_by_search(settings, title, year)
+    if not doc:
+        return False
+    await save_movie_from_api_doc(settings, doc)
+    return True
 
+
+async def get_movie_info(
+    settings: Settings, title: str, year: Optional[int] = None
+) -> Optional[KinopoiskMovieInfo]:
+    """
+    Возвращает данные по фильму. Сначала проверяет таблицу movies; если запись есть — возвращает из кэша (в API не ходит).
+    Если нет — запрашивает API, сохраняет все данные в movies и возвращает результат.
+    """
+    # Сначала из БД
+    cached = await get_movie_from_db(settings, title=title, year=year)
+    if cached is not None:
+        return cached
+
+    if not settings.kinopoisk_api_key:
+        return None
+
+    doc = await _fetch_movie_doc_by_search(settings, title, year)
+    if not doc:
+        return None
+
+    await save_movie_from_api_doc(settings, doc)
+
+    row = _parse_doc_to_row(doc)
+    kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _d, _g, _c, votes, _raw = row
     return KinopoiskMovieInfo(
         kinopoisk_id=kinopoisk_id,
         age_rating=age_rating,
         rating_kp=rating_kp,
         votes=votes,
+        poster_url=poster_url,
     )
 
 
 async def get_age_rating(settings: Settings, title: str, year: Optional[int] = None) -> Optional[str]:
-    """
-    Удобная обёртка: возвращает только возрастной рейтинг.
-    """
+    """Удобная обёртка: возвращает только возрастной рейтинг (из кэша или API)."""
     info = await get_movie_info(settings, title, year)
     return info.age_rating if info else None
 

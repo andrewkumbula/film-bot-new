@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import aiosqlite
 
 from ..config import Settings, load_settings
+from .kinopoisk import get_movie_info
 
 
 async def _get_movie_id(
@@ -123,6 +124,7 @@ async def get_or_create_movie(
 async def add_favorite_for_user(user_id: int, rec: Dict[str, Any]) -> bool:
     """
     Сохраняет рекомендацию в избранное. Использует таблицу movies (по id Кинопоиска или title+year).
+    Если фильма нет в БД и есть API Кинопоиска — сначала забирает полные данные (до постера) и пишет в movies.
     Возвращает True, если добавлено, False — если такой фильм уже в избранном.
     """
     settings = load_settings()
@@ -134,6 +136,10 @@ async def add_favorite_for_user(user_id: int, rec: Dict[str, Any]) -> bool:
     year = rec.get("year")
     age_rating = rec.get("age_rating")
     rating_kp = rec.get("rating_kp")
+
+    # При любом обращении к Кинопоиску забираем все данные и пишем в таблицу; если фильм уже есть — не ходим в API
+    if settings.kinopoisk_api_key:
+        await get_movie_info(settings, title, year)
 
     movie_id = await get_or_create_movie(
         kinopoisk_id=kinopoisk_id,
@@ -172,6 +178,21 @@ async def add_favorite_for_user(user_id: int, rec: Dict[str, Any]) -> bool:
     return True
 
 
+async def remove_favorite_for_user(user_id: int, movie_id: int) -> bool:
+    """
+    Удаляет фильм из избранного пользователя по movie_id.
+    Возвращает True, если запись была удалена, False — если не найдена.
+    """
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute(
+            "DELETE FROM favorites WHERE user_id = ? AND movie_id = ?",
+            (user_id, movie_id),
+        )
+        await db.commit()
+        return cursor.rowcount > 0
+
+
 async def list_favorites_for_user(settings: Settings, user_id: int, limit: int = 10) -> List[Dict[str, Any]]:
     """
     Возвращает избранные фильмы пользователя (данные из movies + поля из favorites).
@@ -179,7 +200,7 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
     async with aiosqlite.connect(settings.db_path) as db:
         cursor = await db.execute(
             """
-            SELECT m.title, m.year, m.age_rating, m.rating_kp,
+            SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
                    f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
             FROM favorites f
             JOIN movies m ON f.movie_id = m.id
@@ -193,9 +214,10 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
 
     favorites: List[Dict[str, Any]] = []
     for row in rows:
-        title, year, age_rating, rating_kp, why, mood_tags, genres, warnings, similar_if_liked = row
+        movie_id, title, year, age_rating, rating_kp, why, mood_tags, genres, warnings, similar_if_liked = row
         favorites.append(
             {
+                "movie_id": movie_id,
                 "title": title,
                 "year": year,
                 "age_rating": age_rating,
@@ -213,11 +235,16 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
 async def add_watched_for_user(user_id: int, rec: Dict[str, Any]) -> bool:
     """
     Добавляет фильм в список «Посмотрел». Использует movies (get_or_create).
+    Если фильма нет в БД и есть API Кинопоиска — сначала забирает полные данные и пишет в movies.
     Возвращает True, если добавлено, False — если уже был в списке.
     """
+    settings = load_settings()
     title = (rec.get("title") or "").strip()
     if not title:
         return False
+
+    if settings.kinopoisk_api_key:
+        await get_movie_info(settings, title, rec.get("year"))
 
     movie_id = await get_or_create_movie(
         kinopoisk_id=rec.get("kinopoisk_id"),

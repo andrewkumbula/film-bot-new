@@ -3,22 +3,35 @@ from __future__ import annotations
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def mood_keyboard() -> InlineKeyboardMarkup:
+def source_keyboard() -> InlineKeyboardMarkup:
+    """Развилка: откуда подбирать фильмы."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🏆 Оскар (номинанты и победители)", callback_data="source:oscar")],
+            [InlineKeyboardButton(text="⭐ Кинопоиск Топ 250", callback_data="source:top250")],
+            [InlineKeyboardButton(text="🎬 Кинофестивали", callback_data="source:festivals")],
+            [InlineKeyboardButton(text="✨ Обычный подбор (настроение, жанр…)", callback_data="source:default")],
+        ]
+    )
+
+
+def mood_keyboard(prefix: str = "") -> InlineKeyboardMarkup:
+    p = prefix
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="😂 Весело", callback_data="mood:fun"),
-                InlineKeyboardButton(text="😱 Страшно", callback_data="mood:scary"),
+                InlineKeyboardButton(text="😂 Весело", callback_data=f"{p}mood:fun"),
+                InlineKeyboardButton(text="😱 Страшно", callback_data=f"{p}mood:scary"),
             ],
             [
-                InlineKeyboardButton(text="🥹 Трогательно", callback_data="mood:touching"),
-                InlineKeyboardButton(text="🧠 Умно", callback_data="mood:smart"),
+                InlineKeyboardButton(text="🥹 Трогательно", callback_data=f"{p}mood:touching"),
+                InlineKeyboardButton(text="🧠 Умно", callback_data=f"{p}mood:smart"),
             ],
             [
-                InlineKeyboardButton(text="🤯 Взрыв мозга", callback_data="mood:mindblown"),
-                InlineKeyboardButton(text="😌 Лёгкое", callback_data="mood:light"),
+                InlineKeyboardButton(text="🤯 Взрыв мозга", callback_data=f"{p}mood:mindblown"),
+                InlineKeyboardButton(text="😌 Лёгкое", callback_data=f"{p}mood:light"),
             ],
-            [InlineKeyboardButton(text="➖ Не важно", callback_data="mood:any")],
+            [InlineKeyboardButton(text="➖ Не важно", callback_data=f"{p}mood:any")],
         ]
     )
 
@@ -35,11 +48,13 @@ GENRE_OPTIONS = [
     ("👨‍👩‍👧 Семейный", "family"),
     ("📽️ Артхаус", "arthouse"),
     ("🧒 Мультфильм", "animation"),
+    ("🎌 Аниме", "anime"),
 ]
 
 
-def genres_keyboard(selected: set[str] | None = None) -> InlineKeyboardMarkup:
+def genres_keyboard(selected: set[str] | None = None, cb_prefix: str = "") -> InlineKeyboardMarkup:
     selected = selected or set()
+    p = cb_prefix
 
     rows = []
     for i in range(0, len(GENRE_OPTIONS), 2):
@@ -49,20 +64,32 @@ def genres_keyboard(selected: set[str] | None = None) -> InlineKeyboardMarkup:
             row.append(
                 InlineKeyboardButton(
                     text=f"{prefix}{label}",
-                    callback_data=f"genre:{code}",
+                    callback_data=f"{p}genre:{code}",
                 )
             )
         rows.append(row)
 
-    # Кнопки "Готово" и "Не важно"
     rows.append(
         [
-            InlineKeyboardButton(text="✅ Готово", callback_data="genres_done"),
-            InlineKeyboardButton(text="➖ Не важно", callback_data="genres_skip"),
+            InlineKeyboardButton(text="✅ Готово", callback_data=f"{p}genres_done"),
+            InlineKeyboardButton(text="➖ Не важно", callback_data=f"{p}genres_skip"),
         ]
     )
 
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def year_era_keyboard(cb_prefix: str = "") -> InlineKeyboardMarkup:
+    """Год (эпоха) для ветки Топ 250."""
+    p = cb_prefix
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🆕 Новое (2010+)", callback_data=f"{p}year:new")],
+            [InlineKeyboardButton(text="📼 90-е–00-е", callback_data=f"{p}year:90s00s")],
+            [InlineKeyboardButton(text="🎞 Классика (до 1990)", callback_data=f"{p}year:classic")],
+            [InlineKeyboardButton(text="➖ Не важно", callback_data=f"{p}year:any")],
+        ]
+    )
 
 
 def duration_keyboard() -> InlineKeyboardMarkup:
@@ -95,30 +122,35 @@ def age_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-# Коды для этапа «чего избегать» → текст для промпта ИИ
+# Коды для этапа «чего избегать» → текст для промпта ИИ (множественный выбор)
 NEGATIVE_OPTIONS = [
     ("🚫 Жестокость", "neg:violence"),
     ("😢 Тяжёлые драмы", "neg:heavydrama"),
     ("📼 Старое кино", "neg:old"),
     ("😞 Грустный финал", "neg:sad"),
-    ("➖ Нет ограничений", "neg:none"),
 ]
+# neg:none = «Нет ограничений», neg:done = «Готово» (подтвердить выбранное)
 
 
-def negative_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="🚫 Жестокость", callback_data="neg:violence"),
-                InlineKeyboardButton(text="😢 Тяжёлые драмы", callback_data="neg:heavydrama"),
-            ],
-            [
-                InlineKeyboardButton(text="📼 Старое кино", callback_data="neg:old"),
-                InlineKeyboardButton(text="😞 Грустный финал", callback_data="neg:sad"),
-            ],
-            [InlineKeyboardButton(text="➖ Нет ограничений", callback_data="neg:none")],
+def negative_keyboard(selected: set[str] | None = None) -> InlineKeyboardMarkup:
+    """Клавиатура «чего избегать» с множественным выбором. selected — множество callback_data (neg:violence и т.д.)."""
+    selected = selected or set()
+    rows = []
+    for i in range(0, len(NEGATIVE_OPTIONS), 2):
+        row = []
+        for label, code in NEGATIVE_OPTIONS[i : i + 2]:
+            prefix = "✅ " if code in selected else ""
+            row.append(
+                InlineKeyboardButton(text=f"{prefix}{label}", callback_data=code),
+            )
+        rows.append(row)
+    rows.append(
+        [
+            InlineKeyboardButton(text="✅ Готово", callback_data="neg:done"),
+            InlineKeyboardButton(text="➖ Нет ограничений", callback_data="neg:none"),
         ]
     )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def company_keyboard() -> InlineKeyboardMarkup:
@@ -137,12 +169,13 @@ def company_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def recommendations_control_keyboard() -> InlineKeyboardMarkup:
+def recommendations_control_keyboard(cb_prefix: str = "") -> InlineKeyboardMarkup:
+    p = cb_prefix
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="🔁 Подобрать ещё", callback_data="reco:again"),
-                InlineKeyboardButton(text="🏠 В меню", callback_data="reco:menu"),
+                InlineKeyboardButton(text="🔁 Подобрать ещё", callback_data=f"{p}reco:again"),
+                InlineKeyboardButton(text="🏠 В меню", callback_data=f"{p}reco:menu"),
             ]
         ]
     )

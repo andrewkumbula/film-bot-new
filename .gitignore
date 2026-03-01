@@ -21,3 +21,4 @@ node_modules/
 
 # локальная БД бота
 app_data/
+app_data/*.db

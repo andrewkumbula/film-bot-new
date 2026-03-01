@@ -7,7 +7,7 @@ import httpx
 from pydantic import ValidationError
 
 from ..config import Settings
-from .schemas import LlmResponse
+from .schemas import LlmResponse, Top250LlmResponse, Top250Pick
 
 
 class LlmError(Exception):
@@ -217,4 +217,89 @@ async def get_recommendations_from_llm(
         "Не удалось получить рекомендации от модели.",
         debug_detail=last_error or "unknown error",
     )
+
+
+def _build_top250_prompt(
+    mood: str,
+    genre_codes: list,
+    year_era: str,
+    candidates: list,
+) -> str:
+    """Промпт для ИИ: выбрать 5 фильмов из списка кандидатов по предпочтениям пользователя."""
+    mood_map = {
+        "fun": "весёлое",
+        "scary": "страшное",
+        "touching": "трогательное",
+        "smart": "умное",
+        "mindblown": "с «взрывом мозга»",
+        "light": "лёгкое",
+        "any": "любое",
+    }
+    era_map = {
+        "new": "новое кино (2010+)",
+        "90s00s": "90-е–00-е",
+        "classic": "классика (до 1990)",
+        "any": "любая эпоха",
+    }
+    mood_str = mood_map.get(mood, mood)
+    era_str = era_map.get(year_era, year_era)
+    genres_str = ", ".join(genre_codes) if genre_codes else "любые"
+
+    lines = []
+    for i, film in enumerate(candidates[:80], 1):  # не более 80 в промпте
+        title = film.get("title", "?")
+        year = film.get("year")
+        year_s = f" ({year})" if year else ""
+        lines.append(f"{i}. {title}{year_s}")
+
+    list_text = "\n".join(lines)
+    prompt = (
+        "Пользователь выбирает фильм из Кинопоиск Топ 250. Его предпочтения:\n"
+        f"- Настроение: {mood_str}\n"
+        f"- Жанры: {genres_str}\n"
+        f"- Эпоха: {era_str}\n\n"
+        "Ниже список фильмов (из Топ 250), уже отфильтрованных по жанру и эпохе. "
+        "Выбери ровно 5 фильмов, которые лучше всего подходят под настроение и предпочтения пользователя. "
+        "Верни ТОЛЬКО один JSON-объект в формате:\n"
+        "{\n"
+        '  "recommendations": [\n'
+        '    {"title": "Название фильма", "year": 2020},\n'
+        "    ...\n"
+        "  ]\n"
+        "}\n\n"
+        "Список фильмов на выбор:\n"
+        f"{list_text}\n\n"
+        "Требования: ровно 5 фильмов из этого списка; названия и годы должны совпадать с вариантами выше; без комментариев, без Markdown."
+    )
+    return prompt
+
+
+async def get_top250_picks_from_llm(
+    settings: Settings,
+    mood: str,
+    genre_codes: list,
+    year_era: str,
+    candidates: list,
+) -> Top250LlmResponse:
+    """
+    Отправляет ИИ список кандидатов (из Топ 250) и предпочтения пользователя;
+    возвращает 5 выбранных фильмов (title, year).
+    """
+    if len(candidates) <= 5:
+        return Top250LlmResponse(
+            recommendations=[
+                Top250Pick(title=c.get("title", ""), year=c.get("year"))
+                for c in candidates[:5]
+            ],
+        )
+    prompt = _build_top250_prompt(mood, genre_codes, year_era, candidates)
+    raw = await _request_llm_raw(settings, prompt, timeout_sec=25)
+    text = _strip_code_fences(raw)
+    try:
+        return Top250LlmResponse.model_validate_json(text)
+    except Exception as e:
+        raise LlmError(
+            "Не удалось выбрать фильмы из списка.",
+            debug_detail=str(e),
+        )
 

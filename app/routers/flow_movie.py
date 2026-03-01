@@ -1,33 +1,39 @@
 from __future__ import annotations
 
 import asyncio
+import random
 import uuid
 from typing import Any, Dict, List, Optional
 
 from aiogram import Router, F
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
 from ..config import Settings
 from ..keyboards.flow import (
+    source_keyboard,
     mood_keyboard,
     genres_keyboard,
     duration_keyboard,
     age_keyboard,
     company_keyboard,
     negative_keyboard,
+    year_era_keyboard,
     recommendations_control_keyboard,
 )
 from ..keyboards.main_menu import main_menu_keyboard
-from ..llm.service import get_recommendations_from_llm, LlmError
+from ..llm.service import get_recommendations_from_llm, get_top250_picks_from_llm, LlmError
 from ..services.favorites import add_favorite_for_user, add_watched_for_user, is_favorite, is_watched
 from ..services.flow_log import log_flow_step
 from ..services.kinopoisk import get_movie_info, KinopoiskMovieInfo
+from ..services.top250 import get_filtered_top250, get_top250_count, match_picks_to_candidates
 from ..services.users import ensure_user
 
 
 class MovieFlow(StatesGroup):
+    source = State()
     mood = State()
     genres = State()
     duration = State()
@@ -37,10 +43,17 @@ class MovieFlow(StatesGroup):
     recommendations = State()
 
 
+class Top250Flow(StatesGroup):
+    mood = State()
+    genres = State()
+    year_era = State()
+    recommendations = State()
+
+
 def get_router(settings: Settings) -> Router:
     router = Router(name="movie_flow")
 
-    # Старт флоу: только кнопка «Подобрать фильм» (остальные пункты убраны из меню)
+    # Старт флоу: только кнопка «Подобрать фильм» → развилка по источнику
     @router.message(F.text.endswith("Подобрать фильм"))
     async def start_flow(message: Message, state: FSMContext) -> None:
         if message.from_user:
@@ -52,16 +65,267 @@ def get_router(settings: Settings) -> Router:
             )
         await state.clear()
         session_id = uuid.uuid4().hex
-        await state.set_state(MovieFlow.mood)
+        await state.set_state(MovieFlow.source)
         await state.update_data(preferences={}, session_id=session_id)
-        await log_flow_step(message.from_user.id, session_id, "start", "mood")
+        await log_flow_step(message.from_user.id, session_id, "start", "source")
         await message.answer("Начнём подбор фильма ✨")
         await message.answer(
-            "Для начала давай выберем <b>настроение</b> для фильма 👇",
-            reply_markup=mood_keyboard(),
+            "Откуда подбирать фильмы? 👇",
+            reply_markup=source_keyboard(),
         )
 
-    # 1. Настроение
+    # Развилка: выбор источника
+    @router.callback_query(MovieFlow.source, F.data.startswith("source:"))
+    async def choose_source(callback: CallbackQuery, state: FSMContext) -> None:
+        source = callback.data.split(":", 1)[1]
+        data = await state.get_data()
+        prefs = data.get("preferences", {})
+        prefs["source"] = source
+        session_id = data.get("session_id") or uuid.uuid4().hex
+        await state.update_data(preferences=prefs, session_id=session_id)
+        await log_flow_step(callback.from_user.id, session_id, "source", source)
+        await callback.answer()
+
+        if source == "default":
+            await state.set_state(MovieFlow.mood)
+            await callback.message.edit_text(
+                "Для начала давай выберем <b>настроение</b> для фильма 👇",
+                reply_markup=mood_keyboard(),
+            )
+            return
+        if source == "top250":
+            await state.set_state(Top250Flow.mood)
+            await state.update_data(preferences=prefs, session_id=session_id)
+            await log_flow_step(callback.from_user.id, session_id, "top250_start", "mood")
+            await callback.message.edit_text(
+                "Выбери <b>настроение / тип просмотра</b> 👇",
+                reply_markup=mood_keyboard(prefix="t250_"),
+            )
+            return
+        # Оскар, фестивали — заглушка
+        await state.clear()
+        await callback.message.edit_text(
+            "Этот режим ещё в разработке 🚧\nПока используй <b>Обычный подбор</b> или <b>Кинопоиск Топ 250</b>."
+        )
+        await callback.message.answer("Выбери действие:", reply_markup=main_menu_keyboard())
+
+    # --- Ветка Топ 250 ---
+    @router.callback_query(Top250Flow.mood, F.data.startswith("t250_mood:"))
+    async def top250_mood(callback: CallbackQuery, state: FSMContext) -> None:
+        mood_code = callback.data.replace("t250_mood:", "", 1)
+        data = await state.get_data()
+        prefs = data.get("preferences", {})
+        prefs["mood"] = mood_code
+        session_id = data.get("session_id") or uuid.uuid4().hex
+        await state.update_data(preferences=prefs, session_id=session_id)
+        await log_flow_step(callback.from_user.id, session_id, "top250_mood", mood_code)
+        await state.set_state(Top250Flow.genres)
+        await callback.message.edit_text(
+            "Теперь выбери <b>жанры</b>. Можно несколько, потом «✅ Готово».",
+            reply_markup=genres_keyboard(set(), cb_prefix="t250_"),
+        )
+        await callback.answer()
+
+    @router.callback_query(Top250Flow.genres, F.data.startswith("t250_"))
+    async def top250_genres(callback: CallbackQuery, state: FSMContext) -> None:
+        data = await state.get_data()
+        prefs = data.get("preferences", {})
+        selected = set(prefs.get("genres", []))
+        session_id = data.get("session_id") or uuid.uuid4().hex
+
+        if callback.data == "t250_genres_done":
+            if not selected:
+                await callback.answer("Выбери хотя бы один жанр 🙏", show_alert=True)
+                return
+            await log_flow_step(callback.from_user.id, session_id, "top250_genres", ",".join(sorted(selected)))
+            await state.set_state(Top250Flow.year_era)
+            await callback.message.edit_text(
+                "Выбери <b>год (эпоху)</b> 👇",
+                reply_markup=year_era_keyboard("t250_"),
+            )
+            await callback.answer()
+            return
+        if callback.data == "t250_genres_skip":
+            prefs["genres"] = []
+            await state.update_data(preferences=prefs)
+            await log_flow_step(callback.from_user.id, session_id, "top250_genres", "skip")
+            await state.set_state(Top250Flow.year_era)
+            await callback.message.edit_text(
+                "Выбери <b>год (эпоху)</b> 👇",
+                reply_markup=year_era_keyboard("t250_"),
+            )
+            await callback.answer()
+            return
+        if callback.data.startswith("t250_genre:"):
+            code = callback.data.replace("t250_genre:", "", 1)
+            if code in selected:
+                selected.remove(code)
+            else:
+                selected.add(code)
+            prefs["genres"] = list(selected)
+            await state.update_data(preferences=prefs)
+            try:
+                await callback.message.edit_reply_markup(reply_markup=genres_keyboard(selected, cb_prefix="t250_"))
+            except TelegramBadRequest as e:
+                if "message is not modified" not in str(e).lower():
+                    raise
+            await callback.answer()
+
+    @router.callback_query(Top250Flow.year_era, F.data.startswith("t250_year:"))
+    async def top250_year_era(callback: CallbackQuery, state: FSMContext) -> None:
+        year_era = callback.data.replace("t250_year:", "", 1)
+        data = await state.get_data()
+        prefs = data.get("preferences", {})
+        prefs["year_era"] = year_era
+        session_id = data.get("session_id") or uuid.uuid4().hex
+        await state.update_data(preferences=prefs, session_id=session_id)
+        await log_flow_step(callback.from_user.id, session_id, "top250_year_era", year_era)
+        await callback.answer()
+
+        mood = prefs.get("mood") or "any"
+        genre_codes = prefs.get("genres") or []
+        # Кандидаты по жанру и эпохе (до 50), затем ИИ выбирает 5 по настроению и предпочтениям
+        candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=50)
+        await state.set_state(Top250Flow.recommendations)
+
+        if not candidates:
+            total = await get_top250_count(settings)
+            if total == 0:
+                text = (
+                    "Топ 250 ещё не загружен — возможно, лимит запросов Кинопоиска (200/день) исчерпан или это первый запуск.\n\n"
+                    "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
+                )
+            else:
+                text = "По твоим фильтрам ничего не нашлось в Топ 250 😅\nПопробуй ослабить жанр или эпоху."
+            await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
+            return
+
+        try:
+            llm_picks = await get_top250_picks_from_llm(settings, mood, genre_codes, year_era, candidates)
+            picks_as_dicts = [{"title": p.title, "year": p.year} for p in llm_picks.recommendations]
+            films = match_picks_to_candidates(picks_as_dicts, candidates)
+        except LlmError:
+            # ИИ не справился — выдаём 5 случайных из кандидатов
+            films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+
+        if not films:
+            films = candidates[:5]
+
+        await state.update_data(recommendations=films)
+        await callback.message.edit_text("Вот подборка из Кинопоиск Топ 250 🎬")
+        for idx, rec in enumerate(films):
+            parts = [
+                f"{idx + 1}. <b>{rec['title']}</b>",
+                f"🔞 {rec.get('age_rating') or '—'}+   ⭐ Кинопоиск: {rec.get('rating_kp') or '—'}",
+            ]
+            if rec.get("year"):
+                parts[0] += f" ({rec['year']})"
+            if rec.get("genres"):
+                parts.append("🎭 " + (rec["genres"][:80] + "…" if len(rec.get("genres", "")) > 80 else rec["genres"]))
+            text = "\n".join(parts)
+            in_fav = await is_favorite(callback.from_user.id, rec)
+            in_watched = await is_watched(callback.from_user.id, rec)
+            fav_l = "✅ В избранном" if in_fav else "⭐️ В избранное"
+            watched_l = "✅ Посмотрел" if in_watched else "🎬 Посмотрел"
+            kb = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(text=fav_l, callback_data=f"t250_fav:{idx}"),
+                        InlineKeyboardButton(text=watched_l, callback_data=f"t250_watched:{idx}"),
+                    ]
+                ]
+            )
+            poster_url = rec.get("poster_url")
+            if poster_url and str(poster_url).strip().startswith("http"):
+                await callback.message.answer_photo(photo=poster_url, caption=text, reply_markup=kb)
+            else:
+                await callback.message.answer(text, reply_markup=kb)
+        await callback.message.answer(
+            "Можем подобрать ещё или вернуться в меню 👇",
+            reply_markup=recommendations_control_keyboard("t250_"),
+        )
+
+    @router.callback_query(Top250Flow.recommendations, F.data.startswith("t250_fav:"))
+    async def top250_fav(callback: CallbackQuery, state: FSMContext) -> None:
+        try:
+            idx = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        data = await state.get_data()
+        recs = data.get("recommendations") or []
+        if idx < 0 or idx >= len(recs):
+            await callback.answer()
+            return
+        rec = recs[idx]
+        added = await add_favorite_for_user(callback.from_user.id, rec)
+        await callback.answer("Добавлено в избранное ⭐️" if added else "Уже в избранном 👍")
+        in_watched = await is_watched(callback.from_user.id, rec)
+        new_kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="✅ В избранном", callback_data=f"t250_fav:{idx}"),
+                    InlineKeyboardButton(
+                        text="✅ Посмотрел" if in_watched else "🎬 Посмотрел",
+                        callback_data=f"t250_watched:{idx}",
+                    ),
+                ]
+            ]
+        )
+        try:
+            await callback.message.edit_reply_markup(reply_markup=new_kb)
+        except Exception:
+            pass
+
+    @router.callback_query(Top250Flow.recommendations, F.data.startswith("t250_watched:"))
+    async def top250_watched(callback: CallbackQuery, state: FSMContext) -> None:
+        try:
+            idx = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        data = await state.get_data()
+        recs = data.get("recommendations") or []
+        if idx < 0 or idx >= len(recs):
+            await callback.answer()
+            return
+        rec = recs[idx]
+        added = await add_watched_for_user(callback.from_user.id, rec)
+        await callback.answer("Добавлено в «Посмотрел» 🎬" if added else "Уже в списке 👍")
+        in_fav = await is_favorite(callback.from_user.id, rec)
+        new_kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="✅ В избранном" if in_fav else "⭐️ В избранное",
+                        callback_data=f"t250_fav:{idx}",
+                    ),
+                    InlineKeyboardButton(text="✅ Посмотрел", callback_data=f"t250_watched:{idx}"),
+                ]
+            ]
+        )
+        try:
+            await callback.message.edit_reply_markup(reply_markup=new_kb)
+        except Exception:
+            pass
+
+    @router.callback_query(Top250Flow.recommendations, F.data == "t250_reco:again")
+    async def top250_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
+        """Подобрать ещё — возврат к выбору года, затем новая подборка из 5."""
+        await state.set_state(Top250Flow.year_era)
+        await callback.message.answer(
+            "Выбери год (эпоху) ещё раз — покажу новую подборку 👇",
+            reply_markup=year_era_keyboard("t250_"),
+        )
+        await callback.answer()
+
+    @router.callback_query(Top250Flow.recommendations, F.data == "t250_reco:menu")
+    async def top250_reco_menu(callback: CallbackQuery, state: FSMContext) -> None:
+        await state.clear()
+        await callback.message.answer("Главное меню 👇", reply_markup=main_menu_keyboard())
+        await callback.answer()
+
+    # 1. Настроение (обычный подбор)
     @router.callback_query(MovieFlow.mood, F.data.startswith("mood:"))
     async def choose_mood(callback: CallbackQuery, state: FSMContext) -> None:
         mood_code = callback.data.split(":", 1)[1]
@@ -123,9 +387,13 @@ def get_router(settings: Settings) -> Router:
                 selected.add(code)
             prefs["genres"] = list(selected)
             await state.update_data(preferences=prefs)
-            await callback.message.edit_reply_markup(
-                reply_markup=genres_keyboard(selected)
-            )
+            try:
+                await callback.message.edit_reply_markup(
+                    reply_markup=genres_keyboard(selected)
+                )
+            except TelegramBadRequest as e:
+                if "message is not modified" not in str(e).lower():
+                    raise
             await callback.answer()
 
     # 3. Длительность
@@ -177,10 +445,12 @@ def get_router(settings: Settings) -> Router:
         await log_flow_step(callback.from_user.id, session_id, "company", company_code)
 
         await state.set_state(MovieFlow.negative)
+        await state.update_data(negative_codes=[])
         await callback.message.edit_text(
             "Почти готово! ✨\n\n"
-            "<b>Есть ли что-то, чего точно НЕ хочешь видеть в фильме?</b>",
-            reply_markup=negative_keyboard(),
+            "<b>Есть ли что-то, чего точно НЕ хочешь видеть в фильме?</b>\n"
+            "Можно выбрать несколько пунктов, затем нажать «Готово».",
+            reply_markup=negative_keyboard(set()),
         )
         await callback.answer()
 
@@ -301,7 +571,11 @@ def get_router(settings: Settings) -> Router:
                     ]
                 ]
             )
-            await responder.answer(text, reply_markup=kb)
+            poster_url = info.poster_url if info else None
+            if poster_url and str(poster_url).strip().startswith("http"):
+                await responder.answer_photo(photo=poster_url, caption=text, reply_markup=kb)
+            else:
+                await responder.answer(text, reply_markup=kb)
 
         await responder.answer(
             "Если хочешь — можем подобрать ещё варианты или вернуться в меню 👇",
@@ -310,16 +584,46 @@ def get_router(settings: Settings) -> Router:
 
     @router.callback_query(MovieFlow.negative, F.data.startswith("neg:"))
     async def negative_choice(callback: CallbackQuery, state: FSMContext) -> None:
-        negative_text = NEGATIVE_TO_PROMPT.get(callback.data, "").strip()
         data = await state.get_data()
         prefs = data.get("preferences", {})
         session_id = data.get("session_id") or uuid.uuid4().hex
-        await state.update_data(negative=negative_text, session_id=session_id)
-        await log_flow_step(callback.from_user.id, session_id, "negative", callback.data)
+        selected = set(data.get("negative_codes") or [])
+
+        if callback.data == "neg:none":
+            await state.update_data(negative="", negative_codes=[], session_id=session_id)
+            await log_flow_step(callback.from_user.id, session_id, "negative", "neg:none")
+            await callback.answer()
+            await _do_recommendations(callback.message, state, callback.from_user.id, prefs, "")
+            return
+
+        if callback.data == "neg:done":
+            negative_text = ", ".join(
+                NEGATIVE_TO_PROMPT[c].strip()
+                for c in selected
+                if NEGATIVE_TO_PROMPT.get(c, "").strip()
+            )
+            await state.update_data(negative=negative_text, session_id=session_id)
+            await log_flow_step(
+                callback.from_user.id, session_id, "negative", ",".join(sorted(selected)) or "none"
+            )
+            await callback.answer()
+            await _do_recommendations(
+                callback.message, state, callback.from_user.id, prefs, negative_text
+            )
+            return
+
+        # Переключение пункта
+        if callback.data in selected:
+            selected.discard(callback.data)
+        else:
+            selected.add(callback.data)
+        await state.update_data(negative_codes=list(selected), session_id=session_id)
+        try:
+            await callback.message.edit_reply_markup(reply_markup=negative_keyboard(selected))
+        except TelegramBadRequest as e:
+            if "message is not modified" not in str(e).lower():
+                raise
         await callback.answer()
-        await _do_recommendations(
-            callback.message, state, callback.from_user.id, prefs, negative_text
-        )
 
     # Добавление в избранное по кнопке
     @router.callback_query(MovieFlow.recommendations, F.data.startswith("fav:"))

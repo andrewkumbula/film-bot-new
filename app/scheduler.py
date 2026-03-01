@@ -11,8 +11,12 @@ from aiogram import Bot
 
 from .config import Settings
 from .routers.report import send_daily_report_to_chat
+from .services.top250 import refresh_top250
 
 logger = logging.getLogger(__name__)
+
+# Топ 250: обновление раз в месяц (1-е число в 04:00, локальное время)
+TOP250_REFRESH_TIME = time(4, 0)
 
 
 def _parse_report_time(report_time: str) -> time:
@@ -66,4 +70,38 @@ async def daily_report_scheduler(bot: Bot, settings: Settings) -> None:
             logger.exception("Daily report send failed: %s", e)
 
         # не отправлять дважды в одну минуту — подождать до следующего дня
+        await asyncio.sleep(60)
+
+
+def _seconds_until_first_of_month(at_time: time) -> float:
+    """Секунды до следующего 1-го числа месяца в at_time (локальное время)."""
+    now = datetime.now()
+    next_first = now.replace(day=1, hour=at_time.hour, minute=at_time.minute, second=0, microsecond=0)
+    if now >= next_first:
+        if next_first.month == 12:
+            next_first = next_first.replace(year=next_first.year + 1, month=1)
+        else:
+            next_first = next_first.replace(month=next_first.month + 1)
+    return (next_first - now).total_seconds()
+
+
+async def top250_refresh_scheduler(settings: Settings) -> None:
+    """
+    Раз в месяц (1-е число в 04:00) обновляет таблицу kinopoisk_top250 с API Кинопоиска.
+    Один полный цикл = 5 запросов к API (5 страниц по 50 фильмов). При лимите 200/день — с запасом.
+    """
+    if not settings.kinopoisk_api_key:
+        logger.info("KINOPOISK_API_KEY not set, Top250 refresh scheduler disabled")
+        return
+    logger.info("Top250 refresh scheduler started, will run on 1st of each month at %s", TOP250_REFRESH_TIME)
+    while True:
+        delay = _seconds_until_first_of_month(TOP250_REFRESH_TIME)
+        if delay < 0:
+            delay = 0
+        if delay > 0:
+            await asyncio.sleep(delay)
+        try:
+            await refresh_top250(settings)
+        except Exception as e:
+            logger.exception("Top250 refresh failed: %s", e)
         await asyncio.sleep(60)

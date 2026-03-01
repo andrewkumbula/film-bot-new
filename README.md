@@ -38,17 +38,66 @@ python -m app
 
 Бот запустится в режиме long polling. Команда `/start` покажет главное меню с кнопками.
 
+### Деплой на сервер
+
+1. **Локально** — закоммитить и отправить код:
+   ```bash
+   git add .
+   git commit -m "описание изменений"
+   git push origin main
+   ```
+
+2. **На сервере** — обновить код и зависимости:
+   ```bash
+   cd /path/to/project   # каталог проекта на сервере
+   git pull origin main
+   source .venv/bin/activate   # или активировать своё виртуальное окружение
+   pip install -r requirements.txt
+   ```
+
+3. **Переменные окружения** — в корне проекта должен быть `.env` с минимумом:
+   - `BOT_TOKEN`, `OPENROUTER_API_KEY`
+   - по желанию: `KINOPOISK_API_KEY`, `DB_PATH`, `REPORT_CHAT_ID`, `REPORT_TIME`
+
+4. **Миграции БД** — если менялась схема (новые таблицы/колонки), один раз выполнить:
+   ```bash
+   python scripts/migrate_add_users.py    # если таблиц ещё нет
+   python scripts/run_migrations.py      # обновление существующей схемы
+   ```
+
+5. **Перезапуск бота** — как запускаешь обычно (systemd, screen, pm2 и т.п.), например:
+   ```bash
+   python -m app
+   ```
+   Или перезапустить сервис: `sudo systemctl restart film-bot` (если настроен).
+
+Итого: **push → на сервере pull, pip install, при необходимости миграции → перезапуск.**
+
+---
+
 ### Деплой и миграции БД
 
-При старте бот вызывает `init_db()`: все таблицы создаются через `CREATE TABLE IF NOT EXISTS`. **Новые таблицы** (например `users`) появляются автоматически после `git pull` и перезапуска — отдельная миграция не нужна.
-
-Если на сервере в отчёте нет колонок `username`, `first_name`, `last_name` (таблица `users` не создана), выполните миграцию один раз из корня проекта:
+**1. Начальная схема (новый сервер или «no such table»)**  
+Из корня проекта:
 
 ```bash
 python scripts/migrate_add_users.py
 ```
 
-Скрипт подхватывает `DB_PATH` из `.env` или использует `app_data/bot.db` по умолчанию.
+Скрипт создаёт все таблицы (movies, favorites, watched, users, flow_log, kinopoisk_top250), если их ещё нет. Путь к БД — `DB_PATH` из `.env` или `app_data/bot.db`.
 
-Если в будущем понадобится изменить схему существующей таблицы (добавить колонку, переименовать и т.п.), в `app/db/database.py` добавляют функцию миграции (по аналогии с `_migrate_old_favorites_if_needed`) и вызывают её из `init_db()`.
+**2. Обновление схемы после изменений в коде**  
+После `git pull` с изменениями в БД выполните один раз:
+
+```bash
+python scripts/run_migrations.py
+```
+
+Скрипт по очереди применяет миграции из `scripts/migrations/`:
+- **001** — колонки в `movies` (poster_url, description, genres, countries, votes, raw_json, updated_at)
+- **002** — уникальный индекс `movies(title, year)` (при дубликатах — пропуск с предупреждением)
+- **003** — колонка `poster_url` в `kinopoisk_top250`
+- **004** — колонка `movie_id` в `kinopoisk_top250` и обратное заполнение из `movies`
+
+Миграции идемпотентны: повторный запуск безопасен. При старте бот тоже выполняет те же шаги через `init_db()`, но на сервере удобнее один раз запустить `run_migrations.py` после деплоя.
 

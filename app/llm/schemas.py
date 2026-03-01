@@ -20,3 +20,14 @@ class LlmResponse(BaseModel):
     recommendations: List[Recommendation]
     followup_questions: List[str] = Field(default_factory=list)
 
+
+class Top250Pick(BaseModel):
+    """Один фильм, выбранный ИИ из списка кандидатов Топ 250."""
+    title: str
+    year: Optional[int] = None
+
+
+class Top250LlmResponse(BaseModel):
+    """Ответ ИИ: 5 фильмов из предложенного списка по предпочтениям пользователя."""
+    recommendations: List[Top250Pick]
+
