@@ -47,6 +47,7 @@ from ..services.not_interested import (
 from ..services.flow_log import log_flow_step
 from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_info, KinopoiskMovieInfo
 from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
+from ..services.user_settings import get_min_rating_filter_enabled
 from ..services.users import ensure_user
 
 
@@ -143,12 +144,11 @@ def get_router(settings: Settings) -> Router:
                 reply_markup=mood_keyboard(prefix="t250_"),
             )
             return
-        # Оскар, кинофестивали — заглушка (режим пока не реализован)
+        # Оскар — заглушка (режим пока не реализован)
         await state.set_state(MovieFlow.source)
         stub_text = (
-            "🚧 <b>Оскар и кинофестивали</b> пока в разработке.\n\n"
-            "Скоро здесь появятся номинанты и победители Оскара, Канна, Венеции и других фестивалей. "
-            "Пока выбери другой способ подбора 👇"
+            "🚧 <b>Оскар</b> (номинанты и победители) пока в разработке.\n\n"
+            "Выбери другой способ подбора 👇"
         )
         try:
             await callback.message.edit_text(stub_text, reply_markup=source_keyboard())
@@ -261,6 +261,12 @@ def get_router(settings: Settings) -> Router:
             c for c in candidates
             if c.get("kinopoisk_id") not in ni_kp and c.get("kinopoisk_id") not in watched_kp
         ]
+        min_rating_on = await get_min_rating_filter_enabled(callback.from_user.id, settings)
+        if min_rating_on:
+            candidates = [
+                c for c in candidates
+                if c.get("rating_kp") is None or (isinstance(c.get("rating_kp"), (int, float)) and float(c["rating_kp"]) >= 6.0)
+            ]
         await state.set_state(Top250Flow.recommendations)
 
         if not candidates:
@@ -274,9 +280,10 @@ def get_router(settings: Settings) -> Router:
                     "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
                 )
             else:
+                extra = " или по настройке «рейтинг не ниже 6.0»" if min_rating_on else ""
                 text = (
-                    "По твоим фильтрам ничего не нашлось в Топ 250 — всё уже в «Не интересно» или ты это смотрел 🎬\n"
-                    "Попробуй ослабить жанр/эпоху или нажми «Подобрать ещё»."
+                    f"По твоим фильтрам ничего не нашлось в Топ 250 — всё уже в «Не интересно», ты это смотрел 🎬{extra}.\n"
+                    "Попробуй ослабить жанр/эпоху, отключить фильтр в Настройках или нажми «Подобрать ещё»."
                 )
             await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
             return
@@ -660,11 +667,11 @@ def get_router(settings: Settings) -> Router:
         ]
         kinopoisk_infos: List[Optional[KinopoiskMovieInfo]] = await asyncio.gather(*kinopoisk_tasks)
 
-        # Не показывать фильмы с рейтингом Кинопоиска ниже 6.0 (если рейтинг известен)
-        MIN_KP_RATING = 6.0
+        # Фильтр по рейтингу: только если у пользователя включена настройка (нет рейтинга = показываем)
+        min_rating_on = await get_min_rating_filter_enabled(user_id, settings)
         filtered_pairs: List[tuple] = []
         for rec, info in zip(llm_response.recommendations, kinopoisk_infos):
-            if info is not None and info.rating_kp is not None and info.rating_kp < MIN_KP_RATING:
+            if min_rating_on and info is not None and info.rating_kp is not None and info.rating_kp < 6.0:
                 continue
             filtered_pairs.append((rec, info))
 
@@ -694,11 +701,12 @@ def get_router(settings: Settings) -> Router:
                     reply_markup=recommendations_control_keyboard(),
                 )
             else:
-                await responder.answer(
-                    "По твоим критериям не нашлось фильмов с рейтингом Кинопоиска ≥ 6.0. "
-                    "Попробуй подобрать ещё раз 🔁",
-                    reply_markup=recommendations_control_keyboard(),
+                msg = (
+                    "По твоим критериям не нашлось подходящих фильмов."
+                    if not min_rating_on
+                    else "По твоим критериям не нашлось фильмов с рейтингом Кинопоиска ≥ 6.0 (включено в Настройках). Попробуй отключить или подобрать ещё раз 🔁"
                 )
+                await responder.answer(msg, reply_markup=recommendations_control_keyboard())
             await state.set_state(MovieFlow.recommendations)
             await state.update_data(recommendations=[])
             return

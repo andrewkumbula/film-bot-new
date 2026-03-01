@@ -113,8 +113,23 @@ async def init_db(settings: Settings) -> None:
         await _ensure_movies_short_description(db)
         await _ensure_movies_unique_title_year(db)
         await _ensure_not_interested_table(db)
+        await _ensure_user_settings_table(db)
 
     await _migrate_old_favorites_if_needed(settings)
+
+
+async def _ensure_user_settings_table(db: aiosqlite.Connection) -> None:
+    """Создаёт таблицу user_settings (настройки пользователей), если её ещё нет."""
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_settings (
+            user_id INTEGER PRIMARY KEY,
+            min_rating_filter_enabled INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT
+        )
+        """
+    )
+    await db.commit()
 
 
 async def _ensure_not_interested_table(db: aiosqlite.Connection) -> None:

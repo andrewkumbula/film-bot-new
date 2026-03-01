@@ -2,11 +2,31 @@ from __future__ import annotations
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from ..config import Settings
 from ..keyboards.main_menu import main_menu_keyboard
+from ..services.user_settings import get_min_rating_filter_enabled, set_min_rating_filter
 from ..services.users import ensure_user
+
+
+def _settings_message_text(show_low_rated: bool) -> str:
+    """show_low_rated = показывать фильмы с рейтингом ниже 6.0 (обратно фильтру в БД)."""
+    line = "✅ Вкл" if show_low_rated else "❌ Выкл"
+    return (
+        "⚙️ <b>Настройки</b>\n\n"
+        "Показывать фильмы с рейтингом Кинопоиска ниже 6.0 — " + line + "\n\n"
+        "По умолчанию выключено (ниже 6.0 не показываем). Если рейтинга нет — фильм показывается."
+    )
+
+
+def _settings_keyboard(show_low_rated: bool) -> InlineKeyboardMarkup:
+    label = "✅ Показывать ниже 6.0 (вкл)" if show_low_rated else "❌ Показывать ниже 6.0 (выкл)"
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=label, callback_data="settings:min_rating_toggle")],
+        ]
+    )
 
 
 def get_router(settings: Settings) -> Router:
@@ -30,14 +50,31 @@ def get_router(settings: Settings) -> Router:
 
     @router.message(F.text.endswith("Настройки"))
     async def cmd_settings(message: Message) -> None:
-        text = (
-            "⚙️ <b>Настройки</b>\n\n"
-            "Сейчас доступно:\n"
-            "• Рекомендации только с рейтингом Кинопоиска ≥ 6.0\n"
-            "• Возраст и рейтинг подгружаются из API Кинопоиска (если указан <code>KINOPOISK_API_KEY</code> в .env)\n\n"
-            "Дополнительные опции появятся в следующих версиях."
-        )
-        await message.answer(text)
+        if not message.from_user:
+            return
+        user_id = message.from_user.id
+        filter_on = await get_min_rating_filter_enabled(user_id, settings)
+        show_low_rated = not filter_on  # обратно: фильтр вкл = не показываем ниже 6
+        text = _settings_message_text(show_low_rated)
+        await message.answer(text, reply_markup=_settings_keyboard(show_low_rated))
+
+    @router.callback_query(F.data == "settings:min_rating_toggle")
+    async def settings_min_rating_toggle(callback: CallbackQuery) -> None:
+        if not callback.from_user:
+            await callback.answer()
+            return
+        await callback.answer()
+        user_id = callback.from_user.id
+        filter_on = await get_min_rating_filter_enabled(user_id, settings)
+        show_low_rated = not filter_on
+        # переключаем: новый show_low_rated = не текущий
+        new_show_low_rated = not show_low_rated
+        await set_min_rating_filter(user_id, not new_show_low_rated, settings)
+        text = _settings_message_text(new_show_low_rated)
+        try:
+            await callback.message.edit_text(text, reply_markup=_settings_keyboard(new_show_low_rated))
+        except Exception:
+            pass
 
     @router.message(F.text.endswith("Помощь"))
     async def cmd_help(message: Message) -> None:
@@ -51,8 +88,8 @@ def get_router(settings: Settings) -> Router:
             "⭐️ <b>Избранное</b>\n"
             "Фильмы, добавленные кнопкой «В избранное» в карточке рекомендации. У каждого фильма есть кнопка «🗑 Удалить из избранного».\n\n"
             "⚙️ <b>Настройки</b>\n"
-            "Кратко о том, как формируются рекомендации и откуда берутся рейтинги.\n\n"
-            "🔞 В карточках показываются возрастной рейтинг и рейтинг Кинопоиска (если настроен API). Фильмы с рейтингом ниже 6.0 не показываются. К карточкам по возможности прикрепляются постеры.\n\n"
+            "В Настройках можно включить «показывать фильмы с рейтингом ниже 6.0» (по умолчанию выключено). Если рейтинга нет — фильм показывается.\n\n"
+            "🔞 В карточках показываются возрастной рейтинг и рейтинг Кинопоиска (если настроен API). К карточкам по возможности прикрепляются постеры.\n\n"
             "Вопросы? Напиши разработчику или нажми /start для возврата в меню."
         )
         await message.answer(text)

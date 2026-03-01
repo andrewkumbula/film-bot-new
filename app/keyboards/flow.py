@@ -10,7 +10,6 @@ def source_keyboard() -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text="✨ Обычный подбор (настроение, жанр…)", callback_data="source:default")],
             [InlineKeyboardButton(text="⭐ Кинопоиск Топ 250", callback_data="source:top250")],
             [InlineKeyboardButton(text="🏆 Оскар (номинанты и победители)", callback_data="source:oscar")],
-            [InlineKeyboardButton(text="🎬 Кинофестивали", callback_data="source:festivals")],
         ]
     )
 
