@@ -4,13 +4,13 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def source_keyboard() -> InlineKeyboardMarkup:
-    """Развилка: откуда подбирать фильмы."""
+    """Развилка: откуда подбирать фильмы. Обычный подбор — сверху, Топ 250 — второй."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🏆 Оскар (номинанты и победители)", callback_data="source:oscar")],
-            [InlineKeyboardButton(text="⭐ Кинопоиск Топ 250", callback_data="source:top250")],
-            [InlineKeyboardButton(text="🎬 Кинофестивали", callback_data="source:festivals")],
             [InlineKeyboardButton(text="✨ Обычный подбор (настроение, жанр…)", callback_data="source:default")],
+            [InlineKeyboardButton(text="⭐ Кинопоиск Топ 250", callback_data="source:top250")],
+            [InlineKeyboardButton(text="🏆 Оскар (номинанты и победители)", callback_data="source:oscar")],
+            [InlineKeyboardButton(text="🎬 Кинофестивали", callback_data="source:festivals")],
         ]
     )
 

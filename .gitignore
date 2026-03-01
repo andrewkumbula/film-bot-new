@@ -22,3 +22,6 @@ node_modules/
 # локальная БД бота
 app_data/
 app_data/*.db
+
+# экспорт Топ 250 для переноса на прод (не коммитить)
+# top250_export.json

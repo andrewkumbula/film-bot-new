@@ -1,0 +1,4006 @@
+{
+  "movies": [
+    {
+      "kinopoisk_id": 535341,
+      "title": "1+1",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 8.859,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10900341/caf9f155-1a19-42f1-a0f3-9c8773e9083e/600x900",
+      "description": null,
+      "genres": "драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1143242,
+      "title": "Джентльмены",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.671,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/637271d5-61b4-4e46-ac83-6d07494c7645/600x900",
+      "description": null,
+      "genres": "криминал,комедия,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1100777,
+      "title": "Триггер",
+      "year": 2018,
+      "age_rating": "18",
+      "rating_kp": 8.45,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/5fb7d956-d5fb-4189-9ec9-1a051aaa7f41/600x900",
+      "description": null,
+      "genres": "драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1318972,
+      "title": "Гнев человеческий",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.708,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/90d57813-387c-44c4-81c1-ecddb3c417a5/600x900",
+      "description": null,
+      "genres": "боевик,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 41519,
+      "title": "Брат",
+      "year": 1997,
+      "age_rating": "18",
+      "rating_kp": 8.369,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/e9008e2f-433f-43b0-b9b8-2ea8e3fb6c9b/600x900",
+      "description": null,
+      "genres": "драма,криминал,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 462682,
+      "title": "Волк с Уолл-стрит",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 8.095,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/44bc954c-acdb-45d7-8ce1-6a9b25f4ca92/600x900",
+      "description": null,
+      "genres": "драма,криминал,биография,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4443734,
+      "title": "Фишер",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 7.855,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10592371/6d6fb101-fb48-4874-8035-30931bc4752a/600x900",
+      "description": null,
+      "genres": "детектив,драма,криминал,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 464963,
+      "title": "Игра престолов",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 9.011,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/dd78edfd-6a1f-486c-9a86-6acbca940418/600x900",
+      "description": null,
+      "genres": "фэнтези,драма,боевик,мелодрама,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1188529,
+      "title": "Достать ножи",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.187,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/e8aa9797-2c24-45fd-a53e-34cf91a8c27c/600x900",
+      "description": null,
+      "genres": "детектив,комедия,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1108577,
+      "title": "Зеленая книга",
+      "year": 2018,
+      "age_rating": "18",
+      "rating_kp": 8.547,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/1e2ed281-b1e8-4083-b721-3ece7afc1031/600x900",
+      "description": null,
+      "genres": "биография,комедия,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5047468,
+      "title": "Холоп 2",
+      "year": 2023,
+      "age_rating": "12",
+      "rating_kp": 7.165,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10592371/ab964fb1-c8d1-4a78-8d49-c754d756d488/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5059049,
+      "title": "Телохранители",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 8.26,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/7c94f6ae-a774-46fa-b94c-cbf2a41d0612/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 41520,
+      "title": "Брат 2",
+      "year": 2000,
+      "age_rating": "18",
+      "rating_kp": 8.293,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/80eab631-346c-4c29-b14d-1fa1438158f9/600x900",
+      "description": null,
+      "genres": "боевик,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 397667,
+      "title": "Остров проклятых",
+      "year": 2009,
+      "age_rating": "18",
+      "rating_kp": 8.559,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/617303b7-cfa7-4273-bd1d-63974bf68927/600x900",
+      "description": null,
+      "genres": "триллер,детектив,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4959134,
+      "title": "По щучьему велению",
+      "year": 2023,
+      "age_rating": "6",
+      "rating_kp": 7.76,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10900341/b3ed4aa7-c38c-4a35-a505-aaa6372ad9da/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 6605654,
+      "title": "Камбэк",
+      "year": 2025,
+      "age_rating": "18",
+      "rating_kp": 8.097,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/39a9d0fb-844a-4faa-9eb0-9cc162189f38/600x900",
+      "description": null,
+      "genres": "драма,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1326397,
+      "title": "Батя",
+      "year": 2020,
+      "age_rating": "18",
+      "rating_kp": 7.885,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/907e3552-9a1e-48d1-8a01-d013a76a8343/600x900",
+      "description": null,
+      "genres": "комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 8124,
+      "title": "Один дома",
+      "year": 1990,
+      "age_rating": null,
+      "rating_kp": 8.282,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/022a58e3-5b9b-411b-bfb3-09fedb700401/600x900",
+      "description": null,
+      "genres": "комедия,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 42664,
+      "title": "Иван Васильевич меняет профессию",
+      "year": 1973,
+      "age_rating": "6",
+      "rating_kp": 8.793,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/a7ef44b8-1983-4992-a889-da6f87a3f559/600x900",
+      "description": null,
+      "genres": "комедия,фантастика,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 42782,
+      "title": "Операция «Ы» и другие приключения Шурика",
+      "year": 1965,
+      "age_rating": "6",
+      "rating_kp": 8.749,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/ccd69a69-7405-4b41-89a8-60dd6dc2a3ee/600x900",
+      "description": null,
+      "genres": "комедия,мелодрама,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5249042,
+      "title": "Папины дочки. Новые",
+      "year": 2023,
+      "age_rating": "12",
+      "rating_kp": 8.309,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/d2b26fed-24a1-4720-910e-1b9b0279b5bc/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 361,
+      "title": "Бойцовский клуб",
+      "year": 1999,
+      "age_rating": "18",
+      "rating_kp": 8.679,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/16490236/495fb59a-bff1-4626-baba-bb392fede945/600x900",
+      "description": null,
+      "genres": "триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1355059,
+      "title": "Беспринципные",
+      "year": 2020,
+      "age_rating": "18",
+      "rating_kp": 7.738,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10592371/e2db42c4-4176-4a0f-b933-488412cd06a5/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 927898,
+      "title": "Переводчик",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.9,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/5c775217-8796-4c7a-aba8-e4c6d48a6c36/600x900",
+      "description": null,
+      "genres": "боевик,триллер,военный,история,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5405057,
+      "title": "Анора",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 6.432,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10953618/b7c8240b-e6e8-4b27-9d8e-0eada5dc50ac/600x900",
+      "description": null,
+      "genres": "драма,мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 251733,
+      "title": "Аватар",
+      "year": 2009,
+      "age_rating": "12",
+      "rating_kp": 7.998,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/4adf61aa-3cb7-4381-9245-523971e5b4c8/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,драма,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 839954,
+      "title": "Легенда",
+      "year": 2015,
+      "age_rating": "18",
+      "rating_kp": 7.266,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/55db3c5f-837f-478e-b2ba-67872bf7b57c/600x900",
+      "description": null,
+      "genres": "криминал,триллер,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 45146,
+      "title": "Любовь и голуби",
+      "year": 1984,
+      "age_rating": "12",
+      "rating_kp": 8.29,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10953618/ab221a46-3981-4f6b-97bb-823f2bae3eb8/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 478491,
+      "title": "Маша и Медведь",
+      "year": 2009,
+      "age_rating": null,
+      "rating_kp": 7.342,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/95af45f4-8d72-4972-83d8-5738cade1cb7/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,детский",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1183582,
+      "title": "Холоп",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 7.187,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/564d729c-ea30-42df-977f-e0cd6c0dd8ef/600x900",
+      "description": null,
+      "genres": "комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 46483,
+      "title": "Ну, погоди!",
+      "year": 1969,
+      "age_rating": null,
+      "rating_kp": 8.722,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/a68f7c1a-fb83-4533-a4e2-f60485f2f440/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,приключения,детский",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4476147,
+      "title": "Кракен",
+      "year": 2025,
+      "age_rating": "12",
+      "rating_kp": 7.699,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/b722ab4d-497b-4a62-b243-95ca989401ff/600x900",
+      "description": null,
+      "genres": "фантастика,приключения,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 258687,
+      "title": "Интерстеллар",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 8.672,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/430042eb-ee69-4818-aed0-a312400a26bf/600x900",
+      "description": null,
+      "genres": "фантастика,драма,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 820638,
+      "title": "Мажор",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 8.213,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486454/f55707ac-f9c4-4a2a-a703-75267b450a68/600x900",
+      "description": null,
+      "genres": "драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 326,
+      "title": "Побег из Шоушенка",
+      "year": 1994,
+      "age_rating": "18",
+      "rating_kp": 9.111,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/0b76b2a2-d1c7-4f04-a284-80ff7bb709a4/600x900",
+      "description": null,
+      "genres": "драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 838050,
+      "title": "Метод",
+      "year": 2015,
+      "age_rating": "18",
+      "rating_kp": 8.393,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/573e8902-b3bc-44a7-881f-6eb0014fb694/600x900",
+      "description": null,
+      "genres": "триллер,криминал,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 775276,
+      "title": "Зверополис",
+      "year": 2016,
+      "age_rating": "6",
+      "rating_kp": 8.318,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/893bba73-3105-4944-8d18-a38f929f2759/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,детектив,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 689,
+      "title": "Гарри Поттер и философский камень",
+      "year": 2001,
+      "age_rating": "12",
+      "rating_kp": 8.298,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/27ed5c19-a045-49dd-8624-5f629c5d96e0/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4626783,
+      "title": "Пчеловод",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 7.243,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/197ef075-aa45-4881-80c5-a182e8847f65/600x900",
+      "description": null,
+      "genres": "боевик,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 447301,
+      "title": "Начало",
+      "year": 2010,
+      "age_rating": "12",
+      "rating_kp": 8.671,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/8ab9a119-dd74-44f0-baec-0629797483d7/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,триллер,драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 435,
+      "title": "Зеленая миля",
+      "year": 1999,
+      "age_rating": "18",
+      "rating_kp": 9.078,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/4057c4b8-8208-4a04-b169-26b0661453e3/600x900",
+      "description": null,
+      "genres": "драма,фэнтези,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5916296,
+      "title": "Ландыши",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 8.242,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/cac5418a-e6d2-4fd3-8e59-0d79c1fc606c/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия,музыка",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4374,
+      "title": "Пираты Карибского моря: Проклятие Черной жемчужины",
+      "year": 2003,
+      "age_rating": "12",
+      "rating_kp": 8.385,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/d7e3dbd6-e4a9-4485-b751-d02f49825166/600x900",
+      "description": null,
+      "genres": "фэнтези,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 462606,
+      "title": "Области тьмы",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 8.029,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/d3bfd32d-41b4-48ad-9584-b3fc1f5669d4/600x900",
+      "description": null,
+      "genres": "триллер,драма,фантастика",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1392743,
+      "title": "Постучись в мою дверь",
+      "year": 2020,
+      "age_rating": "18",
+      "rating_kp": 8.123,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/389c3708-9557-44ea-9579-42b42e0570bd/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4531254,
+      "title": "Два холма",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.597,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486454/cd219bfd-0350-4633-b540-5c8162299874/600x900",
+      "description": null,
+      "genres": "комедия,фантастика",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4860213,
+      "title": "Субстанция",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 6.281,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/49123e40-fc14-4849-8d0a-aca4ed2bb0bb/600x900",
+      "description": null,
+      "genres": "ужасы,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5304403,
+      "title": "Слово пацана. Кровь на асфальте",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 8.116,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/c1eec5f4-ae49-41cc-aea2-d8995486a23e/600x900",
+      "description": null,
+      "genres": "драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4647040,
+      "title": "Король и Шут",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 8.091,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/1485ac9a-7796-470b-a3eb-85dc725d4ec0/600x900",
+      "description": null,
+      "genres": "драма,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4542208,
+      "title": "Вышка",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 6.761,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/21625a72-ee34-4151-aa9c-844c40f610fd/600x900",
+      "description": null,
+      "genres": "триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5079093,
+      "title": "Монастырь",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.416,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/ce90ef63-3c81-4aa7-95f0-f5bbe5123484/600x900",
+      "description": null,
+      "genres": "драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1405508,
+      "title": "Операция «Фортуна»: Искусство побеждать",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.152,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/f9cf62b9-074d-4022-8e6b-8683c8f18318/600x900",
+      "description": null,
+      "genres": "боевик,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 44386,
+      "title": "Джентльмены удачи",
+      "year": 1971,
+      "age_rating": "6",
+      "rating_kp": 8.555,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/218102a7-96be-4d7e-8029-815de0f37cfa/600x900",
+      "description": null,
+      "genres": "комедия,драма,криминал,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 448,
+      "title": "Форрест Гамп",
+      "year": 1994,
+      "age_rating": "18",
+      "rating_kp": 8.921,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/3560b757-9b95-45ec-af8c-623972370f9d/600x900",
+      "description": null,
+      "genres": "драма,комедия,мелодрама,история,военный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1224067,
+      "title": "Вампиры средней полосы",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 8.338,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/d5f54f03-ea2f-4444-8ab7-5145372b489e/600x900",
+      "description": null,
+      "genres": "детектив,комедия,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 463634,
+      "title": "Веном",
+      "year": 2018,
+      "age_rating": "18",
+      "rating_kp": 6.941,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/16b82307-bdcc-4b9b-a427-55a07771c33a/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,ужасы",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 406408,
+      "title": "Законопослушный гражданин",
+      "year": 2009,
+      "age_rating": "18",
+      "rating_kp": 8.06,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/e3a342a0-6e45-4771-aa76-7d70c2cc26f4/600x900",
+      "description": null,
+      "genres": "боевик,триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 685246,
+      "title": "Рик и Морти",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 8.933,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10768063/5cf92e29-0735-4f39-ae00-a9ebe01f3648/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,фантастика,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 522892,
+      "title": "Иллюзия обмана",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 7.788,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/dff4515a-286f-4288-b1cb-43bed18c0080/600x900",
+      "description": null,
+      "genres": "криминал,триллер,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 46225,
+      "title": "Бриллиантовая рука",
+      "year": 1968,
+      "age_rating": "18",
+      "rating_kp": 8.568,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/32ef92db-5cbb-426d-acf9-2327b695edf8/600x900",
+      "description": null,
+      "genres": "комедия,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 2213,
+      "title": "Титаник",
+      "year": 1997,
+      "age_rating": "12",
+      "rating_kp": 8.388,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10592371/7f0e6761-4635-46ad-b804-59d5cf1ae85c/600x900",
+      "description": null,
+      "genres": "мелодрама,триллер,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 44745,
+      "title": "Кавказская пленница, или Новые приключения Шурика",
+      "year": 1966,
+      "age_rating": "6",
+      "rating_kp": 8.52,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/d681bcf8-0fc2-4f2e-a772-0a01920e62b3/600x900",
+      "description": null,
+      "genres": "комедия,приключения,мелодрама,мюзикл",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 389,
+      "title": "Леон",
+      "year": 1994,
+      "age_rating": "18",
+      "rating_kp": 8.671,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/8662d92a-5881-4600-a7ae-549e6fd53b03/600x900",
+      "description": null,
+      "genres": "боевик,триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1043758,
+      "title": "Паразиты",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.051,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/aae3a928-6465-4bed-9af4-16929a44fd79/600x900",
+      "description": null,
+      "genres": "драма,триллер,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 749374,
+      "title": "Атака титанов",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 8.729,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/e42e60bc-0772-4a3a-a24f-4218febf9386/600x900",
+      "description": null,
+      "genres": "аниме,мультфильм,фантастика,драма,боевик,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5078983,
+      "title": "Мажор в Сочи",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.22,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10900341/262b868c-6c7b-4d7b-90af-60e06384b77f/600x900",
+      "description": null,
+      "genres": "приключения,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 46708,
+      "title": "Москва слезам не верит",
+      "year": 1979,
+      "age_rating": "18",
+      "rating_kp": 8.44,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486362/e4656bf5-8539-44ab-a749-93b8c9d54150/600x900",
+      "description": null,
+      "genres": "мелодрама,драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 430,
+      "title": "Шрэк",
+      "year": 2001,
+      "age_rating": "18",
+      "rating_kp": 8.205,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/7ade06a8-4178-4386-9ee2-87fec5a172eb/600x900",
+      "description": null,
+      "genres": "мультфильм,фэнтези,мелодрама,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 843649,
+      "title": "Мстители: Война бесконечности",
+      "year": 2018,
+      "age_rating": "18",
+      "rating_kp": 8.111,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/af92d310-4ae5-4daa-b42c-5bcc380c2e6e/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 44168,
+      "title": "Девчата",
+      "year": 1961,
+      "age_rating": null,
+      "rating_kp": 8.555,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/d5ee73ae-82af-4f60-af5e-f080bed523d8/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 32898,
+      "title": "Достучаться до небес",
+      "year": 1997,
+      "age_rating": "18",
+      "rating_kp": 8.647,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/df6c9527-c2cb-4a17-b4bd-1ed05d2e733d/600x900",
+      "description": null,
+      "genres": "драма,комедия,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 45319,
+      "title": "Жил-был пёс",
+      "year": 1982,
+      "age_rating": null,
+      "rating_kp": 9.196,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/03c5124a-e59a-474b-8dc9-6227db156566/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,короткометражка,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 687595,
+      "title": "Кухня",
+      "year": 2012,
+      "age_rating": "18",
+      "rating_kp": 8.18,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/0f5f576b-33ba-4734-a76d-77c861bbfdb5/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 342,
+      "title": "Криминальное чтиво",
+      "year": 1994,
+      "age_rating": "18",
+      "rating_kp": 8.656,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/0a07a903-9025-4aff-bf7c-46bbb175888c/600x900",
+      "description": null,
+      "genres": "криминал,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5452393,
+      "title": "Граф Монте-Кристо",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 8.121,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/54490542-cc6e-4019-bb35-79aa67195fbe/600x900",
+      "description": null,
+      "genres": "триллер,драма,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1311936,
+      "title": "Трудные подростки",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.181,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/7b25d60a-3221-42de-9f49-fb77439a13f6/600x900",
+      "description": null,
+      "genres": "драма,комедия,спорт",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 843650,
+      "title": "Мстители: Финал",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 7.927,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/ae22f153-9715-41bb-adb4-f648b3e16092/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,драма,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 324,
+      "title": "Поймай меня, если сможешь",
+      "year": 2002,
+      "age_rating": "18",
+      "rating_kp": 8.53,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/e38dd6f9-610e-4c90-8540-dc48560cb9cc/600x900",
+      "description": null,
+      "genres": "криминал,биография,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 409424,
+      "title": "Дюна",
+      "year": 2021,
+      "age_rating": "12",
+      "rating_kp": 7.674,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/9eb762d6-4cdd-464f-9937-aebf30067acc/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,драма,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 977288,
+      "title": "Поезд в Пусан",
+      "year": 2016,
+      "age_rating": "18",
+      "rating_kp": 7.232,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/12feddd0-1f10-4608-b6c7-2d0bad2bdceb/600x900",
+      "description": null,
+      "genres": "ужасы,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 2656,
+      "title": "Пятый элемент",
+      "year": 1997,
+      "age_rating": "18",
+      "rating_kp": 8.179,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/36d8bd84-fc0f-428e-8a51-111c2aef34be/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5235968,
+      "title": "Кентавр",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 7.78,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10812607/f8f91f45-e309-469b-8066-741d2a34a712/600x900",
+      "description": null,
+      "genres": "триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5019944,
+      "title": "Кибердеревня",
+      "year": 2023,
+      "age_rating": "16",
+      "rating_kp": 8.137,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10953618/22898033-9a50-4018-9c08-80793dea6df6/600x900",
+      "description": null,
+      "genres": "приключения,фантастика,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 89514,
+      "title": "Рататуй",
+      "year": 2007,
+      "age_rating": null,
+      "rating_kp": 8.05,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/894f7e3c-cedf-4e5c-946a-9021efdf17dd/600x900",
+      "description": null,
+      "genres": "мультфильм,приключения,комедия,семейный,фэнтези,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 976642,
+      "title": "Последний богатырь",
+      "year": 2017,
+      "age_rating": "12",
+      "rating_kp": 7.235,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10768063/66f7e00a-10d6-478c-9f06-0c506183bee2/600x900",
+      "description": null,
+      "genres": "фэнтези,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1405843,
+      "title": "Пищеблок",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.36,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/791d5250-96e7-47ef-a5ea-a791c6e4fe14/600x900",
+      "description": null,
+      "genres": "триллер,детектив,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 43869,
+      "title": "Служебный роман",
+      "year": 1977,
+      "age_rating": "6",
+      "rating_kp": 8.329,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/fd4e75bb-a6fe-46ef-86cd-0f470334fcbd/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 586397,
+      "title": "Джанго освобожденный",
+      "year": 2012,
+      "age_rating": "18",
+      "rating_kp": 8.255,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/401c67e4-5047-42c2-8668-aeda39da529f/600x900",
+      "description": null,
+      "genres": "вестерн,боевик,драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 915196,
+      "title": "Очень странные дела",
+      "year": 2016,
+      "age_rating": "16",
+      "rating_kp": 8.371,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703859/1e653cad-c84f-4617-b61e-949b3228ef36/600x900",
+      "description": null,
+      "genres": "ужасы,фантастика,фэнтези,триллер,драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 679486,
+      "title": "Тайна Коко",
+      "year": 2017,
+      "age_rating": "12",
+      "rating_kp": 8.726,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/6e11a16e-c9e7-491f-9162-01098a7d8dd9/600x900",
+      "description": null,
+      "genres": "мультфильм,фэнтези,комедия,приключения,семейный,музыка",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 301,
+      "title": "Матрица",
+      "year": 1999,
+      "age_rating": "18",
+      "rating_kp": 8.499,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/cf1970bc-3f08-4e0e-a095-2fb57c3aa7c6/600x900",
+      "description": null,
+      "genres": "фантастика,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4414587,
+      "title": "Министерство неджентльменских дел",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 7.321,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/72d3ef84-c785-46aa-8a8d-16e0f0847c56/600x900",
+      "description": null,
+      "genres": "боевик,комедия,военный,история",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 111543,
+      "title": "Темный рыцарь",
+      "year": 2008,
+      "age_rating": "18",
+      "rating_kp": 8.536,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/0fa5bf50-d5ad-446f-a599-b26d070c8b99/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,триллер,криминал,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 404900,
+      "title": "Во все тяжкие",
+      "year": 2008,
+      "age_rating": "18",
+      "rating_kp": 8.925,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/fb35416f-3b0d-4b96-bc65-cf6923f9e329/600x900",
+      "description": null,
+      "genres": "криминал,драма,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4370148,
+      "title": "Чебурашка",
+      "year": 2022,
+      "age_rating": "6",
+      "rating_kp": 7.508,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/be64a414-cc47-4050-9f87-7aa635458950/600x900",
+      "description": null,
+      "genres": "семейный,комедия,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 689066,
+      "title": "Стражи Галактики",
+      "year": 2014,
+      "age_rating": "12",
+      "rating_kp": 7.859,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/2e6ab20b-7cf1-49e7-b465-bd5a71c13fa3/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 276598,
+      "title": "Драйв",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 7.245,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/7d10f506-1d2a-4d73-98e0-d6605183b938/600x900",
+      "description": null,
+      "genres": "криминал,драма,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1355060,
+      "title": "Топи",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 6.901,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/19b9fbc8-c7f7-4eb3-a592-d089f6b8577e/600x900",
+      "description": null,
+      "genres": "триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1109271,
+      "title": "Майор Гром: Чумной Доктор",
+      "year": 2021,
+      "age_rating": "12",
+      "rating_kp": 7.292,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10812607/1af2d052-6227-43b2-880b-f7e505478e58/600x900",
+      "description": null,
+      "genres": "боевик,криминал,детектив,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1227803,
+      "title": "Чернобыль",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.75,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/3d0b4a89-acd9-49ac-a83e-480c18c41baa/600x900",
+      "description": null,
+      "genres": "драма,история",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5129252,
+      "title": "Беспринципные в деревне",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 6.654,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/d68d8ae2-ec3d-47f6-9991-7aba20890e0e/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1316601,
+      "title": "Дом Дракона",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 8.128,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10592371/e81636b8-fb18-44fb-9074-11fffe9cfc4a/600x900",
+      "description": null,
+      "genres": "фэнтези,боевик,драма,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 930878,
+      "title": "Т-34",
+      "year": 2018,
+      "age_rating": "12",
+      "rating_kp": 6.937,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/2f7d9ac7-36e3-4fe4-89c3-604b19ef27bb/600x900",
+      "description": null,
+      "genres": "драма,военный,боевик,история",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 935898,
+      "title": "Три кота",
+      "year": 2015,
+      "age_rating": null,
+      "rating_kp": 8.23,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/515b1d6a-46e3-48fb-9412-53e7f60439ca/600x900",
+      "description": null,
+      "genres": "мультфильм,детский,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1234808,
+      "title": "Август",
+      "year": 2025,
+      "age_rating": "18",
+      "rating_kp": 7.804,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/830d5135-67a0-4dfc-ac65-bac199bcdde4/600x900",
+      "description": null,
+      "genres": "триллер,военный,история",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 474,
+      "title": "Гладиатор",
+      "year": 2000,
+      "age_rating": "18",
+      "rating_kp": 8.591,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/7c3460dc-344d-433f-8220-f18d86c8397d/600x900",
+      "description": null,
+      "genres": "история,боевик,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 601564,
+      "title": "Легенда №17",
+      "year": 2012,
+      "age_rating": "6",
+      "rating_kp": 8.05,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/a8fce9c6-ed42-42e8-9727-206a6b5fb64a/600x900",
+      "description": null,
+      "genres": "биография,спорт,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5427621,
+      "title": "Батя 2. Дед",
+      "year": 2025,
+      "age_rating": "18",
+      "rating_kp": 7.633,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10853012/a63fdd21-e770-4b28-af61-6897a7f16130/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1267348,
+      "title": "Джон Уик 4",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 7.621,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/62c1301b-c913-4b3c-af87-74934ae1ec93/600x900",
+      "description": null,
+      "genres": "боевик,триллер,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 409600,
+      "title": "Доктор Стрэндж",
+      "year": 2016,
+      "age_rating": "18",
+      "rating_kp": 7.536,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/bb966b79-5b10-485d-88d7-fb6aeb79b185/600x900",
+      "description": null,
+      "genres": "фантастика,фэнтези,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 387556,
+      "title": "Хатико: Самый верный друг",
+      "year": 2008,
+      "age_rating": null,
+      "rating_kp": 8.381,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/82f8a2dc-a439-4832-9f0f-dc599e6e78d2/600x900",
+      "description": null,
+      "genres": "драма,семейный,биография",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 444,
+      "title": "Терминатор 2: Судный день",
+      "year": 1991,
+      "age_rating": "18",
+      "rating_kp": 8.419,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/2dd14742-f241-42ca-9db4-331e3a483c50/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 692861,
+      "title": "Исчезнувшая",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 7.966,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/cdd30c22-0ff5-4a70-9e9c-6e2ed1820d84/600x900",
+      "description": null,
+      "genres": "триллер,драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4419497,
+      "title": "Три богатыря и Конь на троне",
+      "year": 2021,
+      "age_rating": "6",
+      "rating_kp": 7.474,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/84588772-8794-40dd-8897-04ea3482c355/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5321393,
+      "title": "Инспектор Гаврилов",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 8.19,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/171da844-027f-4018-995a-9aa6cf31c6d5/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 322,
+      "title": "Гарри Поттер и узник Азкабана",
+      "year": 2004,
+      "age_rating": "12",
+      "rating_kp": 8.252,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/3eabac99-fb98-4b12-ba9f-6172782d54c6/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 263531,
+      "title": "Мстители",
+      "year": 2012,
+      "age_rating": "12",
+      "rating_kp": 7.894,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/972b7f43-9677-40ce-a9bc-02a88ad3919d/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,фэнтези,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 279102,
+      "title": "ВАЛЛ·И",
+      "year": 2008,
+      "age_rating": null,
+      "rating_kp": 8.366,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/146b1b20-347b-4b6a-98c8-fdc2c75495cb/600x900",
+      "description": null,
+      "genres": "мультфильм,фантастика,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 328,
+      "title": "Властелин колец: Братство кольца",
+      "year": 2001,
+      "age_rating": "18",
+      "rating_kp": 8.63,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/a2d5bcae-a1a9-442f-8195-f5373a5ba77f/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 2360,
+      "title": "Король Лев",
+      "year": 1994,
+      "age_rating": null,
+      "rating_kp": 8.775,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/60aa1abc-b754-4817-ad9c-0bcda427a12b/600x900",
+      "description": null,
+      "genres": "мультфильм,мюзикл,фэнтези,драма,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 462360,
+      "title": "Дэдпул",
+      "year": 2016,
+      "age_rating": "18",
+      "rating_kp": 7.584,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/f5961569-594e-476d-85ec-2ff29862c95c/600x900",
+      "description": null,
+      "genres": "боевик,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 681849,
+      "title": "Лучшее предложение",
+      "year": 2012,
+      "age_rating": "18",
+      "rating_kp": 8.058,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/b90b179d-b5f7-454c-80b3-60884a5ecd5f/600x900",
+      "description": null,
+      "genres": "триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5450038,
+      "title": "Мастер",
+      "year": 2025,
+      "age_rating": "18",
+      "rating_kp": 7.015,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10835644/d0492db0-4047-4797-ae16-a25a242e4324/600x900",
+      "description": null,
+      "genres": "боевик,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5582621,
+      "title": "Беляковы в отпуске",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 7.345,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486362/08dfe73d-179b-4506-84a6-968c6ff25554/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 370,
+      "title": "Унесённые призраками",
+      "year": 2001,
+      "age_rating": "12",
+      "rating_kp": 8.556,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/ae3b699c-3db7-4196-a869-39b610bfe706/600x900",
+      "description": null,
+      "genres": "аниме,мультфильм,фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 61237,
+      "title": "Железный человек",
+      "year": 2008,
+      "age_rating": "12",
+      "rating_kp": 7.982,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/c8e2f069-15f1-4803-95c0-aba858fec360/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 835086,
+      "title": "Ford против Ferrari",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.232,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/211e880d-c183-43aa-83b0-13c08109eaf7/600x900",
+      "description": null,
+      "genres": "биография,спорт,драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 42326,
+      "title": "Трое из Простоквашино",
+      "year": 1978,
+      "age_rating": null,
+      "rating_kp": 8.798,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10953618/32660c93-8722-4b77-afa5-8102ef103f9a/600x900",
+      "description": null,
+      "genres": "мультфильм,детский,короткометражка",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 63991,
+      "title": "Пираты Карибского моря: Сундук мертвеца",
+      "year": 2006,
+      "age_rating": "12",
+      "rating_kp": 8.15,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/2f896b6f-397e-40ef-ae19-e9cb0b2d9675/600x900",
+      "description": null,
+      "genres": "фэнтези,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 688,
+      "title": "Гарри Поттер и Тайная комната",
+      "year": 2002,
+      "age_rating": "12",
+      "rating_kp": 8.152,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/1ef65bfb-b16b-42aa-a54a-758395253290/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 9691,
+      "title": "Бесславные ублюдки",
+      "year": 2009,
+      "age_rating": "18",
+      "rating_kp": 8.032,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/5e6dde98-74a8-4c02-b003-01d48e091025/600x900",
+      "description": null,
+      "genres": "боевик,драма,комедия,военный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 280172,
+      "title": "Как приручить дракона",
+      "year": 2010,
+      "age_rating": "6",
+      "rating_kp": 8.242,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/1a920451-e765-41e9-81aa-78438e82abbc/600x900",
+      "description": null,
+      "genres": "мультфильм,фэнтези,приключения,семейный,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 476,
+      "title": "Назад в будущее",
+      "year": 1985,
+      "age_rating": "12",
+      "rating_kp": 8.648,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/73cf2ed0-fd52-47a2-9e26-74104360786a/600x900",
+      "description": null,
+      "genres": "фантастика,комедия,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 591929,
+      "title": "Гравити Фолз",
+      "year": 2012,
+      "age_rating": "12",
+      "rating_kp": 8.979,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/04954219-061a-4646-a7d6-054fdc34b053/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,детектив,приключения,семейный,фантастика",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 502838,
+      "title": "Шерлок",
+      "year": 2010,
+      "age_rating": "12",
+      "rating_kp": 8.851,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/f28c1ea2-47b0-49d5-b11c-9608744f0233/600x900",
+      "description": null,
+      "genres": "детектив,триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1045583,
+      "title": "Конёк-Горбунок",
+      "year": 2021,
+      "age_rating": "6",
+      "rating_kp": 7.34,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/cbd0f821-16e9-467a-8ece-c20d5fbefcaf/600x900",
+      "description": null,
+      "genres": "фэнтези,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 420923,
+      "title": "Шерлок Холмс",
+      "year": 2009,
+      "age_rating": "12",
+      "rating_kp": 8.061,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/244e2847-f426-4c60-86ba-34cde7db695f/600x900",
+      "description": null,
+      "genres": "боевик,приключения,триллер,драма,комедия,криминал,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 645118,
+      "title": "Головоломка",
+      "year": 2015,
+      "age_rating": "6",
+      "rating_kp": 8.079,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/fe96f444-f022-4d14-a40f-7c1f35cc6ab8/600x900",
+      "description": null,
+      "genres": "мультфильм,семейный,комедия,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 256124,
+      "title": "Смешарики",
+      "year": 2003,
+      "age_rating": null,
+      "rating_kp": 7.809,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/e46541cf-e9c0-429f-a8a7-2d427f1b7d22/600x900",
+      "description": null,
+      "genres": "мультфильм,детский,комедия,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1395460,
+      "title": "Медиатор",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 8.064,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10900341/557cebd4-b654-44ba-bd73-0713ad6ed162/600x900",
+      "description": null,
+      "genres": "драма,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 86326,
+      "title": "Счастливое число Слевина",
+      "year": 2005,
+      "age_rating": "18",
+      "rating_kp": 8.155,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/b902fcb3-ca6f-4247-8e70-69f84e67087e/600x900",
+      "description": null,
+      "genres": "триллер,драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4489198,
+      "title": "Три богатыря и Пуп Земли",
+      "year": 2023,
+      "age_rating": "6",
+      "rating_kp": 6.985,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10809116/eaae6412-29ca-422c-93cf-d2774d054dcd/600x900",
+      "description": null,
+      "genres": "мультфильм,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4958668,
+      "title": "Триггер. Фильм",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 6.353,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/5859a0e6-b3e0-444a-949e-844079332f85/600x900",
+      "description": null,
+      "genres": "драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 841700,
+      "title": "Марсианин",
+      "year": 2015,
+      "age_rating": "18",
+      "rating_kp": 7.77,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/6f631486-e947-487d-94d6-41c2b5a8f5a0/600x900",
+      "description": null,
+      "genres": "фантастика,приключения,драма,комедия,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 104992,
+      "title": "Дьявол носит Prada",
+      "year": 2006,
+      "age_rating": "18",
+      "rating_kp": 7.719,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/39a5e5e5-fea5-4c18-964e-40c4dfa7c995/600x900",
+      "description": null,
+      "genres": "драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5377368,
+      "title": "Беспринципные в Питере",
+      "year": 2025,
+      "age_rating": "18",
+      "rating_kp": 7.715,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10853012/43f48f08-1005-49c7-a775-7fc2afa15dc3/600x900",
+      "description": null,
+      "genres": "комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1048334,
+      "title": "Джокер",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 7.996,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/84934543-5991-4c93-97eb-beb6186a3ad7/600x900",
+      "description": null,
+      "genres": "драма,криминал,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1047883,
+      "title": "Однажды в… Голливуде",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 7.694,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/70580cf5-3287-42d6-8a76-2c715e2f6172/600x900",
+      "description": null,
+      "genres": "драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4536580,
+      "title": "Баба Яга спасает мир",
+      "year": 2023,
+      "age_rating": "6",
+      "rating_kp": 7.298,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10812607/b6c9de8d-d861-4eec-ab0b-d12f8c2dd987/600x900",
+      "description": null,
+      "genres": "фэнтези,комедия,семейный,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 195334,
+      "title": "Престиж",
+      "year": 2006,
+      "age_rating": "18",
+      "rating_kp": 8.515,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/0e1384ae-6367-4bba-9e5d-d91c6625371e/600x900",
+      "description": null,
+      "genres": "триллер,фантастика,драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4635111,
+      "title": "Внутри убийцы",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 7.399,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/178bf968-4255-4ec6-b693-2f240539265d/600x900",
+      "description": null,
+      "genres": "детектив,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 958607,
+      "title": "Леди Баг и Супер-Кот",
+      "year": 2015,
+      "age_rating": "6",
+      "rating_kp": 8.277,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703859/9980853d-bebd-4257-85b7-792d1020ce3a/600x900",
+      "description": null,
+      "genres": "мультфильм,фэнтези,детский,боевик,мелодрама,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5928,
+      "title": "Один дома 2: Затерянный в Нью-Йорке",
+      "year": 1992,
+      "age_rating": null,
+      "rating_kp": 8.037,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e87b5842-3065-422e-81e8-59a1ffcd9b6a/600x900",
+      "description": null,
+      "genres": "комедия,семейный,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 571335,
+      "title": "Бесстыжие",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 8.617,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/e86c0548-501e-45d3-a4c4-e85fe8db8e21/600x900",
+      "description": null,
+      "genres": "драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5437548,
+      "title": "Молодёжка. Новая смена",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 8.889,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703859/478ff41a-bce8-41b7-80b2-cd7b712b6c27/600x900",
+      "description": null,
+      "genres": "драма,комедия,спорт",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1334852,
+      "title": "Сто лет тому вперёд",
+      "year": 2024,
+      "age_rating": "12",
+      "rating_kp": 7.635,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/e67acc36-dc80-4c2c-ba64-426f8a2ae073/600x900",
+      "description": null,
+      "genres": "фантастика,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 804662,
+      "title": "Круэлла",
+      "year": 2021,
+      "age_rating": "12",
+      "rating_kp": 7.587,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/9bb0f260-1c5f-4698-91cc-de481bfd0f55/600x900",
+      "description": null,
+      "genres": "комедия,криминал,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 775273,
+      "title": "Душа",
+      "year": 2020,
+      "age_rating": "6",
+      "rating_kp": 8.358,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/ce2e470c-861c-4995-b6b1-54e1dd4932d4/600x900",
+      "description": null,
+      "genres": "мультфильм,фэнтези,комедия,приключения,семейный,музыка",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 407636,
+      "title": "Гарри Поттер и Дары Смерти: Часть II",
+      "year": 2011,
+      "age_rating": "16",
+      "rating_kp": 8.172,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/19be7746-e2b1-42b5-9de0-c416d34da5f5/600x900",
+      "description": null,
+      "genres": "фэнтези,детектив,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 526,
+      "title": "Большой куш",
+      "year": 2000,
+      "age_rating": "18",
+      "rating_kp": 8.555,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/47fe48f6-ff17-4411-a12f-d337bea2639d/600x900",
+      "description": null,
+      "genres": "криминал,комедия,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5394690,
+      "title": "Иван Васильевич меняет всё",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 6.574,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/fa95b9f9-b4d5-44e5-8aa4-063e4914bfdb/600x900",
+      "description": null,
+      "genres": "комедия,фантастика,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 3498,
+      "title": "Властелин колец: Возвращение короля",
+      "year": 2003,
+      "age_rating": "18",
+      "rating_kp": 8.685,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/e410c71f-baa1-4fe5-bb29-aedb4662f49b/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 14349,
+      "title": "Такси",
+      "year": 1998,
+      "age_rating": "18",
+      "rating_kp": 8.026,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/67f3c053-f324-419d-932e-3d234f2105f5/600x900",
+      "description": null,
+      "genres": "боевик,комедия,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4642651,
+      "title": "Закрыть гештальт",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.572,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/7898d0d5-b748-40c2-b310-96075889d9de/600x900",
+      "description": null,
+      "genres": "комедия,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4642708,
+      "title": "Нулевой пациент",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 8.376,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/518780ef-fe13-4997-9819-0b19a134b558/600x900",
+      "description": null,
+      "genres": "драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 102124,
+      "title": "Пираты Карибского моря: На краю света",
+      "year": 2007,
+      "age_rating": "12",
+      "rating_kp": 8.071,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/dfa69f9c-3c71-436f-9b1d-797cd562f04a/600x900",
+      "description": null,
+      "genres": "приключения,боевик,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4541,
+      "title": "Шоу Трумана",
+      "year": 1998,
+      "age_rating": "18",
+      "rating_kp": 8.283,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/ceb4574e-4b3b-43bf-a217-770d95c8afea/600x900",
+      "description": null,
+      "genres": "драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1199100,
+      "title": "Главный герой",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.366,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/db4fbef1-466a-4dec-9b7a-d4f13eb45738/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 538225,
+      "title": "Первому игроку приготовиться",
+      "year": 2018,
+      "age_rating": "12",
+      "rating_kp": 7.442,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/5ae82f4b-fd6a-46b5-b5ba-897106eb1eae/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1047881,
+      "title": "Во всё тяжкое",
+      "year": 2018,
+      "age_rating": "18",
+      "rating_kp": 7.326,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/eb1d6716-372c-4fcf-b585-727b751f6485/600x900",
+      "description": null,
+      "genres": "драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 312,
+      "title": "Властелин колец: Две крепости",
+      "year": 2002,
+      "age_rating": "18",
+      "rating_kp": 8.624,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/772093e4-7f68-49aa-a805-d654693aee26/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 81041,
+      "title": "Алеша Попович и Тугарин Змей",
+      "year": 2004,
+      "age_rating": "12",
+      "rating_kp": 7.996,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/3255501c-db04-465f-85f4-113f887cfad8/600x900",
+      "description": null,
+      "genres": "мультфильм,комедия,приключения,мюзикл,фэнтези,мелодрама,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1322324,
+      "title": "Всё везде и сразу",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.191,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10671298/5a114ee7-3a48-4edb-8693-b1e769fb006e/600x900",
+      "description": null,
+      "genres": "фантастика,комедия,боевик,приключения,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 178707,
+      "title": "Сверхъестественное",
+      "year": 2005,
+      "age_rating": "18",
+      "rating_kp": 8.244,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/c2c45ca9-0270-4bb2-bb82-5de3f01effbc/600x900",
+      "description": null,
+      "genres": "фэнтези,ужасы,триллер,драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 278522,
+      "title": "Хоббит: Нежданное путешествие",
+      "year": 2012,
+      "age_rating": "6",
+      "rating_kp": 8.117,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/0e569ebd-0639-416b-92c5-2afffbd5d089/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4922959,
+      "title": "Догмен",
+      "year": 2023,
+      "age_rating": "18",
+      "rating_kp": 7.75,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/740fe2d6-0813-470a-8ca0-38cda5ba2303/600x900",
+      "description": null,
+      "genres": "драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 88173,
+      "title": "Алита: Боевой ангел",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 7.232,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/296962f5-fe56-4036-bdc1-2111c065ff69/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 77331,
+      "title": "Ирония судьбы, или С легким паром!",
+      "year": 1975,
+      "age_rating": "6",
+      "rating_kp": 8.203,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/9ba8e12c-ab68-4ec5-83e1-f6f8d787700c/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 689960,
+      "title": "Валериан и город тысячи планет",
+      "year": 2017,
+      "age_rating": "18",
+      "rating_kp": 7.004,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/d931e148-ff72-4c38-9247-0fd660ae985d/600x900",
+      "description": null,
+      "genres": "фантастика,фэнтези,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 508161,
+      "title": "Ходячие мертвецы",
+      "year": 2010,
+      "age_rating": "18",
+      "rating_kp": 8.024,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10768063/c07a81ca-b555-45c5-a9b2-e3d3ac3be125/600x900",
+      "description": null,
+      "genres": "ужасы,триллер,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 77039,
+      "title": "Бригада",
+      "year": 2002,
+      "age_rating": "18",
+      "rating_kp": 8.292,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/2b1296bf-c7d7-4bf3-bcc6-8b2505cc8cc7/600x900",
+      "description": null,
+      "genres": "драма,криминал,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5047464,
+      "title": "Бременские музыканты",
+      "year": 2023,
+      "age_rating": "6",
+      "rating_kp": 7.327,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10953618/f1780454-e9d3-4785-933c-a85a0302bf5f/600x900",
+      "description": null,
+      "genres": "приключения,семейный,фэнтези,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5304528,
+      "title": "Домовенок Кузя",
+      "year": 2024,
+      "age_rating": "6",
+      "rating_kp": 7.705,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486362/49e33d17-07d7-4791-ae62-c9111d3ff4f8/600x900",
+      "description": null,
+      "genres": "комедия,семейный,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 260162,
+      "title": "Далласский клуб покупателей",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 7.95,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/b2995873-7228-41fa-863f-a5cb2e7c85a4/600x900",
+      "description": null,
+      "genres": "драма,биография",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1091,
+      "title": "Люди в чёрном",
+      "year": 1997,
+      "age_rating": "12",
+      "rating_kp": 8.044,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/8daa2569-b300-47f9-b8e7-83f09a7af1a0/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,комедия,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 8408,
+      "title": "Гарри Поттер и Кубок огня",
+      "year": 2005,
+      "age_rating": "16",
+      "rating_kp": 7.981,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/672269af-efcb-41c3-85b4-e9ce87f1ea02/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5230101,
+      "title": "Огниво",
+      "year": 2024,
+      "age_rating": "6",
+      "rating_kp": 7.651,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10900341/a9e47413-c2f3-4a5b-a657-7a1da71a22b6/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 517988,
+      "title": "Время",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 7.29,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/02d70d58-ae4e-4ef4-b886-c215e9e99436/600x900",
+      "description": null,
+      "genres": "фантастика,мелодрама,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 840817,
+      "title": "Движение вверх",
+      "year": 2017,
+      "age_rating": "6",
+      "rating_kp": 7.588,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/ef5cd4a4-e958-47a2-82a4-41176ea382a8/600x900",
+      "description": null,
+      "genres": "спорт,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1355139,
+      "title": "Лулу и Бриггс",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.438,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/c456643c-84fc-4b24-a288-668e3afa95fc/600x900",
+      "description": null,
+      "genres": "комедия,драма,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 493208,
+      "title": "Холодное сердце",
+      "year": 2013,
+      "age_rating": null,
+      "rating_kp": 7.869,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/efa923ca-2007-4a79-b759-377fc1a5664f/600x900",
+      "description": null,
+      "genres": "мультфильм,мюзикл,фэнтези,комедия,мелодрама,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 63912,
+      "title": "Укрощение строптивого",
+      "year": 1980,
+      "age_rating": "18",
+      "rating_kp": 8.416,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/76df764b-1c8b-4bc2-a822-fb2cf1afe2e3/600x900",
+      "description": null,
+      "genres": "мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 848894,
+      "title": "Вторая жизнь Уве",
+      "year": 2015,
+      "age_rating": "18",
+      "rating_kp": 8.279,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/0d39048c-01ec-4e1f-a376-7581387c77df/600x900",
+      "description": null,
+      "genres": "драма,мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1387021,
+      "title": "Лига справедливости Зака Снайдера",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.806,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/3518c34c-092f-42bf-b948-87ebe0bd325a/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 3793,
+      "title": "Константин: Повелитель тьмы",
+      "year": 2005,
+      "age_rating": "18",
+      "rating_kp": 7.878,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486454/73e1c12a-7b14-408f-b5e9-b01765b29d36/600x900",
+      "description": null,
+      "genres": "фэнтези,ужасы,боевик,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 808639,
+      "title": "Дурак",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 8.11,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/2275fc68-29d5-45a1-b48d-e14774bf3b27/600x900",
+      "description": null,
+      "genres": "драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 786958,
+      "title": "Иллюзия обмана 2",
+      "year": 2016,
+      "age_rating": "12",
+      "rating_kp": 6.881,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/011f046c-e469-4c4e-84c2-a8dc392b55f3/600x900",
+      "description": null,
+      "genres": "боевик,триллер,комедия,криминал,детектив,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 592212,
+      "title": "Барбоскины",
+      "year": 2011,
+      "age_rating": null,
+      "rating_kp": 6.939,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10893610/2acdb8f8-d488-4623-8ed2-f13369f89903/600x900",
+      "description": null,
+      "genres": "мультфильм,детский",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 38905,
+      "title": "Чарли и шоколадная фабрика",
+      "year": 2005,
+      "age_rating": null,
+      "rating_kp": 7.649,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/354d74db-134e-4441-ae62-83c5d3b564a2/600x900",
+      "description": null,
+      "genres": "мюзикл,фэнтези,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 819101,
+      "title": "Омерзительная восьмерка",
+      "year": 2015,
+      "age_rating": "18",
+      "rating_kp": 8.01,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/e5013408-8374-400b-a444-b9753e9da28d/600x900",
+      "description": null,
+      "genres": "вестерн,криминал,триллер,драма,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 88198,
+      "title": "Живая сталь",
+      "year": 2011,
+      "age_rating": "18",
+      "rating_kp": 7.674,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/a2da53fd-24c9-4715-8f98-5382b387fd4d/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 581653,
+      "title": "Фиксики",
+      "year": 2010,
+      "age_rating": null,
+      "rating_kp": 7.543,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/50b7df7d-ac91-43b5-bd7b-85b1b2547cbd/600x900",
+      "description": null,
+      "genres": "мультфильм,детский",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 377,
+      "title": "Семь",
+      "year": 1995,
+      "age_rating": "18",
+      "rating_kp": 8.302,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1773646/9ce4716c-dd27-435b-8a3a-f833ad859052/600x900",
+      "description": null,
+      "genres": "триллер,детектив,криминал,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4365427,
+      "title": "Уэнздей",
+      "year": 2022,
+      "age_rating": null,
+      "rating_kp": 7.921,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4483445/edb46841-5649-4462-be63-6dd5bf3da947/600x900",
+      "description": null,
+      "genres": "фэнтези,комедия,криминал,детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 838,
+      "title": "Человек-паук",
+      "year": 2002,
+      "age_rating": "12",
+      "rating_kp": 7.771,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/428e2842-4157-45e8-a9af-1e5245e52c37/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 920265,
+      "title": "Человек-паук: Через вселенные",
+      "year": 2018,
+      "age_rating": "6",
+      "rating_kp": 8.178,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/64417bd3-838b-4910-a9f4-c278c509d568/600x900",
+      "description": null,
+      "genres": "мультфильм,фантастика,фэнтези,боевик,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 6039,
+      "title": "Маска",
+      "year": 1994,
+      "age_rating": "12",
+      "rating_kp": 7.989,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/af924598-65b8-47c5-8297-75a661a7c335/600x900",
+      "description": null,
+      "genres": "комедия,фэнтези,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4642803,
+      "title": "Конец света",
+      "year": 2022,
+      "age_rating": "18",
+      "rating_kp": 7.338,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/4975f62d-3a7f-406c-bfa9-1d6f777af2a3/600x900",
+      "description": null,
+      "genres": "комедия,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1445143,
+      "title": "Мажор. Фильм",
+      "year": 2021,
+      "age_rating": "18",
+      "rating_kp": 7.062,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/cc39ef04-0bd7-4eb6-8563-220fca81edfc/600x900",
+      "description": null,
+      "genres": "боевик,комедия,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 582101,
+      "title": "Дивергент",
+      "year": 2014,
+      "age_rating": "12",
+      "rating_kp": 6.785,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/4dd9e330-ab1a-4e7c-8222-dd60a5ab0675/600x900",
+      "description": null,
+      "genres": "фантастика,детектив,боевик,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 505851,
+      "title": "Грань будущего",
+      "year": 2014,
+      "age_rating": "12",
+      "rating_kp": 7.943,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/59acece0-e900-4914-aa8a-ec5f42026a64/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 345,
+      "title": "Молчание ягнят",
+      "year": 1990,
+      "age_rating": "18",
+      "rating_kp": 8.332,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/9c655ce1-2b59-4941-97aa-f9e928ed0ff4/600x900",
+      "description": null,
+      "genres": "триллер,детектив,криминал,драма,ужасы",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 635772,
+      "title": "Игра в имитацию",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 7.801,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703859/8ac3b989-2556-42bb-9d11-913d42bacc63/600x900",
+      "description": null,
+      "genres": "биография,военный,драма,история",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 84830,
+      "title": "Жмурки",
+      "year": 2005,
+      "age_rating": "18",
+      "rating_kp": 7.301,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/3aa869c1-2f77-4f8c-a614-b13f80cca687/600x900",
+      "description": null,
+      "genres": "комедия,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 4448519,
+      "title": "Вызов",
+      "year": 2023,
+      "age_rating": "12",
+      "rating_kp": 7.882,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10835644/12a8b128-cef9-49bc-b572-b35d7d4fe5b1/600x900",
+      "description": null,
+      "genres": "драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1115407,
+      "title": "Простоквашино",
+      "year": 2018,
+      "age_rating": null,
+      "rating_kp": 7.797,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/9784475/269fa673-c22b-4a31-b174-4b17a166a1a3/600x900",
+      "description": null,
+      "genres": "мультфильм,детский",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 841152,
+      "title": "Славные парни",
+      "year": 2016,
+      "age_rating": "18",
+      "rating_kp": 7.295,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/5fb4b4c8-6d73-46dd-a4c8-e0bf953f8481/600x900",
+      "description": null,
+      "genres": "криминал,комедия,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 6064901,
+      "title": "Красная Поляна",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 7.658,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4716873/e535cb87-a07d-4942-8209-aca1439ba40b/600x900",
+      "description": null,
+      "genres": "комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 39577,
+      "title": "Брюс Всемогущий",
+      "year": 2003,
+      "age_rating": "12",
+      "rating_kp": 7.747,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/a5b49c4b-0cff-495d-a936-482463a953ee/600x900",
+      "description": null,
+      "genres": "фэнтези,комедия,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 725190,
+      "title": "Одержимость",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 8.364,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/16af46be-bcfe-461e-af54-ff17b905b82e/600x900",
+      "description": null,
+      "genres": "драма,музыка",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1236063,
+      "title": "Довод",
+      "year": 2020,
+      "age_rating": "18",
+      "rating_kp": 7.523,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/b35131e0-041b-4ebc-af90-7104f2f75821/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,триллер",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 45779,
+      "title": "Винни Пух",
+      "year": 1969,
+      "age_rating": null,
+      "rating_kp": 8.772,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/c5b6c0c7-f300-4c3d-99f2-cd09801ff43f/600x900",
+      "description": null,
+      "genres": "мультфильм,детский,короткометражка",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 409295,
+      "title": "Исходный код",
+      "year": 2011,
+      "age_rating": "12",
+      "rating_kp": 7.78,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/789dbe50-6884-4f27-a997-bb78d5f0df42/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,триллер,драма",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 458,
+      "title": "Корпорация монстров",
+      "year": 2001,
+      "age_rating": null,
+      "rating_kp": 8.131,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/cb32895b-a8c3-4362-83cd-eaa3990b456b/600x900",
+      "description": null,
+      "genres": "мультфильм,фэнтези,комедия,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 25108,
+      "title": "В бой идут одни «старики»",
+      "year": 1973,
+      "age_rating": "12",
+      "rating_kp": 8.732,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/03265560-cacb-429a-8ccd-50403f2db552/600x900",
+      "description": null,
+      "genres": "военный,драма,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 522,
+      "title": "Карты, деньги, два ствола",
+      "year": 1998,
+      "age_rating": "18",
+      "rating_kp": 8.56,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/6492653f-11d5-4087-a1d2-ec7a74f161d3/600x900",
+      "description": null,
+      "genres": "боевик,комедия,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 716587,
+      "title": "Острые козырьки",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 8.347,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/e1ec4209-569e-4745-a324-b180af8097ef/600x900",
+      "description": null,
+      "genres": "драма,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1183599,
+      "title": "Огонь",
+      "year": 2020,
+      "age_rating": "6",
+      "rating_kp": 8.13,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10592371/0f800256-6a9d-427e-b45b-083eb6a56f7b/600x900",
+      "description": null,
+      "genres": "драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1008445,
+      "title": "Человек-паук: Вдали от дома",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 7.412,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/5cadd28b-996e-4224-ab98-f7aed64aa56c/600x900",
+      "description": null,
+      "genres": "фантастика,фэнтези,боевик,комедия,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 522876,
+      "title": "Век Адалин",
+      "year": 2015,
+      "age_rating": "18",
+      "rating_kp": 7.905,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/68440e1f-ccc7-410a-bc56-92994554b63a/600x900",
+      "description": null,
+      "genres": "драма,мелодрама,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1445170,
+      "title": "Три кота и море приключений",
+      "year": 2022,
+      "age_rating": null,
+      "rating_kp": 8.48,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/b4f8d337-de5d-44e2-8f6b-bc81a4bdb796/600x900",
+      "description": null,
+      "genres": "мультфильм,детский,комедия,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 822709,
+      "title": "Тор: Рагнарёк",
+      "year": 2017,
+      "age_rating": "18",
+      "rating_kp": 7.716,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1946459/614af17f-82ab-4ba7-b614-adf5c81f68c4/600x900",
+      "description": null,
+      "genres": "фантастика,фэнтези,боевик,комедия,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 195524,
+      "title": "Я – легенда",
+      "year": 2007,
+      "age_rating": "18",
+      "rating_kp": 7.874,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/60692c49-3ca0-46ed-92d4-db37636f8d5b/600x900",
+      "description": null,
+      "genres": "ужасы,драма,боевик",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 48356,
+      "title": "Гарри Поттер и Орден Феникса",
+      "year": 2007,
+      "age_rating": "16",
+      "rating_kp": 7.852,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4303601/1c8e7019-20c6-4bfb-ad17-6b7746ca5147/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 89515,
+      "title": "Гарри Поттер и Принц-полукровка",
+      "year": 2009,
+      "age_rating": "12",
+      "rating_kp": 7.853,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/3b4b90e6-0b62-410c-a583-6977df318fbe/600x900",
+      "description": null,
+      "genres": "фэнтези,приключения,семейный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 683999,
+      "title": "Отель «Гранд Будапешт»",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 7.956,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/ea08a062-81a9-46e9-a475-e49388216eea/600x900",
+      "description": null,
+      "genres": "комедия,приключения,детектив,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 762738,
+      "title": "Джон Уик",
+      "year": 2014,
+      "age_rating": "18",
+      "rating_kp": 7.033,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/5ab427c8-4a7d-4766-abf9-a9748a69dbf4/600x900",
+      "description": null,
+      "genres": "боевик,триллер,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1263293,
+      "title": "Душегубы",
+      "year": 2019,
+      "age_rating": "18",
+      "rating_kp": 8.231,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/99590a6f-42e8-4ed6-905e-61500cae3c83/600x900",
+      "description": null,
+      "genres": "триллер,детектив,криминал",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 1189814,
+      "title": "Казанова",
+      "year": 2020,
+      "age_rating": "18",
+      "rating_kp": 8.226,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/7f9fcef2-9817-4c96-ba22-4836470fe883/600x900",
+      "description": null,
+      "genres": "детектив",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5942378,
+      "title": "Еретик",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 6.658,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10812607/19679180-4bac-4b11-9ebe-00b3cb283d97/600x900",
+      "description": null,
+      "genres": "триллер,ужасы",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 77044,
+      "title": "Друзья",
+      "year": 1994,
+      "age_rating": "18",
+      "rating_kp": 9.227,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4486454/bae692d9-8260-46a4-9188-8509a72aa005/600x900",
+      "description": null,
+      "genres": "комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 470178,
+      "title": "Аквамен",
+      "year": 2018,
+      "age_rating": "18",
+      "rating_kp": 6.833,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1629390/f59e2998-8371-4260-80d2-018e2bdbd2cf/600x900",
+      "description": null,
+      "genres": "фэнтези,боевик,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 841263,
+      "title": "Стражи Галактики. Часть 2",
+      "year": 2017,
+      "age_rating": "18",
+      "rating_kp": 7.782,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/ea4ff704-113d-46de-b6b4-03176ac95118/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,приключения,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 81555,
+      "title": "Загадочная история Бенджамина Баттона",
+      "year": 2008,
+      "age_rating": "18",
+      "rating_kp": 8.074,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/6ffcf4e6-d512-4eac-a404-7344f5371255/600x900",
+      "description": null,
+      "genres": "драма,фэнтези",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 468522,
+      "title": "Отряд самоубийц",
+      "year": 2016,
+      "age_rating": "18",
+      "rating_kp": 6.104,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/42b0d2da-9735-4279-b37e-dc36c9a20433/600x900",
+      "description": null,
+      "genres": "фантастика,боевик,фэнтези,приключения",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 329,
+      "title": "Список Шиндлера",
+      "year": 1993,
+      "age_rating": "18",
+      "rating_kp": 8.851,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/1e1ac6d9-c658-4f5f-937e-d080bca0d893/600x900",
+      "description": null,
+      "genres": "биография,история,драма,военный",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 81733,
+      "title": "Гордость и предубеждение",
+      "year": 2005,
+      "age_rating": "12",
+      "rating_kp": 8.151,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1898899/fa8474e9-35ca-447c-9dca-baf879ccaa9e/600x900",
+      "description": null,
+      "genres": "драма,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 5428537,
+      "title": "Постучись в мою Тверь",
+      "year": 2024,
+      "age_rating": "18",
+      "rating_kp": 7.086,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10953618/7638be3c-46db-4866-bfcf-7cfdfb1ac805/600x900",
+      "description": null,
+      "genres": "комедия,мелодрама",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 527,
+      "title": "День сурка",
+      "year": 1993,
+      "age_rating": "18",
+      "rating_kp": 8.14,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1599028/ed4f90cb-188b-4cac-a41a-c175ff9b9e48/600x900",
+      "description": null,
+      "genres": "фэнтези,драма,мелодрама,комедия",
+      "countries": null,
+      "votes": null
+    },
+    {
+      "kinopoisk_id": 606646,
+      "title": "12 лет рабства",
+      "year": 2013,
+      "age_rating": "18",
+      "rating_kp": 7.944,
+      "poster_url": "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/5bf49fa3-333d-4625-9857-14b533adbad7/600x900",
+      "description": null,
+      "genres": "драма,биография,история",
+      "countries": null,
+      "votes": null
+    }
+  ],
+  "top250": [
+    {
+      "kinopoisk_id": 535341,
+      "position": 1
+    },
+    {
+      "kinopoisk_id": 1143242,
+      "position": 2
+    },
+    {
+      "kinopoisk_id": 1100777,
+      "position": 3
+    },
+    {
+      "kinopoisk_id": 1318972,
+      "position": 4
+    },
+    {
+      "kinopoisk_id": 41519,
+      "position": 5
+    },
+    {
+      "kinopoisk_id": 462682,
+      "position": 6
+    },
+    {
+      "kinopoisk_id": 4443734,
+      "position": 7
+    },
+    {
+      "kinopoisk_id": 464963,
+      "position": 8
+    },
+    {
+      "kinopoisk_id": 1188529,
+      "position": 9
+    },
+    {
+      "kinopoisk_id": 1108577,
+      "position": 10
+    },
+    {
+      "kinopoisk_id": 5047468,
+      "position": 11
+    },
+    {
+      "kinopoisk_id": 5059049,
+      "position": 12
+    },
+    {
+      "kinopoisk_id": 41520,
+      "position": 13
+    },
+    {
+      "kinopoisk_id": 397667,
+      "position": 14
+    },
+    {
+      "kinopoisk_id": 4959134,
+      "position": 15
+    },
+    {
+      "kinopoisk_id": 6605654,
+      "position": 16
+    },
+    {
+      "kinopoisk_id": 1326397,
+      "position": 17
+    },
+    {
+      "kinopoisk_id": 8124,
+      "position": 18
+    },
+    {
+      "kinopoisk_id": 42664,
+      "position": 19
+    },
+    {
+      "kinopoisk_id": 42782,
+      "position": 20
+    },
+    {
+      "kinopoisk_id": 5249042,
+      "position": 21
+    },
+    {
+      "kinopoisk_id": 361,
+      "position": 22
+    },
+    {
+      "kinopoisk_id": 1355059,
+      "position": 23
+    },
+    {
+      "kinopoisk_id": 927898,
+      "position": 24
+    },
+    {
+      "kinopoisk_id": 5405057,
+      "position": 25
+    },
+    {
+      "kinopoisk_id": 251733,
+      "position": 26
+    },
+    {
+      "kinopoisk_id": 839954,
+      "position": 27
+    },
+    {
+      "kinopoisk_id": 45146,
+      "position": 28
+    },
+    {
+      "kinopoisk_id": 478491,
+      "position": 29
+    },
+    {
+      "kinopoisk_id": 1183582,
+      "position": 30
+    },
+    {
+      "kinopoisk_id": 46483,
+      "position": 31
+    },
+    {
+      "kinopoisk_id": 4476147,
+      "position": 32
+    },
+    {
+      "kinopoisk_id": 258687,
+      "position": 33
+    },
+    {
+      "kinopoisk_id": 820638,
+      "position": 34
+    },
+    {
+      "kinopoisk_id": 326,
+      "position": 35
+    },
+    {
+      "kinopoisk_id": 838050,
+      "position": 36
+    },
+    {
+      "kinopoisk_id": 775276,
+      "position": 37
+    },
+    {
+      "kinopoisk_id": 689,
+      "position": 38
+    },
+    {
+      "kinopoisk_id": 4626783,
+      "position": 39
+    },
+    {
+      "kinopoisk_id": 447301,
+      "position": 40
+    },
+    {
+      "kinopoisk_id": 435,
+      "position": 41
+    },
+    {
+      "kinopoisk_id": 5916296,
+      "position": 42
+    },
+    {
+      "kinopoisk_id": 4374,
+      "position": 43
+    },
+    {
+      "kinopoisk_id": 462606,
+      "position": 44
+    },
+    {
+      "kinopoisk_id": 1392743,
+      "position": 45
+    },
+    {
+      "kinopoisk_id": 4531254,
+      "position": 46
+    },
+    {
+      "kinopoisk_id": 4860213,
+      "position": 47
+    },
+    {
+      "kinopoisk_id": 5304403,
+      "position": 48
+    },
+    {
+      "kinopoisk_id": 4647040,
+      "position": 49
+    },
+    {
+      "kinopoisk_id": 4542208,
+      "position": 50
+    },
+    {
+      "kinopoisk_id": 5079093,
+      "position": 51
+    },
+    {
+      "kinopoisk_id": 1405508,
+      "position": 52
+    },
+    {
+      "kinopoisk_id": 44386,
+      "position": 53
+    },
+    {
+      "kinopoisk_id": 448,
+      "position": 54
+    },
+    {
+      "kinopoisk_id": 1224067,
+      "position": 55
+    },
+    {
+      "kinopoisk_id": 463634,
+      "position": 56
+    },
+    {
+      "kinopoisk_id": 406408,
+      "position": 57
+    },
+    {
+      "kinopoisk_id": 685246,
+      "position": 58
+    },
+    {
+      "kinopoisk_id": 522892,
+      "position": 59
+    },
+    {
+      "kinopoisk_id": 46225,
+      "position": 60
+    },
+    {
+      "kinopoisk_id": 2213,
+      "position": 61
+    },
+    {
+      "kinopoisk_id": 44745,
+      "position": 62
+    },
+    {
+      "kinopoisk_id": 389,
+      "position": 63
+    },
+    {
+      "kinopoisk_id": 1043758,
+      "position": 64
+    },
+    {
+      "kinopoisk_id": 749374,
+      "position": 65
+    },
+    {
+      "kinopoisk_id": 5078983,
+      "position": 66
+    },
+    {
+      "kinopoisk_id": 46708,
+      "position": 67
+    },
+    {
+      "kinopoisk_id": 430,
+      "position": 68
+    },
+    {
+      "kinopoisk_id": 843649,
+      "position": 69
+    },
+    {
+      "kinopoisk_id": 44168,
+      "position": 70
+    },
+    {
+      "kinopoisk_id": 32898,
+      "position": 71
+    },
+    {
+      "kinopoisk_id": 45319,
+      "position": 72
+    },
+    {
+      "kinopoisk_id": 687595,
+      "position": 73
+    },
+    {
+      "kinopoisk_id": 342,
+      "position": 74
+    },
+    {
+      "kinopoisk_id": 5452393,
+      "position": 75
+    },
+    {
+      "kinopoisk_id": 1311936,
+      "position": 76
+    },
+    {
+      "kinopoisk_id": 843650,
+      "position": 77
+    },
+    {
+      "kinopoisk_id": 324,
+      "position": 78
+    },
+    {
+      "kinopoisk_id": 409424,
+      "position": 79
+    },
+    {
+      "kinopoisk_id": 977288,
+      "position": 80
+    },
+    {
+      "kinopoisk_id": 2656,
+      "position": 81
+    },
+    {
+      "kinopoisk_id": 5235968,
+      "position": 82
+    },
+    {
+      "kinopoisk_id": 5019944,
+      "position": 83
+    },
+    {
+      "kinopoisk_id": 89514,
+      "position": 84
+    },
+    {
+      "kinopoisk_id": 976642,
+      "position": 85
+    },
+    {
+      "kinopoisk_id": 1405843,
+      "position": 86
+    },
+    {
+      "kinopoisk_id": 43869,
+      "position": 87
+    },
+    {
+      "kinopoisk_id": 586397,
+      "position": 88
+    },
+    {
+      "kinopoisk_id": 915196,
+      "position": 89
+    },
+    {
+      "kinopoisk_id": 679486,
+      "position": 90
+    },
+    {
+      "kinopoisk_id": 301,
+      "position": 91
+    },
+    {
+      "kinopoisk_id": 4414587,
+      "position": 92
+    },
+    {
+      "kinopoisk_id": 111543,
+      "position": 93
+    },
+    {
+      "kinopoisk_id": 404900,
+      "position": 94
+    },
+    {
+      "kinopoisk_id": 4370148,
+      "position": 95
+    },
+    {
+      "kinopoisk_id": 689066,
+      "position": 96
+    },
+    {
+      "kinopoisk_id": 276598,
+      "position": 97
+    },
+    {
+      "kinopoisk_id": 1355060,
+      "position": 98
+    },
+    {
+      "kinopoisk_id": 1109271,
+      "position": 99
+    },
+    {
+      "kinopoisk_id": 1227803,
+      "position": 100
+    },
+    {
+      "kinopoisk_id": 5129252,
+      "position": 101
+    },
+    {
+      "kinopoisk_id": 1316601,
+      "position": 102
+    },
+    {
+      "kinopoisk_id": 930878,
+      "position": 103
+    },
+    {
+      "kinopoisk_id": 935898,
+      "position": 104
+    },
+    {
+      "kinopoisk_id": 1234808,
+      "position": 105
+    },
+    {
+      "kinopoisk_id": 474,
+      "position": 106
+    },
+    {
+      "kinopoisk_id": 601564,
+      "position": 107
+    },
+    {
+      "kinopoisk_id": 5427621,
+      "position": 108
+    },
+    {
+      "kinopoisk_id": 1267348,
+      "position": 109
+    },
+    {
+      "kinopoisk_id": 409600,
+      "position": 110
+    },
+    {
+      "kinopoisk_id": 387556,
+      "position": 111
+    },
+    {
+      "kinopoisk_id": 444,
+      "position": 112
+    },
+    {
+      "kinopoisk_id": 692861,
+      "position": 113
+    },
+    {
+      "kinopoisk_id": 4419497,
+      "position": 114
+    },
+    {
+      "kinopoisk_id": 5321393,
+      "position": 115
+    },
+    {
+      "kinopoisk_id": 322,
+      "position": 116
+    },
+    {
+      "kinopoisk_id": 263531,
+      "position": 117
+    },
+    {
+      "kinopoisk_id": 279102,
+      "position": 118
+    },
+    {
+      "kinopoisk_id": 328,
+      "position": 119
+    },
+    {
+      "kinopoisk_id": 2360,
+      "position": 120
+    },
+    {
+      "kinopoisk_id": 462360,
+      "position": 121
+    },
+    {
+      "kinopoisk_id": 681849,
+      "position": 122
+    },
+    {
+      "kinopoisk_id": 5450038,
+      "position": 123
+    },
+    {
+      "kinopoisk_id": 5582621,
+      "position": 124
+    },
+    {
+      "kinopoisk_id": 370,
+      "position": 125
+    },
+    {
+      "kinopoisk_id": 61237,
+      "position": 126
+    },
+    {
+      "kinopoisk_id": 835086,
+      "position": 127
+    },
+    {
+      "kinopoisk_id": 42326,
+      "position": 128
+    },
+    {
+      "kinopoisk_id": 63991,
+      "position": 129
+    },
+    {
+      "kinopoisk_id": 688,
+      "position": 130
+    },
+    {
+      "kinopoisk_id": 9691,
+      "position": 131
+    },
+    {
+      "kinopoisk_id": 280172,
+      "position": 132
+    },
+    {
+      "kinopoisk_id": 476,
+      "position": 133
+    },
+    {
+      "kinopoisk_id": 591929,
+      "position": 134
+    },
+    {
+      "kinopoisk_id": 502838,
+      "position": 135
+    },
+    {
+      "kinopoisk_id": 1045583,
+      "position": 136
+    },
+    {
+      "kinopoisk_id": 420923,
+      "position": 137
+    },
+    {
+      "kinopoisk_id": 645118,
+      "position": 138
+    },
+    {
+      "kinopoisk_id": 256124,
+      "position": 139
+    },
+    {
+      "kinopoisk_id": 1395460,
+      "position": 140
+    },
+    {
+      "kinopoisk_id": 86326,
+      "position": 141
+    },
+    {
+      "kinopoisk_id": 4489198,
+      "position": 142
+    },
+    {
+      "kinopoisk_id": 4958668,
+      "position": 143
+    },
+    {
+      "kinopoisk_id": 841700,
+      "position": 144
+    },
+    {
+      "kinopoisk_id": 104992,
+      "position": 145
+    },
+    {
+      "kinopoisk_id": 5377368,
+      "position": 146
+    },
+    {
+      "kinopoisk_id": 1048334,
+      "position": 147
+    },
+    {
+      "kinopoisk_id": 1047883,
+      "position": 148
+    },
+    {
+      "kinopoisk_id": 4536580,
+      "position": 149
+    },
+    {
+      "kinopoisk_id": 195334,
+      "position": 150
+    },
+    {
+      "kinopoisk_id": 4635111,
+      "position": 151
+    },
+    {
+      "kinopoisk_id": 958607,
+      "position": 152
+    },
+    {
+      "kinopoisk_id": 5928,
+      "position": 153
+    },
+    {
+      "kinopoisk_id": 571335,
+      "position": 154
+    },
+    {
+      "kinopoisk_id": 5437548,
+      "position": 155
+    },
+    {
+      "kinopoisk_id": 1334852,
+      "position": 156
+    },
+    {
+      "kinopoisk_id": 804662,
+      "position": 157
+    },
+    {
+      "kinopoisk_id": 775273,
+      "position": 158
+    },
+    {
+      "kinopoisk_id": 407636,
+      "position": 159
+    },
+    {
+      "kinopoisk_id": 526,
+      "position": 160
+    },
+    {
+      "kinopoisk_id": 5394690,
+      "position": 161
+    },
+    {
+      "kinopoisk_id": 3498,
+      "position": 162
+    },
+    {
+      "kinopoisk_id": 14349,
+      "position": 163
+    },
+    {
+      "kinopoisk_id": 4642651,
+      "position": 164
+    },
+    {
+      "kinopoisk_id": 4642708,
+      "position": 165
+    },
+    {
+      "kinopoisk_id": 102124,
+      "position": 166
+    },
+    {
+      "kinopoisk_id": 4541,
+      "position": 167
+    },
+    {
+      "kinopoisk_id": 1199100,
+      "position": 168
+    },
+    {
+      "kinopoisk_id": 538225,
+      "position": 169
+    },
+    {
+      "kinopoisk_id": 1047881,
+      "position": 170
+    },
+    {
+      "kinopoisk_id": 312,
+      "position": 171
+    },
+    {
+      "kinopoisk_id": 81041,
+      "position": 172
+    },
+    {
+      "kinopoisk_id": 1322324,
+      "position": 173
+    },
+    {
+      "kinopoisk_id": 178707,
+      "position": 174
+    },
+    {
+      "kinopoisk_id": 278522,
+      "position": 175
+    },
+    {
+      "kinopoisk_id": 4922959,
+      "position": 176
+    },
+    {
+      "kinopoisk_id": 88173,
+      "position": 177
+    },
+    {
+      "kinopoisk_id": 77331,
+      "position": 178
+    },
+    {
+      "kinopoisk_id": 689960,
+      "position": 179
+    },
+    {
+      "kinopoisk_id": 508161,
+      "position": 180
+    },
+    {
+      "kinopoisk_id": 77039,
+      "position": 181
+    },
+    {
+      "kinopoisk_id": 5047464,
+      "position": 182
+    },
+    {
+      "kinopoisk_id": 5304528,
+      "position": 183
+    },
+    {
+      "kinopoisk_id": 260162,
+      "position": 184
+    },
+    {
+      "kinopoisk_id": 1091,
+      "position": 185
+    },
+    {
+      "kinopoisk_id": 8408,
+      "position": 186
+    },
+    {
+      "kinopoisk_id": 5230101,
+      "position": 187
+    },
+    {
+      "kinopoisk_id": 517988,
+      "position": 188
+    },
+    {
+      "kinopoisk_id": 840817,
+      "position": 189
+    },
+    {
+      "kinopoisk_id": 1355139,
+      "position": 190
+    },
+    {
+      "kinopoisk_id": 493208,
+      "position": 191
+    },
+    {
+      "kinopoisk_id": 63912,
+      "position": 192
+    },
+    {
+      "kinopoisk_id": 848894,
+      "position": 193
+    },
+    {
+      "kinopoisk_id": 1387021,
+      "position": 194
+    },
+    {
+      "kinopoisk_id": 3793,
+      "position": 195
+    },
+    {
+      "kinopoisk_id": 808639,
+      "position": 196
+    },
+    {
+      "kinopoisk_id": 786958,
+      "position": 197
+    },
+    {
+      "kinopoisk_id": 592212,
+      "position": 198
+    },
+    {
+      "kinopoisk_id": 38905,
+      "position": 199
+    },
+    {
+      "kinopoisk_id": 819101,
+      "position": 200
+    },
+    {
+      "kinopoisk_id": 88198,
+      "position": 201
+    },
+    {
+      "kinopoisk_id": 581653,
+      "position": 202
+    },
+    {
+      "kinopoisk_id": 377,
+      "position": 203
+    },
+    {
+      "kinopoisk_id": 4365427,
+      "position": 204
+    },
+    {
+      "kinopoisk_id": 838,
+      "position": 205
+    },
+    {
+      "kinopoisk_id": 920265,
+      "position": 206
+    },
+    {
+      "kinopoisk_id": 6039,
+      "position": 207
+    },
+    {
+      "kinopoisk_id": 4642803,
+      "position": 208
+    },
+    {
+      "kinopoisk_id": 1445143,
+      "position": 209
+    },
+    {
+      "kinopoisk_id": 582101,
+      "position": 210
+    },
+    {
+      "kinopoisk_id": 505851,
+      "position": 211
+    },
+    {
+      "kinopoisk_id": 345,
+      "position": 212
+    },
+    {
+      "kinopoisk_id": 635772,
+      "position": 213
+    },
+    {
+      "kinopoisk_id": 84830,
+      "position": 214
+    },
+    {
+      "kinopoisk_id": 4448519,
+      "position": 215
+    },
+    {
+      "kinopoisk_id": 1115407,
+      "position": 216
+    },
+    {
+      "kinopoisk_id": 841152,
+      "position": 217
+    },
+    {
+      "kinopoisk_id": 6064901,
+      "position": 218
+    },
+    {
+      "kinopoisk_id": 39577,
+      "position": 219
+    },
+    {
+      "kinopoisk_id": 725190,
+      "position": 220
+    },
+    {
+      "kinopoisk_id": 1236063,
+      "position": 221
+    },
+    {
+      "kinopoisk_id": 45779,
+      "position": 222
+    },
+    {
+      "kinopoisk_id": 409295,
+      "position": 223
+    },
+    {
+      "kinopoisk_id": 458,
+      "position": 224
+    },
+    {
+      "kinopoisk_id": 25108,
+      "position": 225
+    },
+    {
+      "kinopoisk_id": 522,
+      "position": 226
+    },
+    {
+      "kinopoisk_id": 716587,
+      "position": 227
+    },
+    {
+      "kinopoisk_id": 1183599,
+      "position": 228
+    },
+    {
+      "kinopoisk_id": 1008445,
+      "position": 229
+    },
+    {
+      "kinopoisk_id": 522876,
+      "position": 230
+    },
+    {
+      "kinopoisk_id": 1445170,
+      "position": 231
+    },
+    {
+      "kinopoisk_id": 822709,
+      "position": 232
+    },
+    {
+      "kinopoisk_id": 195524,
+      "position": 233
+    },
+    {
+      "kinopoisk_id": 48356,
+      "position": 234
+    },
+    {
+      "kinopoisk_id": 89515,
+      "position": 235
+    },
+    {
+      "kinopoisk_id": 683999,
+      "position": 236
+    },
+    {
+      "kinopoisk_id": 762738,
+      "position": 237
+    },
+    {
+      "kinopoisk_id": 1263293,
+      "position": 238
+    },
+    {
+      "kinopoisk_id": 1189814,
+      "position": 239
+    },
+    {
+      "kinopoisk_id": 5942378,
+      "position": 240
+    },
+    {
+      "kinopoisk_id": 77044,
+      "position": 241
+    },
+    {
+      "kinopoisk_id": 470178,
+      "position": 242
+    },
+    {
+      "kinopoisk_id": 841263,
+      "position": 243
+    },
+    {
+      "kinopoisk_id": 81555,
+      "position": 244
+    },
+    {
+      "kinopoisk_id": 468522,
+      "position": 245
+    },
+    {
+      "kinopoisk_id": 329,
+      "position": 246
+    },
+    {
+      "kinopoisk_id": 81733,
+      "position": 247
+    },
+    {
+      "kinopoisk_id": 5428537,
+      "position": 248
+    },
+    {
+      "kinopoisk_id": 527,
+      "position": 249
+    },
+    {
+      "kinopoisk_id": 606646,
+      "position": 250
+    }
+  ]
+}
