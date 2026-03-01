@@ -111,19 +111,32 @@ async def build_movies_csv() -> tuple[bytes, str]:
 
 async def build_top250_csv() -> tuple[bytes, str, int]:
     """
-    Выгружает таблицу Кинопоиск Топ 250 в CSV.
+    Выгружает Кинопоиск Топ 250 в CSV.
+    Данные о фильмах берутся из movies (JOIN с kinopoisk_top250 по movie_id) — один источник правды.
+    Если колонки movie_id нет — читаем только из kinopoisk_top250.
     Возвращает (csv_bytes, filename, count).
     """
     settings = load_settings()
     async with aiosqlite.connect(settings.db_path) as db:
         db.row_factory = aiosqlite.Row
-        cursor = await db.execute(
-            """
-            SELECT kinopoisk_id, title, year, genres, rating_kp, position, age_rating, poster_url, updated_at
-            FROM kinopoisk_top250
-            ORDER BY position
-            """
-        )
+        try:
+            cursor = await db.execute(
+                """
+                SELECT t.kinopoisk_id, t.position, t.updated_at,
+                       m.title, m.year, m.genres, m.rating_kp, m.age_rating, m.poster_url
+                FROM kinopoisk_top250 t
+                JOIN movies m ON t.movie_id = m.id
+                ORDER BY t.position
+                """
+            )
+        except Exception:
+            cursor = await db.execute(
+                """
+                SELECT kinopoisk_id, title, year, genres, rating_kp, position, age_rating, poster_url, updated_at
+                FROM kinopoisk_top250
+                ORDER BY position
+                """
+            )
         rows = await cursor.fetchall()
 
     output = io.StringIO()
@@ -137,8 +150,8 @@ async def build_top250_csv() -> tuple[bytes, str, int]:
             row["title"] or "",
             row["year"] or "",
             row["genres"] or "",
-            row["rating_kp"] if row["rating_kp"] is not None else "",
-            row["position"] or "",
+            row["rating_kp"] if row.get("rating_kp") is not None else "",
+            row.get("position") or "",
             row["age_rating"] or "",
             row["poster_url"] or "",
             row["updated_at"] or "",

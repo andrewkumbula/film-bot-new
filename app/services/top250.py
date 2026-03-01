@@ -179,6 +179,17 @@ async def get_top250_kinopoisk_ids(settings: Settings) -> Set[int]:
         return set()
 
 
+async def get_top250_positions_map(settings: Settings) -> Dict[int, int]:
+    """Возвращает словарь kinopoisk_id → место в Топ 250 (1–250). Пустой словарь, если таблица пуста."""
+    try:
+        async with aiosqlite.connect(settings.db_path) as db:
+            cursor = await db.execute("SELECT kinopoisk_id, position FROM kinopoisk_top250")
+            rows = await cursor.fetchall()
+            return {r[0]: r[1] for r in rows if r[0] is not None and r[1] is not None} if rows else {}
+    except Exception:
+        return {}
+
+
 def filter_pairs_by_top250(
     pairs: List[tuple],
     top250_ids: Set[int],
@@ -273,6 +284,7 @@ async def get_filtered_top250(
             "rating_kp": row["rating_kp"],
             "age_rating": row["age_rating"],
             "poster_url": row["poster_url"] or None,
+            "position": row.get("position"),
         })
     if len(filtered) <= limit:
         return filtered

@@ -28,7 +28,7 @@ from ..llm.service import get_recommendations_from_llm, get_top250_picks_from_ll
 from ..services.favorites import add_favorite_for_user, add_watched_for_user, is_favorite, is_watched
 from ..services.flow_log import log_flow_step
 from ..services.kinopoisk import get_movie_info, KinopoiskMovieInfo
-from ..services.top250 import get_filtered_top250, get_top250_count, match_picks_to_candidates
+from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
 from ..services.users import ensure_user
 
 
@@ -218,6 +218,9 @@ def get_router(settings: Settings) -> Router:
                 f"{idx + 1}. <b>{rec['title']}</b>",
                 f"🔞 {rec.get('age_rating') or '—'}+   ⭐ Кинопоиск: {rec.get('rating_kp') or '—'}",
             ]
+            pos = rec.get("position")
+            if pos is not None:
+                parts.append(f"🏆 № {pos} в Топ 250 Кинопоиска")
             if rec.get("year"):
                 parts[0] += f" ({rec['year']})"
             if rec.get("genres"):
@@ -537,6 +540,7 @@ def get_router(settings: Settings) -> Router:
         session_id = data.get("session_id") or uuid.uuid4().hex
         await log_flow_step(user_id, session_id, "recommendations", str(len(filtered_pairs)))
 
+        top250_positions = await get_top250_positions_map(settings)
         for idx, (rec, info) in enumerate(filtered_pairs):
             parts: List[str] = []
             title_line = f"{idx + 1}. <b>{rec.title}</b>"
@@ -547,6 +551,8 @@ def get_router(settings: Settings) -> Router:
             age_str = f"🔞 {info.age_rating}+" if info and info.age_rating else "🔞 Возраст: —"
             rating_str = f"⭐ Кинопоиск: {info.rating_kp:.1f}" if info and info.rating_kp is not None else "⭐ Кинопоиск: —"
             parts.append(f"{age_str}   {rating_str}")
+            if info and info.kinopoisk_id is not None and info.kinopoisk_id in top250_positions:
+                parts.append(f"🏆 № {top250_positions[info.kinopoisk_id]} в Топ 250 Кинопоиска")
             if rec.genres:
                 parts.append("🎭 Жанры: " + ", ".join(rec.genres))
             if rec.mood_tags:
