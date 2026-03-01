@@ -242,6 +242,61 @@ def _genres_match(db_genres_str: str, selected_codes: List[str]) -> bool:
     return False
 
 
+def _row_get(row, *keys) -> Any:
+    """Берёт значение из row по первому успешному ключу/индексу (Row может не поддерживать 'in')."""
+    for k in keys:
+        try:
+            if isinstance(k, int):
+                if len(row) > k:
+                    return row[k]
+            else:
+                val = row[k]
+                return val
+        except (KeyError, TypeError, IndexError):
+            continue
+    return None
+
+
+def _row_to_filtered_item_by_index(row, has_poster: bool) -> Dict[str, Any]:
+    """Собирает словарь по индексам: 0=kinopoisk_id, 1=title, 2=year, 3=genres, 4=rating_kp, 5=position, 6=age_rating, 7=poster_url (если has_poster)."""
+    try:
+        y = row[2]
+        year = int(y) if y is not None else None
+    except (TypeError, ValueError, IndexError):
+        year = None
+    return {
+        "kinopoisk_id": row[0] if len(row) > 0 else None,
+        "title": (row[1] or "") if len(row) > 1 else "",
+        "year": year,
+        "genres": row[3] if len(row) > 3 else None,
+        "rating_kp": row[4] if len(row) > 4 else None,
+        "age_rating": row[6] if len(row) > 6 else None,
+        "poster_url": (row[7] or None) if has_poster and len(row) > 7 else None,
+        "position": row[5] if len(row) > 5 else None,
+    }
+
+
+def _row_to_filtered_item(row, has_poster: bool = True, use_index: bool = False) -> Dict[str, Any]:
+    """Собирает словарь из строки БД. use_index=True — по индексам (для простого SELECT из top250)."""
+    if use_index:
+        return _row_to_filtered_item_by_index(row, has_poster)
+    try:
+        year_raw = _row_get(row, "year", "m.year", 2)
+        year = int(year_raw) if year_raw is not None else None
+    except (TypeError, ValueError):
+        year = None
+    return {
+        "kinopoisk_id": _row_get(row, "kinopoisk_id", "m.kinopoisk_id", 0),
+        "title": (_row_get(row, "title", "m.title", 1) or ""),
+        "year": year,
+        "genres": _row_get(row, "genres", "m.genres", 3),
+        "rating_kp": _row_get(row, "rating_kp", "m.rating_kp", 4),
+        "age_rating": _row_get(row, "age_rating", "m.age_rating", 6),
+        "poster_url": (_row_get(row, "poster_url", "m.poster_url", 7) or None) if has_poster else None,
+        "position": _row_get(row, "position", "t.position", 5),
+    }
+
+
 async def get_filtered_top250(
     settings: Settings,
     mood: str,
@@ -252,40 +307,64 @@ async def get_filtered_top250(
     """
     Возвращает фильмы Топ 250, отфильтрованные по жанру и году (эпохе).
     Данные берутся из movies (JOIN с kinopoisk_top250 по movie_id); при отсутствии movie_id — из самой top250.
+    При ошибке БД возвращает пустой список и пишет в лог.
     """
+    rows = []
+    has_poster = True
+    use_index = False  # для JOIN используем имена колонок (AS), для простого SELECT — индексы
     async with aiosqlite.connect(settings.db_path) as db:
         db.row_factory = aiosqlite.Row
-        try:
-            cursor = await db.execute(
+        for query_sql, with_poster, use_idx in [
+            (
                 """
-                SELECT m.kinopoisk_id, m.title, m.year, m.genres, m.rating_kp, m.age_rating, m.poster_url, t.position
+                SELECT
+                    m.kinopoisk_id AS kinopoisk_id,
+                    COALESCE(NULLIF(TRIM(m.title), ''), t.title) AS title,
+                    COALESCE(m.year, t.year) AS year,
+                    COALESCE(NULLIF(TRIM(m.genres), ''), t.genres) AS genres,
+                    COALESCE(m.rating_kp, t.rating_kp) AS rating_kp,
+                    COALESCE(m.age_rating, t.age_rating) AS age_rating,
+                    COALESCE(NULLIF(TRIM(m.poster_url), ''), t.poster_url) AS poster_url,
+                    t.position AS position
                 FROM kinopoisk_top250 t
                 JOIN movies m ON t.movie_id = m.id
                 ORDER BY t.position
-                """
-            )
-        except Exception:
-            cursor = await db.execute(
-                "SELECT kinopoisk_id, title, year, genres, rating_kp, position, age_rating, poster_url FROM kinopoisk_top250 ORDER BY position"
-            )
-        rows = await cursor.fetchall()
+                """,
+                True,
+                False,
+            ),
+            (
+                "SELECT kinopoisk_id, title, year, genres, rating_kp, position, age_rating, poster_url FROM kinopoisk_top250 ORDER BY position",
+                True,
+                True,
+            ),
+            (
+                "SELECT kinopoisk_id, title, year, genres, rating_kp, position, age_rating FROM kinopoisk_top250 ORDER BY position",
+                False,
+                True,
+            ),
+        ]:
+            try:
+                cursor = await db.execute(query_sql)
+                rows = await cursor.fetchall()
+                has_poster = with_poster
+                use_index = use_idx
+                break
+            except Exception as e:
+                logger.debug("get_filtered_top250 query failed: %s", e)
+                continue
+        if not rows:
+            logger.warning("get_filtered_top250: no rows from any query variant")
+            return []
+
     filtered = []
     for row in rows:
-        year = row["year"]
-        if not _year_era_filter(year, year_era):
+        item = _row_to_filtered_item(row, has_poster, use_index=use_index)
+        if not _year_era_filter(item["year"], year_era):
             continue
-        if not _genres_match(row["genres"] or "", genre_codes):
+        if not _genres_match(item["genres"] or "", genre_codes):
             continue
-        filtered.append({
-            "kinopoisk_id": row["kinopoisk_id"],
-            "title": row["title"],
-            "year": row["year"],
-            "genres": row["genres"],
-            "rating_kp": row["rating_kp"],
-            "age_rating": row["age_rating"],
-            "poster_url": row["poster_url"] or None,
-            "position": row.get("position"),
-        })
+        filtered.append(item)
     if len(filtered) <= limit:
         return filtered
     return random.sample(filtered, limit)

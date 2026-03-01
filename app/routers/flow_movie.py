@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import random
 import uuid
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -171,9 +174,9 @@ def get_router(settings: Settings) -> Router:
                     raise
             await callback.answer()
 
-    @router.callback_query(Top250Flow.year_era, F.data.startswith("t250_year:"))
+    @router.callback_query(F.data.startswith("t250_year:"))
     async def top250_year_era(callback: CallbackQuery, state: FSMContext) -> None:
-        year_era = callback.data.replace("t250_year:", "", 1)
+        year_era = callback.data.replace("t250_year:", "", 1).strip()
         data = await state.get_data()
         prefs = data.get("preferences", {})
         prefs["year_era"] = year_era
@@ -181,41 +184,62 @@ def get_router(settings: Settings) -> Router:
         await state.update_data(preferences=prefs, session_id=session_id)
         await log_flow_step(callback.from_user.id, session_id, "top250_year_era", year_era)
         await callback.answer()
+        try:
+            await callback.message.edit_text("Подбираю фильмы… 🎬")
+        except Exception:
+            pass
 
         mood = prefs.get("mood") or "any"
         genre_codes = prefs.get("genres") or []
-        # Кандидаты по жанру и эпохе (до 50), затем ИИ выбирает 5 по настроению и предпочтениям
-        candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=50)
-        await state.set_state(Top250Flow.recommendations)
-
-        if not candidates:
-            total = await get_top250_count(settings)
-            if total == 0:
-                text = (
-                    "Топ 250 ещё не загружен — возможно, лимит запросов Кинопоиска (200/день) исчерпан или это первый запуск.\n\n"
-                    "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
-                )
-            else:
-                text = "По твоим фильтрам ничего не нашлось в Топ 250 😅\nПопробуй ослабить жанр или эпоху."
-            await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
-            return
+        candidates = []
+        films = []
+        header_msg = "Вот подборка из Кинопоиск Топ 250 🎬"
 
         try:
-            llm_picks = await get_top250_picks_from_llm(settings, mood, genre_codes, year_era, candidates)
-            picks_as_dicts = [{"title": p.title, "year": p.year} for p in llm_picks.recommendations]
-            films = match_picks_to_candidates(picks_as_dicts, candidates)
-        except LlmError:
-            # ИИ не справился — выдаём 5 случайных из кандидатов
-            films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+            # Кандидаты по жанру и эпохе (до 50), затем ИИ выбирает 5 по настроению и предпочтениям
+            candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=50)
+            await state.set_state(Top250Flow.recommendations)
 
-        if not films:
-            films = candidates[:5]
+            if not candidates:
+                total = await get_top250_count(settings)
+                if total == 0:
+                    text = (
+                        "Топ 250 ещё не загружен — возможно, лимит запросов Кинопоиска (200/день) исчерпан или это первый запуск.\n\n"
+                        "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
+                    )
+                else:
+                    text = "По твоим фильтрам ничего не нашлось в Топ 250 😅\nПопробуй ослабить жанр или эпоху."
+                await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
+                return
+
+            try:
+                llm_picks = await get_top250_picks_from_llm(settings, mood, genre_codes, year_era, candidates)
+                picks_as_dicts = [{"title": p.title, "year": p.year} for p in llm_picks.recommendations]
+                films = match_picks_to_candidates(picks_as_dicts, candidates)
+            except LlmError:
+                films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+
+            if not films:
+                films = candidates[:5]
+
+        except Exception:
+            logger.exception("Top250 year_era: error after 'Подбираю фильмы'")
+            if candidates:
+                films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+                await state.set_state(Top250Flow.recommendations)
+                header_msg = "Сервис подбора временно недоступен. Вот подборка по твоим фильтрам 🎬"
+            else:
+                await callback.message.edit_text(
+                    "Произошла ошибка при подборе (таймаут или сеть). Попробуй ещё раз или выбери <b>Обычный подбор</b>.",
+                    reply_markup=recommendations_control_keyboard("t250_"),
+                )
+                return
 
         await state.update_data(recommendations=films)
-        await callback.message.edit_text("Вот подборка из Кинопоиск Топ 250 🎬")
+        await callback.message.edit_text(header_msg)
         for idx, rec in enumerate(films):
             parts = [
-                f"{idx + 1}. <b>{rec['title']}</b>",
+                f"{idx + 1}. <b>{rec.get('title') or '—'}</b>",
                 f"🔞 {rec.get('age_rating') or '—'}+   ⭐ Кинопоиск: {rec.get('rating_kp') or '—'}",
             ]
             pos = rec.get("position")
@@ -238,10 +262,14 @@ def get_router(settings: Settings) -> Router:
                     ]
                 ]
             )
-            poster_url = rec.get("poster_url")
-            if poster_url and str(poster_url).strip().startswith("http"):
-                await callback.message.answer_photo(photo=poster_url, caption=text, reply_markup=kb)
-            else:
+            try:
+                poster_url = rec.get("poster_url")
+                if poster_url and str(poster_url).strip().startswith("http"):
+                    await callback.message.answer_photo(photo=poster_url, caption=text, reply_markup=kb)
+                else:
+                    await callback.message.answer(text, reply_markup=kb)
+            except Exception as e:
+                logger.warning("Top250: не удалось отправить карточку фильма %s: %s", rec.get("title"), e)
                 await callback.message.answer(text, reply_markup=kb)
         await callback.message.answer(
             "Можем подобрать ещё или вернуться в меню 👇",
