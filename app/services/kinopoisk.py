@@ -174,15 +174,57 @@ async def _fetch_movie_doc_by_id(settings: Settings, kinopoisk_id: int) -> Optio
         return None
 
 
+def _normalize_title(s: str) -> str:
+    """Нормализация названия для сравнения: нижний регистр, лишние пробелы."""
+    return (s or "").strip().lower()
+
+
+def _doc_title_match_score(doc: Dict[str, Any], requested_title: str, requested_year: Optional[int]) -> int:
+    """
+    Оценка совпадения doc с запрошенным названием и годом. Больше = лучше.
+    Приоритет: точное совпадение названия > год совпадает > первое в списке.
+    """
+    doc_name = _normalize_title(doc.get("name") or doc.get("alternativeName") or "")
+    doc_year = doc.get("year")
+    if doc_year is not None:
+        try:
+            doc_year = int(doc_year)
+        except (TypeError, ValueError):
+            doc_year = None
+    req_title = _normalize_title(requested_title)
+    if not req_title:
+        return 1 if (requested_year is None or doc_year == requested_year) else 0
+    year_ok = requested_year is None or doc_year == requested_year
+    # Точное совпадение названия (или запрос входит в название)
+    if doc_name == req_title and year_ok:
+        return 100
+    if req_title in doc_name and year_ok:
+        return 80
+    if doc_name in req_title and year_ok:
+        return 60
+    # Совпадение по словам (например "летающие ножи" vs "ножи летающие")
+    req_words = set(req_title.split())
+    doc_words = set(doc_name.split())
+    if req_words and req_words <= doc_words and year_ok:
+        return 50
+    if year_ok:
+        return 10  # год совпал, название нет
+    return 0
+
+
 async def _fetch_movie_doc_by_search(
     settings: Settings, title: str, year: Optional[int] = None
 ) -> Optional[Dict[str, Any]]:
-    """Запрос к API: поиск по названию (и году). Возвращает первый подходящий doc, не пишет в БД."""
+    """
+    Запрос к API: поиск по названию (и году).
+    Возвращает doc с наилучшим совпадением названия и года, а не первый результат —
+    иначе при похожих названиях (например «Летающие ножи» и «Летающие звери») можно взять не тот фильм.
+    """
     if not settings.kinopoisk_api_key:
         return None
     url = f"{settings.kinopoisk_base_url.rstrip('/')}/v1.4/movie/search"
     headers = {"X-API-KEY": settings.kinopoisk_api_key}
-    params = {"query": title.strip(), "limit": 5}
+    params = {"query": title.strip(), "limit": 10}
     if year:
         params["query"] = f"{title.strip()} {year}"
     try:
@@ -196,12 +238,15 @@ async def _fetch_movie_doc_by_search(
     docs = data.get("docs") or []
     if not docs:
         return None
+    requested_title = (title or "").strip()
+    best = None
+    best_score = -1
     for d in docs:
-        doc_year = d.get("year")
-        if year and doc_year and int(doc_year) != year:
-            continue
-        return d
-    return docs[0]
+        score = _doc_title_match_score(d, requested_title, year)
+        if score > best_score:
+            best_score = score
+            best = d
+    return best if best_score > 0 else docs[0]
 
 
 async def refresh_movie_from_api(
