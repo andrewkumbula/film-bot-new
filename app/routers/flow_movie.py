@@ -234,59 +234,65 @@ def get_router(settings: Settings) -> Router:
 
         mood = prefs.get("mood") or "any"
         genre_codes = prefs.get("genres") or []
-        candidates = []
-        films = []
+        candidates: List[Dict[str, Any]] = []
+        films: List[Dict[str, Any]] = []
         header_msg = "Вот подборка из Кинопоиск Топ 250 🎬"
 
         try:
-            # Кандидаты по жанру и эпохе (до 50), затем ИИ выбирает 5 по настроению и предпочтениям
             candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=50)
-            # Исключить «Не интересно» и «Смотрел»
+        except Exception as e:
+            logger.exception("Top250 get_filtered_top250 failed: %s", e)
+            await callback.message.edit_text(
+                "Не удалось загрузить список Топ 250 из базы. Попробуй позже или выбери <b>Обычный подбор</b>.",
+                reply_markup=recommendations_control_keyboard("t250_"),
+            )
+            return
+
+        try:
             ni_kp = await get_not_interested_kinopoisk_ids(callback.from_user.id)
             watched_kp = await get_watched_kinopoisk_ids(callback.from_user.id)
-            candidates = [
-                c for c in candidates
-                if c.get("kinopoisk_id") not in ni_kp and c.get("kinopoisk_id") not in watched_kp
-            ]
-            await state.set_state(Top250Flow.recommendations)
+        except Exception as e:
+            logger.warning("Top250 get ni/watched ids failed, using empty: %s", e)
+            ni_kp = set()
+            watched_kp = set()
 
-            if not candidates:
-                total = await get_top250_count(settings)
-                if total == 0:
-                    text = (
-                        "Топ 250 ещё не загружен — возможно, лимит запросов Кинопоиска (200/день) исчерпан или это первый запуск.\n\n"
-                        "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
-                    )
-                else:
-                    text = (
-                        "По твоим фильтрам ничего не нашлось в Топ 250 — всё уже в «Не интересно» или ты это смотрел 🎬\n"
-                        "Попробуй ослабить жанр/эпоху или нажми «Подобрать ещё»."
-                    )
-                await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
-                return
+        candidates = [
+            c for c in candidates
+            if c.get("kinopoisk_id") not in ni_kp and c.get("kinopoisk_id") not in watched_kp
+        ]
+        await state.set_state(Top250Flow.recommendations)
 
+        if not candidates:
             try:
-                llm_picks = await get_top250_picks_from_llm(settings, mood, genre_codes, year_era, candidates)
-                picks_as_dicts = [{"title": p.title, "year": p.year} for p in llm_picks.recommendations]
-                films = match_picks_to_candidates(picks_as_dicts, candidates)
-            except LlmError:
-                films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
-
-            if not films:
-                films = candidates[:5]
-
-        except Exception:
-            logger.exception("Top250 year_era: error after 'Подбираю фильмы'")
-            if candidates:
-                films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
-                await state.set_state(Top250Flow.recommendations)
-                header_msg = "Сервис подбора временно недоступен. Вот подборка по твоим фильтрам 🎬"
-            else:
-                await callback.message.edit_text(
-                    "Произошла ошибка при подборе (таймаут или сеть). Попробуй ещё раз или выбери <b>Обычный подбор</b>.",
-                    reply_markup=recommendations_control_keyboard("t250_"),
+                total = await get_top250_count(settings)
+            except Exception:
+                total = 0
+            if total == 0:
+                text = (
+                    "Топ 250 ещё не загружен — возможно, лимит запросов Кинопоиска (200/день) исчерпан или это первый запуск.\n\n"
+                    "Данные подгружаются при старте бота и 1-го числа каждого месяца. Попробуй перезапустить бота позже или выбери <b>Обычный подбор</b>."
                 )
-                return
+            else:
+                text = (
+                    "По твоим фильтрам ничего не нашлось в Топ 250 — всё уже в «Не интересно» или ты это смотрел 🎬\n"
+                    "Попробуй ослабить жанр/эпоху или нажми «Подобрать ещё»."
+                )
+            await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("t250_"))
+            return
+
+        try:
+            llm_picks = await get_top250_picks_from_llm(settings, mood, genre_codes, year_era, candidates)
+            picks_as_dicts = [{"title": p.title, "year": p.year} for p in llm_picks.recommendations]
+            films = match_picks_to_candidates(picks_as_dicts, candidates)
+        except LlmError:
+            logger.info("Top250 LLM failed, using random 5")
+            films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+        except Exception as e:
+            logger.warning("Top250 LLM/network error, using random 5: %s", e)
+            films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+
+        if not films:
+            films = candidates[:5]
 
         await state.update_data(recommendations=films)
         await callback.message.edit_text(header_msg)
