@@ -104,8 +104,7 @@ async def _fetch_top250_unofficial(settings: Settings) -> List[tuple]:
     headers = {"X-API-KEY": api_key}
     result: List[tuple] = []
     page = 1
-    page_size = 50
-    while page <= 13:  # 5 при pageSize=50, до 13 если по 20
+    while page <= 13:  # 5 страниц по 50 или до 13 по 20 — пока не наберём 250 или пустая страница
         try:
             async with httpx.AsyncClient(timeout=20.0) as client:
                 resp = await client.get(url, headers=headers, params={**params, "page": page})
@@ -131,9 +130,7 @@ async def _fetch_top250_unofficial(settings: Settings) -> List[tuple]:
             result.append((doc, position))
         if len(result) >= 250:
             break
-        # следующая страница только если получили полную страницу (значит, может быть ещё)
-        if len(items) < page_size:
-            break
+        # следующая страница: стоп только если пустой ответ (больше страниц нет)
         page += 1
     return result[:250]
 
