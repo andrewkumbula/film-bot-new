@@ -458,18 +458,34 @@ def get_router(settings: Settings) -> Router:
     @router.callback_query(Top250Flow.recommendations, F.data == "t250_reco:again")
     async def top250_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
         """Подобрать ещё — возврат к выбору года, затем новая подборка из 5."""
+        await callback.answer()
         await state.set_state(Top250Flow.year_era)
         await callback.message.answer(
             "Выбери год (эпоху) ещё раз — покажу новую подборку 👇",
             reply_markup=year_era_keyboard("t250_"),
         )
-        await callback.answer()
 
     @router.callback_query(Top250Flow.recommendations, F.data == "t250_reco:menu")
     async def top250_reco_menu(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
         await state.clear()
         await callback.message.answer("Главное меню 👇", reply_markup=main_menu_keyboard())
+
+    # Fallback: кнопки Топ 250 без состояния (после перезапуска бота и т.п.)
+    @router.callback_query(F.data == "t250_reco:menu")
+    async def fallback_t250_reco_menu(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer()
+        await state.clear()
+        await callback.message.answer("Главное меню 👇", reply_markup=main_menu_keyboard())
+
+    @router.callback_query(F.data == "t250_reco:again")
+    async def fallback_t250_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
+        await state.set_state(Top250Flow.year_era)
+        await callback.message.answer(
+            "Выбери год (эпоху) ещё раз — покажу новую подборку 👇",
+            reply_markup=year_era_keyboard("t250_"),
+        )
 
     # 1. Настроение (обычный подбор)
     @router.callback_query(MovieFlow.mood, F.data.startswith("mood:"))
@@ -932,25 +948,26 @@ def get_router(settings: Settings) -> Router:
 
     @router.callback_query(MovieFlow.recommendations, F.data == "reco:menu")
     async def recommendations_to_menu(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
         await state.clear()
         await callback.message.answer(
             "Главное меню 👇",
             reply_markup=main_menu_keyboard(),
         )
-        await callback.answer()
 
     # После перезапуска бота состояние теряется — обрабатываем кнопки без состояния
     @router.callback_query(F.data == "reco:menu")
     async def fallback_reco_menu(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
         await state.clear()
         await callback.message.answer(
             "Главное меню 👇",
             reply_markup=main_menu_keyboard(),
         )
-        await callback.answer()
 
     @router.callback_query(F.data == "reco:again")
     async def fallback_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
         await state.clear()
         await state.set_state(MovieFlow.mood)
         await state.update_data(preferences={})
@@ -958,7 +975,6 @@ def get_router(settings: Settings) -> Router:
             "Давай подберём фильм! Выбери <b>настроение</b> 👇",
             reply_markup=mood_keyboard(),
         )
-        await callback.answer()
 
     return router
 
