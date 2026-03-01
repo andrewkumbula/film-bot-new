@@ -234,6 +234,7 @@ def get_router(settings: Settings) -> Router:
 
         mood = prefs.get("mood") or "any"
         genre_codes = prefs.get("genres") or []
+        settings = load_settings()
         candidates: List[Dict[str, Any]] = []
         films: List[Dict[str, Any]] = []
         header_msg = "Вот подборка из Кинопоиск Топ 250 🎬"
