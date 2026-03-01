@@ -43,6 +43,21 @@ python -m app
 
 Бот запустится в режиме long polling. Команда `/start` покажет главное меню с кнопками.
 
+### Регрессия (тесты)
+
+Перед коммитом или деплоем можно прогнать тесты, чтобы не сломать прод:
+
+```bash
+pip install -r requirements.txt   # pytest и pytest-asyncio уже в зависимостях
+python -m pytest tests/ -v
+```
+
+Или скрипт из корня проекта: `./scripts/run_tests.sh` (подставляет тестовые `BOT_TOKEN` и `OPENROUTER_API_KEY`, если не заданы).
+
+**Что проверяется:** импорт модулей (config, db, user_settings), создание таблиц при `init_db`, чтение/запись настроек пользователя и логика фильтра рейтинга. БД для тестов — `tests/.tmp/pytest_bot.db` (в .gitignore).
+
+Если используешь GitHub — в репозитории уже есть workflow `.github/workflows/tests.yml`: тесты запускаются на каждый push и pull request в `main`/`master`.
+
 ### Логи
 
 - **В терминале:** при запуске `python -m app` логи пишутся в stderr — всё видно в консоли.

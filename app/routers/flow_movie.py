@@ -638,6 +638,7 @@ def get_router(settings: Settings) -> Router:
         prefs: Dict[str, Any],
         negative_text: str,
     ) -> None:
+        settings = load_settings()
         await responder.answer("Супер, думаю над вариантами фильма 🎬\nДай мне пару секунд…")
         try:
             llm_response = await get_recommendations_from_llm(
