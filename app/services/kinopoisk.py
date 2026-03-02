@@ -349,45 +349,64 @@ async def refresh_movie_from_api(
 _MIN_TITLE_MATCH_SCORE_TO_USE = 40
 
 
+def _year_candidates(year: Optional[int]) -> list:
+    """Для fallback ±1 год: [year, year-1, year+1] без дублей и без None."""
+    if year is None:
+        return []
+    out = [year]
+    if year - 1 not in out:
+        out.append(year - 1)
+    if year + 1 not in out:
+        out.append(year + 1)
+    return out
+
+
 async def get_movie_info(
     settings: Settings, title: str, year: Optional[int] = None
 ) -> Optional[KinopoiskMovieInfo]:
     """
     Возвращает данные по фильму. Сначала проверяет таблицу movies (точное совпадение title+year); если запись есть — из кэша.
-    Если нет — запрашивает API, проверяет, что выбранный документ действительно совпадает с запросом, сохраняет и возвращает.
+    Если нет — запрашивает API. При неудаче по точному году пробует ±1 год (ИИ может указать 2022, а в Кинопоиске 2021).
     """
-    # Сначала из БД — только точное совпадение title и year, «Летающие звери» не вернётся по запросу «Летающие ножи»
-    cached = await get_movie_from_db(settings, title=title, year=year)
-    if cached is not None:
-        return cached
+    title = (title or "").strip()
+    if not title:
+        return None
+
+    years_to_try = _year_candidates(year) if year is not None else [None]
+
+    # 1) Кэш: точный год, затем ±1
+    for y in years_to_try:
+        cached = await get_movie_from_db(settings, title=title, year=y)
+        if cached is not None:
+            return cached
 
     if not settings.kinopoisk_api_key:
         return None
 
-    doc = await _fetch_movie_doc_by_search(settings, title, year)
-    if not doc:
-        return None
+    # 2) API: точный год, затем ±1
+    for y in years_to_try:
+        doc = await _fetch_movie_doc_by_search(settings, title, y)
+        if not doc:
+            continue
+        score = _doc_title_match_score(doc, title, y)
+        if score < _MIN_TITLE_MATCH_SCORE_TO_USE:
+            continue
+        await save_movie_from_api_doc(settings, doc)
+        row = _parse_doc_to_row(doc)
+        kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _poster_urls, _d, _g, _c, votes, _raw = row
+        poster_urls = json.loads(_poster_urls) if _poster_urls and isinstance(_poster_urls, str) else None
+        if not isinstance(poster_urls, list):
+            poster_urls = None
+        return KinopoiskMovieInfo(
+            kinopoisk_id=kinopoisk_id,
+            age_rating=age_rating,
+            rating_kp=rating_kp,
+            votes=votes,
+            poster_url=poster_url,
+            poster_urls=poster_urls,
+        )
 
-    # Защита: если API вернул документ с другим названием (например только год совпал) — не сохраняем и не подставляем его данные
-    score = _doc_title_match_score(doc, (title or "").strip(), year)
-    if score < _MIN_TITLE_MATCH_SCORE_TO_USE:
-        return None  # карточка покажется без постера и рейтинга Кинопоиска, но не с данными другого фильма
-
-    await save_movie_from_api_doc(settings, doc)
-
-    row = _parse_doc_to_row(doc)
-    kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _poster_urls, _d, _g, _c, votes, _raw = row
-    poster_urls = json.loads(_poster_urls) if _poster_urls and isinstance(_poster_urls, str) else None
-    if not isinstance(poster_urls, list):
-        poster_urls = None
-    return KinopoiskMovieInfo(
-        kinopoisk_id=kinopoisk_id,
-        age_rating=age_rating,
-        rating_kp=rating_kp,
-        votes=votes,
-        poster_url=poster_url,
-        poster_urls=poster_urls,
-    )
+    return None
 
 
 async def get_age_rating(settings: Settings, title: str, year: Optional[int] = None) -> Optional[str]:
