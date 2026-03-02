@@ -11,6 +11,7 @@ from aiogram import Bot
 
 from .config import Settings
 from .routers.report import send_daily_report_to_chat
+from .services.movie_mapping_cleanup import run_cleanup_level1
 from .services.short_descriptions import backfill_short_descriptions
 from .services.top250 import refresh_top250
 
@@ -20,6 +21,8 @@ logger = logging.getLogger(__name__)
 TOP250_REFRESH_TIME = time(4, 0)
 # Краткие описания для карточек: ночной бэкфилл в 03:00
 SHORT_DESC_BACKFILL_TIME = time(3, 0)
+# Маппинг пустых записей movies на полные (100% название + год ±1): в 02:30
+MOVIE_CLEANUP_TIME = time(2, 30)
 
 
 def _parse_report_time(report_time: str) -> time:
@@ -109,6 +112,29 @@ async def short_descriptions_backfill_scheduler(settings: Settings) -> None:
                 logger.info("Short descriptions backfill: %s movies updated", n)
         except Exception as e:
             logger.exception("Short descriptions backfill failed: %s", e)
+        await asyncio.sleep(60)
+
+
+async def movie_mapping_cleanup_scheduler(settings: Settings) -> None:
+    """
+    Раз в сутки в MOVIE_CLEANUP_TIME: пустые записи movies (без kinopoisk_id)
+    с 100% совпадением названия и годом ±1 маппятся на полные, ссылки переносятся, пустая удаляется.
+    """
+    logger.info("Movie mapping cleanup scheduler started, will run daily at %s", MOVIE_CLEANUP_TIME)
+    while True:
+        delay = _seconds_until(MOVIE_CLEANUP_TIME)
+        if delay < 0:
+            delay = 0
+        if delay > 0:
+            await asyncio.sleep(delay)
+        try:
+            result = await run_cleanup_level1(settings)
+            if result["merged"]:
+                logger.info("Movie mapping cleanup: merged %s records", result["merged"])
+            if result["errors"]:
+                logger.warning("Movie mapping cleanup: %s errors", len(result["errors"]))
+        except Exception as e:
+            logger.exception("Movie mapping cleanup failed: %s", e)
         await asyncio.sleep(60)
 
 
