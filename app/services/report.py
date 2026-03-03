@@ -72,7 +72,7 @@ async def build_movies_csv() -> tuple[bytes, str]:
         cursor = await db.execute(
             """
             SELECT id, kinopoisk_id, title, year, age_rating, rating_kp,
-                   poster_url, description, genres, countries, votes, updated_at
+                   poster_url, description, short_description, genres, countries, votes, updated_at
             FROM movies
             ORDER BY title, year
             """
@@ -83,7 +83,7 @@ async def build_movies_csv() -> tuple[bytes, str]:
     writer = csv.writer(output)
     writer.writerow([
         "id", "kinopoisk_id", "title", "year", "age_rating", "rating_kp",
-        "poster_url", "description", "genres", "countries", "votes", "updated_at",
+        "poster_url", "description", "short_description", "genres", "countries", "votes", "updated_at",
     ])
     for row in rows:
         writer.writerow([
@@ -95,6 +95,7 @@ async def build_movies_csv() -> tuple[bytes, str]:
             row["rating_kp"] if row["rating_kp"] is not None else "",
             row["poster_url"] or "",
             (row["description"] or "").replace("\n", " ").replace("\r", ""),
+            (row["short_description"] or "").replace("\n", " ").replace("\r", ""),
             row["genres"] or "",
             row["countries"] or "",
             row["votes"] or "",

@@ -18,6 +18,8 @@ class Settings:
     openrouter_api_key: str
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     model: str = "xiaomi/mimo-v2-flash"
+    # Модель для генерации кратких описаний фильмов (ночной бэкфилл); по умолчанию Haiku
+    model_short_desc: str = "anthropic/claude-3-5-haiku"
     debug: bool = False
     db_path: Path = BASE_DIR / "app_data" / "bot.db"
     # API Кинопоиска (poiskkino.dev) для поиска фильмов и постеров
@@ -44,6 +46,7 @@ def load_settings() -> Settings:
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
     openrouter_base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").strip()
     model = os.getenv("OPENROUTER_MODEL", "xiaomi/mimo-v2-flash").strip()
+    model_short_desc = os.getenv("OPENROUTER_MODEL_SHORT_DESC", "anthropic/claude-3-5-haiku").strip() or "anthropic/claude-3-5-haiku"
     debug = os.getenv("DEBUG", "false").lower() in {"1", "true", "yes"}
 
     if not bot_token:
@@ -68,6 +71,7 @@ def load_settings() -> Settings:
         openrouter_api_key=openrouter_api_key,
         openrouter_base_url=openrouter_base_url,
         model=model,
+        model_short_desc=model_short_desc,
         debug=debug,
         db_path=db_path,
         kinopoisk_api_key=kinopoisk_api_key,

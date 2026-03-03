@@ -285,11 +285,12 @@ async def shorten_description_for_card(
     if not long_description or len(long_description) < 20:
         return None
     prompt = (
-        "Дай одно короткое яркое описание фильма для карточки в мессенджере.\n"
-        "Исходный текст описания:\n"
+        "Напиши одно короткое описание фильма для карточки в мессенджере — как цепляющий слоган или интригующий тизер, а не пересказ сюжета.\n\n"
+        "Нужно: образность, атмосфера, настроение или один яркий образ. Не надо сухого перечисления типа «герой узнаёт, что… и становится…». "
+        "Можно вопрос, метафору, контраст или намёк на главную идею. Язык живой, без кавычек.\n\n"
+        "Исходный текст:\n"
         f"{long_description[:1500]}\n\n"
-        "Требования: строго до 120 символов, один предложение, живой язык, без кавычек. "
-        "Ответь только этим текстом, без пояснений."
+        "Строго до 120 символов, одно предложение. Ответь только этим текстом, без пояснений."
     )
     if title:
         prompt = f"Фильм: {title}\n\n" + prompt
@@ -298,8 +299,9 @@ async def shorten_description_for_card(
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
     }
+    model = getattr(settings, "model_short_desc", None) or settings.model
     payload = {
-        "model": settings.model,
+        "model": model,
         "messages": [
             {"role": "user", "content": prompt},
         ],
