@@ -65,27 +65,45 @@ async def build_movies_csv() -> tuple[bytes, str]:
     """
     Выгружает все фильмы из таблицы movies в CSV.
     Возвращает (csv_bytes, filename). Поле raw_json не включается.
+    Колонка short_description добавляется, если есть в таблице (миграция при старте бота).
     """
     settings = load_settings()
+    has_short_desc = False
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute("PRAGMA table_info(movies)")
+        columns = [r[1] for r in await cursor.fetchall()]
+        has_short_desc = "short_description" in columns
+
+    base_cols = [
+        "id", "kinopoisk_id", "title", "year", "age_rating", "rating_kp",
+        "poster_url", "description", "genres", "countries", "votes", "updated_at",
+    ]
+    if has_short_desc:
+        header = base_cols.copy()
+        header.insert(header.index("description") + 1, "short_description")
+    else:
+        header = base_cols
+
+    select_cols = ", ".join(header)
     async with aiosqlite.connect(settings.db_path) as db:
         db.row_factory = aiosqlite.Row
         cursor = await db.execute(
-            """
-            SELECT id, kinopoisk_id, title, year, age_rating, rating_kp,
-                   poster_url, description, short_description, genres, countries, votes, updated_at
-            FROM movies
-            ORDER BY title, year
-            """
+            f"SELECT {select_cols} FROM movies ORDER BY title, year"
         )
         rows = await cursor.fetchall()
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "id", "kinopoisk_id", "title", "year", "age_rating", "rating_kp",
-        "poster_url", "description", "short_description", "genres", "countries", "votes", "updated_at",
-    ])
+    writer.writerow(header)
     for row in rows:
+        def cell(key: str):
+            val = row[key] if key in row.keys() else ""
+            if val is None:
+                return ""
+            if key in ("description", "short_description"):
+                return (val or "").replace("\n", " ").replace("\r", "")
+            return val
+
         writer.writerow([
             row["id"],
             row["kinopoisk_id"] or "",
@@ -94,8 +112,8 @@ async def build_movies_csv() -> tuple[bytes, str]:
             row["age_rating"] or "",
             row["rating_kp"] if row["rating_kp"] is not None else "",
             row["poster_url"] or "",
-            (row["description"] or "").replace("\n", " ").replace("\r", ""),
-            (row["short_description"] or "").replace("\n", " ").replace("\r", ""),
+            cell("description"),
+            *([cell("short_description")] if has_short_desc else []),
             row["genres"] or "",
             row["countries"] or "",
             row["votes"] or "",
