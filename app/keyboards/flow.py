@@ -91,6 +91,40 @@ def year_era_keyboard(cb_prefix: str = "") -> InlineKeyboardMarkup:
     )
 
 
+def oscar_type_keyboard() -> InlineKeyboardMarkup:
+    """Тип подборки Оскара: только победители / только номинанты / все."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🏆 Только победители", callback_data="oscar_type:winner")],
+            [InlineKeyboardButton(text="📋 Только номинанты", callback_data="oscar_type:nominee")],
+            [InlineKeyboardButton(text="📽 Всё подряд", callback_data="oscar_type:all")],
+        ]
+    )
+
+
+def oscar_year_keyboard() -> InlineKeyboardMarkup:
+    """Год (эпоха) для ветки Оскара — крупные периоды."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🆕 2020+", callback_data="oscar_year:2020")],
+            [
+                InlineKeyboardButton(text="2010–2019", callback_data="oscar_year:2010s"),
+                InlineKeyboardButton(text="2000–2009", callback_data="oscar_year:2000s"),
+            ],
+            [
+                InlineKeyboardButton(text="1990–1999", callback_data="oscar_year:1990s"),
+                InlineKeyboardButton(text="1980–1989", callback_data="oscar_year:1980s"),
+            ],
+            [
+                InlineKeyboardButton(text="1970–1979", callback_data="oscar_year:1970s"),
+                InlineKeyboardButton(text="1960–1969", callback_data="oscar_year:1960s"),
+            ],
+            [InlineKeyboardButton(text="🎞 Классика (до 1960)", callback_data="oscar_year:classic")],
+            [InlineKeyboardButton(text="➖ Не важно", callback_data="oscar_year:any")],
+        ]
+    )
+
+
 def duration_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[

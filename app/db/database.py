@@ -114,8 +114,92 @@ async def init_db(settings: Settings) -> None:
         await _ensure_movies_unique_title_year(db)
         await _ensure_not_interested_table(db)
         await _ensure_user_settings_table(db)
+        await _ensure_oscar_tables(db)
+        await _ensure_oscar_year_from_source(db)
+        await _ensure_movies_oscar_flags(db)
+        await _ensure_shown_recently_table(db)
 
     await _migrate_old_favorites_if_needed(settings)
+
+
+async def _ensure_oscar_tables(db: aiosqlite.Connection) -> None:
+    """Создаёт таблицы Оскара: oscar_nominations и oscar_moments."""
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS oscar_nominations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT NOT NULL DEFAULT 'best_picture',
+            ceremony_year INTEGER NOT NULL,
+            ceremony_label TEXT NOT NULL,
+            title_from_source TEXT NOT NULL,
+            is_winner INTEGER NOT NULL DEFAULT 0,
+            movie_id INTEGER REFERENCES movies(id),
+            year_from_source INTEGER,
+            created_at TEXT DEFAULT (datetime('now'))
+        )
+        """
+    )
+    await db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_oscar_nom_movie ON oscar_nominations(movie_id)"
+    )
+    await db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_oscar_nom_year ON oscar_nominations(ceremony_year)"
+    )
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS oscar_moments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ceremony_year INTEGER NOT NULL,
+            category TEXT,
+            kind TEXT NOT NULL,
+            title TEXT,
+            description TEXT,
+            created_at TEXT DEFAULT (datetime('now'))
+        )
+        """
+    )
+    await db.commit()
+
+
+async def _ensure_oscar_year_from_source(db: aiosqlite.Connection) -> None:
+    """Добавляет колонку year_from_source в oscar_nominations, если её нет (старые БД)."""
+    cursor = await db.execute("PRAGMA table_info(oscar_nominations)")
+    rows = await cursor.fetchall()
+    columns = [r[1] for r in rows] if rows else []
+    if "year_from_source" not in columns:
+        await db.execute("ALTER TABLE oscar_nominations ADD COLUMN year_from_source INTEGER")
+        await db.commit()
+
+
+async def _ensure_shown_recently_table(db: aiosqlite.Connection) -> None:
+    """Таблица недавно показанных фильмов: не показывать в следующих N выдачах."""
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS shown_recently (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            delivery_number INTEGER NOT NULL,
+            movie_id INTEGER,
+            kinopoisk_id INTEGER,
+            created_at TEXT DEFAULT (datetime('now'))
+        )
+        """
+    )
+    await db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_shown_recently_user_delivery ON shown_recently(user_id, delivery_number)"
+    )
+    await db.commit()
+
+
+async def _ensure_movies_oscar_flags(db: aiosqlite.Connection) -> None:
+    """Добавляет в movies колонки nominated_oscar и won_oscar (boolean)."""
+    cursor = await db.execute("PRAGMA table_info(movies)")
+    rows = await cursor.fetchall()
+    columns = [r[1] for r in rows] if rows else []
+    for col, typ in [("nominated_oscar", "INTEGER"), ("won_oscar", "INTEGER")]:
+        if col not in columns:
+            await db.execute(f"ALTER TABLE movies ADD COLUMN {col} {typ} DEFAULT 0")
+    await db.commit()
 
 
 async def _ensure_user_settings_table(db: aiosqlite.Connection) -> None:

@@ -25,6 +25,8 @@ from ..keyboards.flow import (
     negative_keyboard,
     year_era_keyboard,
     recommendations_control_keyboard,
+    oscar_type_keyboard,
+    oscar_year_keyboard,
 )
 from ..keyboards.main_menu import main_menu_keyboard
 from ..llm.service import get_recommendations_from_llm, get_top250_picks_from_llm, LlmError
@@ -47,8 +49,42 @@ from ..services.not_interested import (
 from ..services.flow_log import log_flow_step
 from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_info, KinopoiskMovieInfo
 from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
+from ..services.oscar import get_filtered_oscar, get_oscar_count, get_oscar_flags, get_movie_id_by_kinopoisk, link_oscar_to_movie
 from ..services.user_settings import get_min_rating_filter_enabled
 from ..services.users import ensure_user
+from ..services.recently_shown import (
+    RECENT_DELIVERIES_COUNT,
+    get_next_delivery_number,
+    get_recently_shown_ids,
+    filter_out_recently_shown,
+    record_shown,
+)
+
+
+def _oscar_card_kb(idx: int, in_fav: bool, in_watched: bool, in_ni: bool) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ В избранном" if in_fav else "⭐️ В избранное", callback_data=f"oscar_fav:{idx}"),
+                InlineKeyboardButton(text="✅ Смотрел" if in_watched else "🎬 Смотрел", callback_data=f"oscar_watched:{idx}"),
+            ],
+            [InlineKeyboardButton(text="✅ Не интересно" if in_ni else "👎 Не интересно", callback_data=f"oscar_not_interested:{idx}")],
+        ]
+    )
+
+
+async def _update_oscar_card_buttons(
+    callback: CallbackQuery,
+    idx: int,
+    *,
+    in_fav: bool,
+    in_watched: bool,
+    in_ni: bool,
+) -> None:
+    try:
+        await callback.message.edit_reply_markup(reply_markup=_oscar_card_kb(idx, in_fav, in_watched, in_ni))
+    except Exception:
+        pass
 
 
 async def _send_movie_card(
@@ -88,6 +124,12 @@ class MovieFlow(StatesGroup):
 class Top250Flow(StatesGroup):
     mood = State()
     genres = State()
+    year_era = State()
+    recommendations = State()
+
+
+class OscarFlow(StatesGroup):
+    type_filter = State()
     year_era = State()
     recommendations = State()
 
@@ -144,16 +186,15 @@ def get_router(settings: Settings) -> Router:
                 reply_markup=mood_keyboard(prefix="t250_"),
             )
             return
-        # Оскар — заглушка (режим пока не реализован)
-        await state.set_state(MovieFlow.source)
-        stub_text = (
-            "🚧 <b>Оскар</b> (номинанты и победители) пока в разработке.\n\n"
-            "Выбери другой способ подбора 👇"
-        )
-        try:
-            await callback.message.edit_text(stub_text, reply_markup=source_keyboard())
-        except Exception:
-            await callback.message.answer(stub_text, reply_markup=source_keyboard())
+        if source == "oscar":
+            await state.set_state(OscarFlow.type_filter)
+            await state.update_data(preferences=prefs, session_id=session_id)
+            await log_flow_step(callback.from_user.id, session_id, "oscar_start", "type")
+            await callback.message.edit_text(
+                "Выбери <b>тип</b> подборки по Оскару 👇",
+                reply_markup=oscar_type_keyboard(),
+            )
+            return
 
     # --- Ветка Топ 250 ---
     @router.callback_query(Top250Flow.mood, F.data.startswith("t250_mood:"))
@@ -240,7 +281,7 @@ def get_router(settings: Settings) -> Router:
         header_msg = "Вот подборка из Кинопоиск Топ 250 🎬"
 
         try:
-            candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=50)
+            candidates = await get_filtered_top250(settings, mood, genre_codes, year_era, limit=80)
         except Exception as e:
             logger.exception("Top250 get_filtered_top250 failed: %s", e)
             await callback.message.edit_text(
@@ -267,6 +308,11 @@ def get_router(settings: Settings) -> Router:
                 c for c in candidates
                 if c.get("rating_kp") is None or (isinstance(c.get("rating_kp"), (int, float)) and float(c["rating_kp"]) >= 6.0)
             ]
+        exclude_movie_ids, exclude_kinopoisk_ids = await get_recently_shown_ids(
+            settings, callback.from_user.id, RECENT_DELIVERIES_COUNT
+        )
+        candidates = filter_out_recently_shown(candidates, exclude_movie_ids, exclude_kinopoisk_ids)
+        delivery_number = await get_next_delivery_number(settings, callback.from_user.id)
         await state.set_state(Top250Flow.recommendations)
 
         if not candidates:
@@ -326,6 +372,11 @@ def get_router(settings: Settings) -> Router:
             pos = rec.get("position")
             if pos is not None:
                 parts.append(f"🏆 № {pos} в Топ 250 Кинопоиска")
+            nominated_oscar, won_oscar = await get_oscar_flags(settings, kinopoisk_id=rec.get("kinopoisk_id"))
+            if won_oscar:
+                parts.append("🏆 Победитель Оскара")
+            elif nominated_oscar:
+                parts.append("📋 Номинант Оскара")
             if rec.get("year"):
                 parts[0] += f" ({rec['year']})"
             if rec.get("genres"):
@@ -356,6 +407,10 @@ def get_router(settings: Settings) -> Router:
             except Exception as e:
                 logger.warning("Top250: не удалось отправить карточку фильма %s: %s", rec.get("title"), e)
                 await callback.message.answer(text, reply_markup=kb)
+        try:
+            await record_shown(settings, callback.from_user.id, delivery_number, films)
+        except Exception as e:
+            logger.warning("record_shown (Top250) failed: %s", e)
         await callback.message.answer(
             "Можем подобрать ещё или вернуться в меню 👇",
             reply_markup=recommendations_control_keyboard("t250_"),
@@ -493,6 +548,245 @@ def get_router(settings: Settings) -> Router:
             "Выбери год (эпоху) ещё раз — покажу новую подборку 👇",
             reply_markup=year_era_keyboard("t250_"),
         )
+
+    # --- Ветка Оскар ---
+    @router.callback_query(OscarFlow.type_filter, F.data.startswith("oscar_type:"))
+    async def oscar_type(callback: CallbackQuery, state: FSMContext) -> None:
+        type_filter = callback.data.split(":", 1)[1]
+        data = await state.get_data()
+        prefs = data.get("preferences", {})
+        prefs["oscar_type"] = type_filter
+        session_id = data.get("session_id") or uuid.uuid4().hex
+        await state.update_data(preferences=prefs, session_id=session_id)
+        await log_flow_step(callback.from_user.id, session_id, "oscar_type", type_filter)
+        await state.set_state(OscarFlow.year_era)
+        await callback.message.edit_text(
+            "Выбери <b>период</b> (год церемонии) 👇",
+            reply_markup=oscar_year_keyboard(),
+        )
+        await callback.answer()
+
+    @router.callback_query(OscarFlow.year_era, F.data.startswith("oscar_year:"))
+    async def oscar_year(callback: CallbackQuery, state: FSMContext) -> None:
+        year_era = callback.data.split(":", 1)[1]
+        data = await state.get_data()
+        prefs = data.get("preferences", {})
+        type_filter = prefs.get("oscar_type") or "all"
+        session_id = data.get("session_id") or uuid.uuid4().hex
+        await state.update_data(preferences={**prefs, "oscar_year_era": year_era}, session_id=session_id)
+        await log_flow_step(callback.from_user.id, session_id, "oscar_year", year_era)
+        await callback.answer()
+        try:
+            await callback.message.edit_text("Подбираю фильмы по Оскару… 🎬")
+        except Exception:
+            pass
+
+        settings = load_settings()
+        candidates: List[Dict[str, Any]] = []
+        try:
+            candidates = await get_filtered_oscar(settings, type_filter, year_era, limit=100)
+        except Exception as e:
+            logger.exception("Oscar get_filtered_oscar failed: %s", e)
+            await callback.message.edit_text(
+                "Не удалось загрузить список Оскара. Попробуй позже или выбери другой подбор.\n\n"
+                "Если список ещё не загружался: на сервере выполни из корня проекта:\n"
+                "<code>python scripts/parse_oscar_wikipedia.py</code>",
+                reply_markup=recommendations_control_keyboard("oscar_"),
+            )
+            return
+
+        ni_kp = set()
+        watched_kp = set()
+        try:
+            ni_kp = await get_not_interested_kinopoisk_ids(callback.from_user.id)
+            watched_kp = await get_watched_kinopoisk_ids(callback.from_user.id)
+        except Exception:
+            pass
+        candidates = [
+            c for c in candidates
+            if (c.get("kinopoisk_id") or 0) not in ni_kp and (c.get("kinopoisk_id") or 0) not in watched_kp
+        ]
+        min_rating_on = await get_min_rating_filter_enabled(callback.from_user.id, settings)
+        if min_rating_on:
+            # Фильтр по рейтингу только для уже привязанных; без привязки показываем
+            candidates = [
+                c for c in candidates
+                if c.get("movie_id") is None
+                or c.get("rating_kp") is None
+                or (isinstance(c.get("rating_kp"), (int, float)) and float(c["rating_kp"]) >= 6.0)
+            ]
+        exclude_movie_ids, exclude_kinopoisk_ids = await get_recently_shown_ids(
+            settings, callback.from_user.id, RECENT_DELIVERIES_COUNT
+        )
+        candidates = filter_out_recently_shown(candidates, exclude_movie_ids, exclude_kinopoisk_ids)
+        delivery_number = await get_next_delivery_number(settings, callback.from_user.id)
+
+        await state.set_state(OscarFlow.recommendations)
+        total = await get_oscar_count(settings, with_movie_only=False)
+        if not candidates:
+            if total == 0:
+                text = (
+                    "В базе пока нет номинаций Оскара.\n\n"
+                    "Запусти: python scripts/parse_oscar_wikipedia.py"
+                )
+            else:
+                text = "По выбранным фильтрам ничего не нашлось или все отфильтрованы (смотрел / не интересно / рейтинг). Попробуй другой период или тип."
+            await callback.message.edit_text(text, reply_markup=recommendations_control_keyboard("oscar_"))
+            return
+
+        films = candidates[:5] if len(candidates) <= 5 else random.sample(candidates, 5)
+        await state.update_data(recommendations=films)
+        await callback.message.edit_text("Вот подборка по Оскару 🏆")
+        for idx, rec in enumerate(films):
+            # Если нет привязки к Кинопоиску — пробуем подтянуть при выводе
+            if rec.get("movie_id") is None and rec.get("oscar_id"):
+                title = (rec.get("title") or rec.get("title_from_source") or "").strip()
+                year = rec.get("year") or rec.get("year_from_source")
+                if year is None and rec.get("ceremony_year"):
+                    year = int(rec["ceremony_year"]) - 1
+                if title and settings.kinopoisk_api_key:
+                    try:
+                        info = await get_movie_info(settings, title, year)
+                        if info is None and year is not None:
+                            info = await get_movie_info(settings, title, year - 1)
+                        if info is None and year is not None:
+                            info = await get_movie_info(settings, title, year + 1)
+                        if info and info.kinopoisk_id is not None:
+                            movie_id = await get_movie_id_by_kinopoisk(settings, info.kinopoisk_id)
+                            if movie_id:
+                                await link_oscar_to_movie(settings, rec["oscar_id"], movie_id)
+                                rec["movie_id"] = movie_id
+                                rec["kinopoisk_id"] = info.kinopoisk_id
+                                rec["year"] = rec.get("year") or year
+                                rec["age_rating"] = info.age_rating
+                                rec["rating_kp"] = info.rating_kp
+                                rec["poster_url"] = info.poster_url
+                                rec["poster_urls"] = info.poster_urls
+                                rec["short_description"] = info.short_description
+                    except Exception as e:
+                        logger.debug("Oscar on-the-fly Kinopoisk lookup for %s: %s", title, e)
+
+            parts = [f"{idx + 1}. <b>{rec.get('title') or rec.get('title_from_source') or '—'}</b>"]
+            if rec.get("year"):
+                parts[0] += f" ({rec['year']})"
+            if rec.get("is_winner"):
+                parts.append("🏆 Победитель Оскара")
+            else:
+                parts.append("📋 Номинант Оскара")
+            age_raw = (rec.get("age_rating") or "").strip()
+            age_str = f"{age_raw}+" if age_raw and not str(age_raw).endswith("+") else (age_raw or "—")
+            rating_str = rec.get("rating_kp")
+            if rating_str is not None and isinstance(rating_str, (int, float)):
+                rating_str = f"{float(rating_str):.1f}"
+            else:
+                rating_str = "—"
+            parts.append(f"🔞 {age_str}   ⭐ Кинопоиск: {rating_str}")
+            if rec.get("genres"):
+                parts.append("🎭 " + (rec["genres"][:80] + "…" if len(rec.get("genres", "")) > 80 else rec["genres"]))
+            if rec.get("short_description"):
+                parts.append("📝 " + (rec["short_description"] or "").strip())
+            text = "\n".join(parts)
+            in_fav = await is_favorite(callback.from_user.id, rec)
+            in_watched = await is_watched(callback.from_user.id, rec)
+            in_ni = await is_not_interested(callback.from_user.id, rec)
+            fav_l = "✅ В избранном" if in_fav else "⭐️ В избранное"
+            watched_l = "✅ Смотрел" if in_watched else "🎬 Смотрел"
+            not_int_l = "✅ Не интересно" if in_ni else "👎 Не интересно"
+            kb = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(text=fav_l, callback_data=f"oscar_fav:{idx}"),
+                        InlineKeyboardButton(text=watched_l, callback_data=f"oscar_watched:{idx}"),
+                    ],
+                    [InlineKeyboardButton(text=not_int_l, callback_data=f"oscar_not_interested:{idx}")],
+                ]
+            )
+            urls = rec.get("poster_urls") or ([rec.get("poster_url")] if rec.get("poster_url") else [])
+            try:
+                await _send_movie_card(callback.message, urls or [], text, kb, settings)
+            except Exception as e:
+                logger.warning("Oscar: не удалось отправить карточку %s: %s", rec.get("title"), e)
+                await callback.message.answer(text, reply_markup=kb)
+        try:
+            await record_shown(settings, callback.from_user.id, delivery_number, films)
+        except Exception as e:
+            logger.warning("record_shown (Oscar) failed: %s", e)
+        await callback.message.answer(
+            "Можем подобрать ещё или вернуться в меню 👇",
+            reply_markup=recommendations_control_keyboard("oscar_"),
+        )
+
+    @router.callback_query(OscarFlow.recommendations, F.data.startswith("oscar_fav:"))
+    async def oscar_fav(callback: CallbackQuery, state: FSMContext) -> None:
+        try:
+            idx = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        data = await state.get_data()
+        recs = data.get("recommendations") or []
+        if idx < 0 or idx >= len(recs):
+            await callback.answer()
+            return
+        rec = recs[idx]
+        added = await add_favorite_for_user(callback.from_user.id, rec)
+        await callback.answer("Добавлено в избранное ⭐️" if added else "Уже в избранном 👍")
+        in_watched = await is_watched(callback.from_user.id, rec)
+        in_ni = await is_not_interested(callback.from_user.id, rec)
+        _update_oscar_card_buttons(callback, idx, in_fav=True, in_watched=in_watched, in_ni=in_ni)
+
+    @router.callback_query(OscarFlow.recommendations, F.data.startswith("oscar_watched:"))
+    async def oscar_watched(callback: CallbackQuery, state: FSMContext) -> None:
+        try:
+            idx = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        data = await state.get_data()
+        recs = data.get("recommendations") or []
+        if idx < 0 or idx >= len(recs):
+            await callback.answer()
+            return
+        rec = recs[idx]
+        added = await add_watched_for_user(callback.from_user.id, rec)
+        await callback.answer("Добавлено в «Смотрел» 🎬" if added else "Уже в списке 👍")
+        in_fav = await is_favorite(callback.from_user.id, rec)
+        in_ni = await is_not_interested(callback.from_user.id, rec)
+        _update_oscar_card_buttons(callback, idx, in_fav=in_fav, in_watched=True, in_ni=in_ni)
+
+    @router.callback_query(OscarFlow.recommendations, F.data.startswith("oscar_not_interested:"))
+    async def oscar_not_interested(callback: CallbackQuery, state: FSMContext) -> None:
+        try:
+            idx = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        data = await state.get_data()
+        recs = data.get("recommendations") or []
+        if idx < 0 or idx >= len(recs):
+            await callback.answer()
+            return
+        rec = recs[idx]
+        added = await add_not_interested(callback.from_user.id, rec)
+        await callback.answer("Отметил: не интересно 👎" if added else "Уже в списке «Не интересно»")
+        in_fav = await is_favorite(callback.from_user.id, rec)
+        in_watched = await is_watched(callback.from_user.id, rec)
+        _update_oscar_card_buttons(callback, idx, in_fav=in_fav, in_watched=in_watched, in_ni=True)
+
+    @router.callback_query(F.data == "oscar_reco:again")
+    async def oscar_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
+        await state.set_state(OscarFlow.year_era)
+        await callback.message.answer(
+            "Выбери период ещё раз 👇",
+            reply_markup=oscar_year_keyboard(),
+        )
+
+    @router.callback_query(F.data == "oscar_reco:menu")
+    async def oscar_reco_menu(callback: CallbackQuery, state: FSMContext) -> None:
+        await callback.answer()
+        await state.clear()
+        await callback.message.answer("Главное меню 👇", reply_markup=main_menu_keyboard())
 
     # 1. Настроение (обычный подбор)
     @router.callback_query(MovieFlow.mood, F.data.startswith("mood:"))
@@ -692,6 +986,20 @@ def get_router(settings: Settings) -> Router:
             pairs_filtered.append((rec, info))
         filtered_pairs = pairs_filtered
 
+        # Исключить фильмы, показанные в последних N выдачах
+        delivery_number = await get_next_delivery_number(settings, user_id)
+        exclude_movie_ids, exclude_kinopoisk_ids = await get_recently_shown_ids(
+            settings, user_id, RECENT_DELIVERIES_COUNT
+        )
+        if exclude_kinopoisk_ids or exclude_movie_ids:
+            pairs_filtered = []
+            for rec, info in filtered_pairs:
+                kp = (info.kinopoisk_id if info else None) or getattr(rec, "kinopoisk_id", None)
+                if kp is not None and kp in exclude_kinopoisk_ids:
+                    continue
+                pairs_filtered.append((rec, info))
+            filtered_pairs = pairs_filtered
+
         if not filtered_pairs:
             data = await state.get_data()
             session_id = data.get("session_id") or uuid.uuid4().hex
@@ -712,9 +1020,13 @@ def get_router(settings: Settings) -> Router:
             await state.update_data(recommendations=[])
             return
 
-        # Сохраняем в состоянии только отфильтрованные рекомендации
+        # Показываем не более 5 фильмов; если после фильтров осталось больше — берём первые 5
+        RECOMMENDATIONS_TO_SHOW = 5
+        pairs_to_show = filtered_pairs[:RECOMMENDATIONS_TO_SHOW]
+
+        # Сохраняем в состоянии только то, что показываем (до 5)
         recs_for_state: List[Dict[str, Any]] = []
-        for rec, info in filtered_pairs:
+        for rec, info in pairs_to_show:
             rec_dict = rec.model_dump()
             if info:
                 if info.kinopoisk_id is not None:
@@ -728,10 +1040,10 @@ def get_router(settings: Settings) -> Router:
 
         data = await state.get_data()
         session_id = data.get("session_id") or uuid.uuid4().hex
-        await log_flow_step(user_id, session_id, "recommendations", str(len(filtered_pairs)))
+        await log_flow_step(user_id, session_id, "recommendations", str(len(pairs_to_show)))
 
         top250_positions = await get_top250_positions_map(settings)
-        for idx, (rec, info) in enumerate(filtered_pairs):
+        for idx, (rec, info) in enumerate(pairs_to_show):
             parts: List[str] = []
             title_line = f"{idx + 1}. <b>{rec.title}</b>"
             if rec.year:
@@ -743,6 +1055,11 @@ def get_router(settings: Settings) -> Router:
             parts.append(f"{age_str}   {rating_str}")
             if info and info.kinopoisk_id is not None and info.kinopoisk_id in top250_positions:
                 parts.append(f"🏆 № {top250_positions[info.kinopoisk_id]} в Топ 250 Кинопоиска")
+            nominated_oscar, won_oscar = await get_oscar_flags(settings, kinopoisk_id=info.kinopoisk_id if info else None)
+            if won_oscar:
+                parts.append("🏆 Победитель Оскара")
+            elif nominated_oscar:
+                parts.append("📋 Номинант Оскара")
             if info and (info.short_description or "").strip():
                 parts.append("📝 " + (info.short_description or "").strip())
             if rec.genres:
@@ -775,6 +1092,11 @@ def get_router(settings: Settings) -> Router:
             urls = (info.poster_urls or ([info.poster_url] if info and info.poster_url else [])) if info else []
             settings = load_settings()
             await _send_movie_card(responder, urls, text, kb, settings)
+
+        try:
+            await record_shown(settings, user_id, delivery_number, recs_for_state)
+        except Exception as e:
+            logger.warning("record_shown (ordinary) failed: %s", e)
 
         await responder.answer(
             "Если хочешь — можем подобрать ещё варианты или вернуться в меню 👇",
