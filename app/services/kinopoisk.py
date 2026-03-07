@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -17,8 +18,19 @@ import httpx
 
 from ..config import Settings
 
-# Не более 3 одновременных запросов к API Кинопоиска (снижает риск 429 и таймаутов)
-_KINOPOISK_API_SEMAPHORE = asyncio.Semaphore(3)
+logger = logging.getLogger(__name__)
+
+# Один запрос в момент + пауза после запроса, чтобы не получать 429 от API Кинопоиска.
+# Семафор создаём при первом использовании (внутри running loop), иначе RuntimeError: attached to a different loop
+_KINOPOISK_API_SEMAPHORE: Optional[asyncio.Semaphore] = None
+_KINOPOISK_REQUEST_DELAY_SEC = 0.5
+
+
+def _get_kinopoisk_semaphore() -> asyncio.Semaphore:
+    global _KINOPOISK_API_SEMAPHORE
+    if _KINOPOISK_API_SEMAPHORE is None:
+        _KINOPOISK_API_SEMAPHORE = asyncio.Semaphore(1)
+    return _KINOPOISK_API_SEMAPHORE
 
 
 @dataclass
@@ -219,14 +231,22 @@ async def _fetch_movie_doc_by_id(settings: Settings, kinopoisk_id: int) -> Optio
         return None
     url = f"{settings.kinopoisk_base_url.rstrip('/')}/v1.4/movie/{kinopoisk_id}"
     headers = {"X-API-KEY": settings.kinopoisk_api_key}
-    async with _KINOPOISK_API_SEMAPHORE:
+    async with _get_kinopoisk_semaphore():
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(url, headers=headers)
                 if response.status_code != 200:
+                    logger.warning(
+                        "Kinopoisk API by_id: status %s for kinopoisk_id=%s",
+                        response.status_code,
+                        kinopoisk_id,
+                    )
                     return None
-                return response.json()
-        except (httpx.RequestError, ValueError):
+                result = response.json()
+                await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC)
+                return result
+        except (httpx.RequestError, ValueError) as e:
+            logger.warning("Kinopoisk API by_id error for kinopoisk_id=%s: %s", kinopoisk_id, e)
             return None
 
 
@@ -306,14 +326,21 @@ async def _fetch_movie_doc_by_search(
     params = {"query": title.strip(), "limit": 10}
     if year:
         params["query"] = f"{title.strip()} {year}"
-    async with _KINOPOISK_API_SEMAPHORE:
+    async with _get_kinopoisk_semaphore():
         try:
             async with httpx.AsyncClient(timeout=8.0) as client:
                 response = await client.get(url, headers=headers, params=params)
                 if response.status_code != 200:
+                    logger.warning(
+                        "Kinopoisk API search: status %s for query=%s",
+                        response.status_code,
+                        params.get("query", ""),
+                    )
                     return None
                 data = response.json()
-        except (httpx.RequestError, ValueError):
+            await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC)
+        except (httpx.RequestError, ValueError) as e:
+            logger.warning("Kinopoisk API search error for query=%s: %s", params.get("query", ""), e)
             return None
     docs = data.get("docs") or []
     if not docs:
