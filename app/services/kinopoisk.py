@@ -2,9 +2,12 @@
 Сервис для получения данных о фильмах/сериалах через API Кинопоиска (poiskkino.dev).
 Сначала проверяем таблицу movies; в API ходим только если фильма ещё нет. Все данные сохраняем.
 Токен можно получить в Telegram-боте @poiskkinodev_bot.
+
+Одновременные запросы к API ограничены семафором, чтобы не получать 429 / таймауты.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
@@ -13,6 +16,9 @@ import aiosqlite
 import httpx
 
 from ..config import Settings
+
+# Не более 3 одновременных запросов к API Кинопоиска (снижает риск 429 и таймаутов)
+_KINOPOISK_API_SEMAPHORE = asyncio.Semaphore(3)
 
 
 @dataclass
@@ -213,14 +219,15 @@ async def _fetch_movie_doc_by_id(settings: Settings, kinopoisk_id: int) -> Optio
         return None
     url = f"{settings.kinopoisk_base_url.rstrip('/')}/v1.4/movie/{kinopoisk_id}"
     headers = {"X-API-KEY": settings.kinopoisk_api_key}
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, headers=headers)
-            if response.status_code != 200:
-                return None
-            return response.json()
-    except (httpx.RequestError, ValueError):
-        return None
+    async with _KINOPOISK_API_SEMAPHORE:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(url, headers=headers)
+                if response.status_code != 200:
+                    return None
+                return response.json()
+        except (httpx.RequestError, ValueError):
+            return None
 
 
 async def ensure_movie_details_by_id(
@@ -299,14 +306,15 @@ async def _fetch_movie_doc_by_search(
     params = {"query": title.strip(), "limit": 10}
     if year:
         params["query"] = f"{title.strip()} {year}"
-    try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
-            response = await client.get(url, headers=headers, params=params)
-            if response.status_code != 200:
-                return None
-            data = response.json()
-    except (httpx.RequestError, ValueError):
-        return None
+    async with _KINOPOISK_API_SEMAPHORE:
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                response = await client.get(url, headers=headers, params=params)
+                if response.status_code != 200:
+                    return None
+                data = response.json()
+        except (httpx.RequestError, ValueError):
+            return None
     docs = data.get("docs") or []
     if not docs:
         return None
