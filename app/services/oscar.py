@@ -103,7 +103,7 @@ async def get_filtered_oscar(
         if type_filter == "nominee" and is_winner:
             continue
         poster_urls = None
-        if row.get("poster_urls"):
+        if row["poster_urls"]:
             try:
                 raw = row["poster_urls"]
                 if raw and isinstance(raw, str):
@@ -121,13 +121,13 @@ async def get_filtered_oscar(
             "kinopoisk_id": row["kinopoisk_id"],
             "title": title,
             "year": row["year"],
-            "year_from_source": row.get("year_from_source"),
+            "year_from_source": row["year_from_source"],
             "genres": row["genres"],
             "rating_kp": row["rating_kp"],
             "age_rating": row["age_rating"],
             "poster_url": row["poster_url"],
             "poster_urls": poster_urls,
-            "short_description": (row["short_description"] or "").strip() if row.get("short_description") else None,
+            "short_description": (row["short_description"] or "").strip() if row["short_description"] else None,
         })
         if len(result) >= limit:
             break
