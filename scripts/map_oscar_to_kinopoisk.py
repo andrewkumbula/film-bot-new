@@ -33,7 +33,10 @@ async def main() -> None:
         )
         rows = await cursor.fetchall()
 
-    print(f"Записей без movie_id: {len(rows)}")
+    print(f"Записей без movie_id (уже привязанные при следующем запуске не трогаем): {len(rows)}")
+    if not rows:
+        print("Нечего обрабатывать. Запустите снова после parse_oscar_wikipedia.py или когда появятся новые номинации.")
+        return
     mapped = 0
     for oscar_id, title_from_source, year_from_source, ceremony_year in rows:
         title = (title_from_source or "").strip()
