@@ -587,10 +587,16 @@ def get_router(settings: Settings) -> Router:
             candidates = await get_filtered_oscar(settings, type_filter, year_era, limit=100)
         except Exception as e:
             logger.exception("Oscar get_filtered_oscar failed: %s", e)
-            await callback.message.edit_text(
+            err_msg = str(e).strip()[:200].replace("<", " ").replace(">", " ")
+            text = (
                 "Не удалось загрузить список Оскара. Попробуй позже или выбери другой подбор.\n\n"
                 "Если список ещё не загружался: на сервере выполни из корня проекта:\n"
-                "<code>python scripts/parse_oscar_wikipedia.py</code>",
+                "<code>python scripts/parse_oscar_wikipedia.py</code>"
+            )
+            if err_msg:
+                text += f"\n\nДля администратора: <code>{err_msg}</code>"
+            await callback.message.edit_text(
+                text,
                 reply_markup=recommendations_control_keyboard("oscar_"),
             )
             return
