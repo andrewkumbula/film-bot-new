@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import httpx
 from pydantic import ValidationError
@@ -439,6 +439,42 @@ async def get_series_recommendations_from_llm(
     except ValidationError as e:
         raise LlmError(
             "Модель вернула некорректный ответ по сериалам.",
+            debug_detail=str(e),
+        )
+
+
+def _build_series_similar_prompt(series_title: str, series_year: Optional[int] = None) -> str:
+    """Промпт для подбора сериалов, похожих на указанный."""
+    year_part = f" ({series_year})" if series_year else ""
+    return (
+        f"Пользователю понравился сериал «{series_title}»{year_part}. "
+        "Подбери 8–12 других сериалов, похожих по стилю, жанру или настроению.\n\n"
+        "Верни ТОЛЬКО один JSON-объект:\n"
+        "{\n"
+        '  "session_summary": "краткая сводка в 1 предложение",\n'
+        '  "recommendations": [\n'
+        '    {"title": "Название", "year": 2020, "why": "Почему похож"},\n'
+        "    ...\n"
+        "  ]\n"
+        "}\n\n"
+        "Требования: только реальные сериалы (не фильмы); title и year как на Кинопоиске/IMDb; без комментариев и Markdown."
+    )
+
+
+async def get_series_similar_from_llm(
+    settings: Settings, series_title: str, series_year: Optional[int] = None
+) -> SeriesLlmResponse:
+    """
+    Запрос к ИИ: сериалы, похожие на указанный. Возвращает список {title, year, why}.
+    """
+    prompt = _build_series_similar_prompt(series_title, series_year)
+    raw = await _request_llm_raw(settings, prompt, timeout_sec=30)
+    text = _strip_code_fences(raw)
+    try:
+        return SeriesLlmResponse.model_validate_json(text)
+    except ValidationError as e:
+        raise LlmError(
+            "Не удалось подобрать похожие сериалы.",
             debug_detail=str(e),
         )
 

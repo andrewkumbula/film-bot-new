@@ -24,7 +24,7 @@ from ..keyboards.series import (
     series_card_keyboard,
     series_reco_control_keyboard,
 )
-from ..llm.service import get_series_recommendations_from_llm, LlmError
+from ..llm.service import get_series_recommendations_from_llm, get_series_similar_from_llm, LlmError
 from ..services.kinopoisk import get_or_create_series_from_llm, enrich_series_from_kinopoisk
 from ..services.series import (
     get_filtered_series,
@@ -383,7 +383,65 @@ def get_router(settings: Settings) -> Router:
 
     @router.callback_query(SeriesFlow.recommendations, F.data.startswith(f"{PREFIX}similar:"))
     async def series_similar(callback: CallbackQuery, state: FSMContext) -> None:
-        await callback.answer("Похожие сериалы — в следующих версиях 🔜")
+        try:
+            idx = int(callback.data.split(":", 1)[1])
+        except (ValueError, IndexError):
+            await callback.answer()
+            return
+        data = await state.get_data()
+        recs = data.get("series_recommendations") or []
+        if idx < 0 or idx >= len(recs):
+            await callback.answer()
+            return
+        series = recs[idx]
+        user_id = callback.from_user.id if callback.from_user else 0
+        settings = load_settings()
+        await callback.answer("Ищу похожие…")
+        try:
+            llm_response = await get_series_similar_from_llm(
+                settings, series.get("name") or "", series.get("year"),
+            )
+        except LlmError:
+            await callback.message.answer(
+                "Не удалось подобрать похожие сериалы. Попробуйте «Подобрать ещё» или другой сериал.",
+                reply_markup=series_reco_control_keyboard(),
+            )
+            return
+        watched_ids = await get_series_watched_ids(settings, user_id)
+        candidates: List[Dict[str, Any]] = []
+        for pick in llm_response.recommendations:
+            if len(candidates) >= 3:
+                break
+            if not (pick.title or "").strip():
+                continue
+            rec = await get_or_create_series_from_llm(
+                settings, pick.title, pick.year, getattr(pick, "why", "") or "",
+            )
+            if rec is None or rec.get("id") in watched_ids or rec.get("id") == series.get("id"):
+                continue
+            await enrich_series_from_kinopoisk(settings, rec["id"])
+            refreshed = await get_series_by_id(settings, rec["id"])
+            if refreshed is None:
+                continue
+            refreshed["why"] = getattr(pick, "why", "") or ""
+            candidates.append(refreshed)
+        if not candidates:
+            await callback.message.answer(
+                "Похожих сериалов не нашлось или они уже в «Уже смотрел». Попробуйте «Подобрать ещё».",
+                reply_markup=series_reco_control_keyboard(),
+            )
+            return
+        await state.update_data(series_recommendations=candidates)
+        await callback.message.answer("Похожие на «" + (series.get("name") or "сериал") + "» 📺")
+        for i, s in enumerate(candidates):
+            in_fav = await is_series_in_favorites(settings, user_id, s["id"])
+            in_watched = await _is_series_watched(settings, user_id, s["id"])
+            kb = series_card_keyboard(s["id"], i, in_fav, in_watched)
+            await _send_series_card(callback.message, s, kb)
+        await callback.message.answer(
+            "Можем подобрать ещё или вернуться в меню 👇",
+            reply_markup=series_reco_control_keyboard(),
+        )
 
     @router.callback_query(SeriesFlow.recommendations, F.data == f"{PREFIX}reco:again")
     async def series_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
