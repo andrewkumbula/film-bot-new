@@ -31,3 +31,16 @@ class Top250LlmResponse(BaseModel):
     """Ответ ИИ: 5 фильмов из предложенного списка по предпочтениям пользователя."""
     recommendations: List[Top250Pick]
 
+
+class SeriesPick(BaseModel):
+    """Один сериал, предложенный ИИ по предпочтениям пользователя."""
+    title: str
+    year: Optional[int] = None
+    why: str = ""
+
+
+class SeriesLlmResponse(BaseModel):
+    """Ответ ИИ: сериалы по времени, формату, настроению и ограничениям."""
+    session_summary: str = ""
+    recommendations: List[SeriesPick]
+

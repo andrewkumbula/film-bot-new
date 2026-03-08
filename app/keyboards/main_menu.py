@@ -3,11 +3,14 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 def main_menu_keyboard() -> ReplyKeyboardMarkup:
     """
-    Главное меню /start.
+    Главное меню /start: фильм, сериал, избранное, настройки, помощь.
     """
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🎬 Подобрать фильм")],
+            [
+                KeyboardButton(text="🎬 Подобрать фильм"),
+                KeyboardButton(text="📺 Подобрать сериал"),
+            ],
             [
                 KeyboardButton(text="⭐️ Избранное"),
                 KeyboardButton(text="⚙️ Настройки"),

@@ -118,6 +118,7 @@ async def init_db(settings: Settings) -> None:
         await _ensure_oscar_year_from_source(db)
         await _ensure_movies_oscar_flags(db)
         await _ensure_shown_recently_table(db)
+        await _ensure_series_tables(db)
 
     await _migrate_old_favorites_if_needed(settings)
 
@@ -169,6 +170,66 @@ async def _ensure_oscar_year_from_source(db: aiosqlite.Connection) -> None:
     if "year_from_source" not in columns:
         await db.execute("ALTER TABLE oscar_nominations ADD COLUMN year_from_source INTEGER")
         await db.commit()
+
+
+async def _ensure_series_tables(db: aiosqlite.Connection) -> None:
+    """Таблицы для сериалов: series, series_favorites, series_watched."""
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS series (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kinopoisk_id INTEGER UNIQUE,
+            name TEXT NOT NULL,
+            original_name TEXT,
+            year INTEGER,
+            rating_kp REAL,
+            votes INTEGER,
+            poster_url TEXT,
+            poster_urls TEXT,
+            description TEXT,
+            short_description TEXT,
+            is_mini_series INTEGER DEFAULT 0,
+            seasons_total INTEGER,
+            episodes_total INTEGER,
+            runtime_episode_min INTEGER,
+            status TEXT,
+            countries TEXT,
+            genres TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now'))
+        )
+        """
+    )
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_series_kinopoisk ON series(kinopoisk_id)")
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_series_year ON series(year)")
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_series_rating ON series(rating_kp)")
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS series_favorites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            series_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (series_id) REFERENCES series(id),
+            UNIQUE(user_id, series_id)
+        )
+        """
+    )
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_series_favorites_user ON series_favorites(user_id)")
+    await db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS series_watched (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            series_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (series_id) REFERENCES series(id),
+            UNIQUE(user_id, series_id)
+        )
+        """
+    )
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_series_watched_user ON series_watched(user_id)")
+    await db.commit()
 
 
 async def _ensure_shown_recently_table(db: aiosqlite.Connection) -> None:

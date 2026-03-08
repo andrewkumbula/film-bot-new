@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import httpx
 from pydantic import ValidationError
 
 from ..config import Settings
-from .schemas import LlmResponse, Top250LlmResponse, Top250Pick
+from .schemas import LlmResponse, Top250LlmResponse, Top250Pick, SeriesLlmResponse, SeriesPick
 
 
 class LlmError(Exception):
@@ -353,6 +353,92 @@ async def get_top250_picks_from_llm(
     except Exception as e:
         raise LlmError(
             "Не удалось выбрать фильмы из списка.",
+            debug_detail=str(e),
+        )
+
+
+def _build_series_prompt(
+    time_slot: str,
+    format_type: str,
+    mood: str,
+    restrictions: List[str],
+) -> str:
+    """Промпт для подбора сериалов по времени, формату, настроению и ограничениям."""
+    time_map = {
+        "1-2h": "1–2 часа",
+        "2-4h": "2–4 часа",
+        "several": "несколько вечеров",
+        "any": "не важно",
+    }
+    format_map = {
+        "mini": "мини-сериал",
+        "one_season": "1 сезон",
+        "several_seasons": "несколько сезонов",
+        "any": "не важно",
+    }
+    mood_map = {
+        "light": "лёгкое / расслабиться",
+        "tense": "напряжённое",
+        "funny": "смешное",
+        "atmospheric": "атмосферное",
+        "dark": "мрачное",
+        "romance": "романтика",
+        "surprise": "удиви",
+        "any": "не важно",
+    }
+    rest_map = {
+        "completed_only": "только завершённые",
+        "no_horror": "без ужасов",
+        "no_heavy_drama": "без тяжёлой драмы",
+        "rating_7_plus": "рейтинг 7+",
+        "no_russian": "без российских сериалов",
+    }
+    lines = [
+        f"- Время: {time_map.get(time_slot, time_slot)}",
+        f"- Формат: {format_map.get(format_type, format_type)}",
+        f"- Настроение: {mood_map.get(mood, mood)}",
+    ]
+    if restrictions:
+        lines.append("- Ограничения: " + ", ".join(rest_map.get(r, r) for r in restrictions))
+    details = "\n".join(lines)
+    return (
+        "Ты — эксперт по сериалам. Пользователь хочет подобрать сериал на вечер.\n"
+        f"Предпочтения:\n{details}\n\n"
+        "Верни ТОЛЬКО один JSON-объект в формате:\n"
+        "{\n"
+        '  "session_summary": "краткая сводка в 1 предложение",\n'
+        '  "recommendations": [\n'
+        '    {"title": "Название сериала", "year": 2020, "why": "Почему подходит"},\n'
+        "    ...\n"
+        "  ]\n"
+        "}\n\n"
+        "Требования:\n"
+        "- Дай от 8 до 12 сериалов (реальных, с Кинопоиска/IMDb). Часть может отфильтроваться.\n"
+        "- Используй только сериалы (не полнометражные фильмы).\n"
+        "- title — оригинальное или русское название, как чаще ищут; year — год первого сезона.\n"
+        "- Без комментариев вне JSON, без Markdown, без ```.\n"
+    )
+
+
+async def get_series_recommendations_from_llm(
+    settings: Settings,
+    time_slot: str,
+    format_type: str,
+    mood: str,
+    restrictions: List[str],
+) -> SeriesLlmResponse:
+    """
+    Запрос к ИИ: подбор сериалов по времени, формату, настроению и ограничениям.
+    Возвращает список {title, year, why} для последующего обогащения из Кинопоиска.
+    """
+    prompt = _build_series_prompt(time_slot, format_type, mood, restrictions)
+    raw = await _request_llm_raw(settings, prompt, timeout_sec=35)
+    text = _strip_code_fences(raw)
+    try:
+        return SeriesLlmResponse.model_validate_json(text)
+    except ValidationError as e:
+        raise LlmError(
+            "Модель вернула некорректный ответ по сериалам.",
             debug_detail=str(e),
         )
 

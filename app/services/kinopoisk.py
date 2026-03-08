@@ -444,6 +444,352 @@ async def get_movie_info(
     return None
 
 
+def _is_series_doc(doc: Dict[str, Any]) -> bool:
+    """Проверяет, что doc из API — сериал (а не фильм)."""
+    if not doc:
+        return False
+    t = (doc.get("type") or "").strip().lower()
+    if t in ("tv-series", "tv_series", "сериал", "series"):
+        return True
+    if doc.get("isSeries") is True:
+        return True
+    return False
+
+
+async def _fetch_series_doc_by_search(
+    settings: Settings, title: str, year: Optional[int] = None
+) -> Optional[Dict[str, Any]]:
+    """
+    Поиск сериала по названию. Использует тот же search API, фильтрует только сериалы.
+    """
+    if not settings.kinopoisk_api_key:
+        return None
+    url = f"{settings.kinopoisk_base_url.rstrip('/')}/v1.4/movie/search"
+    headers = {"X-API-KEY": settings.kinopoisk_api_key}
+    params = {"query": title.strip(), "limit": 15}
+    if year:
+        params["query"] = f"{title.strip()} {year}"
+    async with _get_kinopoisk_semaphore():
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                response = await client.get(url, headers=headers, params=params)
+                if response.status_code != 200:
+                    return None
+                data = response.json()
+            await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC)
+        except (httpx.RequestError, ValueError):
+            return None
+    docs = [d for d in (data.get("docs") or []) if _is_series_doc(d)]
+    if not docs:
+        return None
+    requested_title = (title or "").strip()
+    best = None
+    best_score = -1
+    for d in docs:
+        score = _doc_title_match_score(d, requested_title, year)
+        if score > best_score:
+            best_score = score
+            best = d
+    return best if best_score > 0 else docs[0]
+
+
+def _parse_doc_to_series_row(doc: Dict[str, Any]) -> tuple:
+    """Из ответа API собирает кортеж для INSERT/UPDATE series."""
+    kinopoisk_id = doc.get("id")
+    if kinopoisk_id is not None:
+        try:
+            kinopoisk_id = int(kinopoisk_id)
+        except (TypeError, ValueError):
+            kinopoisk_id = None
+    name = (doc.get("name") or doc.get("alternativeName") or "").strip() or (str(kinopoisk_id) if kinopoisk_id else "")
+    original_name = (doc.get("alternativeName") or doc.get("name") or "").strip() or None
+    year = doc.get("year")
+    if year is not None:
+        try:
+            year = int(year)
+        except (TypeError, ValueError):
+            year = None
+    r = doc.get("rating")
+    rating_kp = None
+    if r is not None:
+        if isinstance(r, (int, float)):
+            rating_kp = float(r)
+        elif isinstance(r, dict) and r.get("kp") is not None:
+            try:
+                rating_kp = float(r["kp"])
+            except (TypeError, ValueError):
+                pass
+    votes = doc.get("votes")
+    if votes is not None:
+        try:
+            votes = int(votes)
+        except (TypeError, ValueError):
+            votes = None
+    poster_url = _parse_poster(doc)
+    poster_urls = _parse_poster_urls(doc)
+    poster_urls_json = json.dumps(poster_urls, ensure_ascii=False)[:2000] if poster_urls else None
+    description = (doc.get("description") or "").strip() or None
+    if description and len(description) > 5000:
+        description = description[:5000]
+    genres_raw = doc.get("genres") or []
+    genre_names = [g.get("name") or "" for g in genres_raw if isinstance(g, dict)]
+    genres = ",".join(g.strip() for g in genre_names if g.strip()) or None
+    countries_raw = doc.get("countries") or []
+    country_names = [c.get("name") or "" for c in countries_raw if isinstance(c, dict)]
+    countries = ",".join(c.strip() for c in country_names if c.strip()) or None
+    # Сериал-специфичные поля (API может отдавать по-разному)
+    movie_length = doc.get("movieLength")  # может быть длина серии в минутах
+    if movie_length is not None:
+        try:
+            runtime_episode_min = int(movie_length)
+        except (TypeError, ValueError):
+            runtime_episode_min = None
+    else:
+        runtime_episode_min = None
+    # Количество сезонов/серий — в некоторых API в полях seriesLength, numberOfEpisodes
+    episodes_total = doc.get("numberOfEpisodes") or doc.get("episodesCount")
+    if episodes_total is not None:
+        try:
+            episodes_total = int(episodes_total)
+        except (TypeError, ValueError):
+            episodes_total = None
+    seasons_total = doc.get("seasonsCount") or doc.get("numberOfSeasons")
+    if seasons_total is not None:
+        try:
+            seasons_total = int(seasons_total)
+        except (TypeError, ValueError):
+            seasons_total = None
+    status = (doc.get("status") or "").strip() or None
+    if status and isinstance(status, dict):
+        status = (status.get("name") or "").strip() or None
+    is_mini = 1 if (seasons_total == 1 and (episodes_total or 0) <= 10) else 0
+    return (
+        kinopoisk_id, name, original_name, year, rating_kp, votes,
+        poster_url, poster_urls_json, description, None,  # short_description заполним отдельно
+        is_mini, seasons_total, episodes_total, runtime_episode_min, status, countries, genres,
+    )
+
+
+async def save_series_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> Optional[int]:
+    """
+    Сохраняет сериал из ответа API в таблицу series. Возвращает series.id или None.
+    """
+    row = _parse_doc_to_series_row(doc)
+    (kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls_json,
+     description, _, is_mini, seasons_total, episodes_total, runtime_episode_min, status, countries, genres) = row
+    if not name and not kinopoisk_id:
+        return None
+    async with aiosqlite.connect(settings.db_path) as db:
+        if kinopoisk_id is not None:
+            cursor = await db.execute("SELECT id FROM series WHERE kinopoisk_id = ? LIMIT 1", (kinopoisk_id,))
+            existing = await cursor.fetchone()
+        else:
+            cursor = await db.execute(
+                "SELECT id FROM series WHERE name = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                (name, year, year),
+            )
+            existing = await cursor.fetchone()
+        if existing:
+            await db.execute(
+                """UPDATE series SET name=?, original_name=?, year=?, rating_kp=?, votes=?, poster_url=?, poster_urls=?,
+                   description=?, short_description=?, is_mini_series=?, seasons_total=?, episodes_total=?,
+                   runtime_episode_min=?, status=?, countries=?, genres=?, updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+                (name, original_name, year, rating_kp, votes, poster_url, poster_urls_json,
+                 description, None, is_mini, seasons_total, episodes_total, runtime_episode_min, status, countries, genres, existing[0]),
+            )
+            await db.commit()
+            return existing[0]
+        cursor = await db.execute(
+            """INSERT INTO series (kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls,
+               description, short_description, is_mini_series, seasons_total, episodes_total, runtime_episode_min,
+               status, countries, genres) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls_json,
+             description, None, is_mini, seasons_total, episodes_total, runtime_episode_min, status, countries, genres),
+        )
+        await db.commit()
+        return cursor.lastrowid
+
+
+async def get_series_info(
+    settings: Settings, title: str, year: Optional[int] = None
+) -> Optional[Dict[str, Any]]:
+    """
+    Возвращает данные по сериалу: сначала из таблицы series, иначе — поиск в API (только сериалы),
+    сохранение в series и возврат словаря для карточки.
+    """
+    title = (title or "").strip()
+    if not title:
+        return None
+    async with aiosqlite.connect(settings.db_path) as db:
+        db.row_factory = aiosqlite.Row
+        for y in (year, year - 1, year + 1) if year is not None else (None,):
+            if y is not None and y < 0:
+                continue
+            cursor = await db.execute(
+                "SELECT id, kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls, "
+                "description, short_description, is_mini_series, seasons_total, episodes_total, runtime_episode_min, "
+                "status, countries, genres FROM series WHERE name = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                (title, y, y),
+            )
+            row = await cursor.fetchone()
+            if row:
+                return _series_row_to_dict(row)
+    if not settings.kinopoisk_api_key:
+        return None
+    years_to_try = [year, year - 1, year + 1, None] if year is not None else [None]
+    for y in years_to_try:
+        if y is not None and y < 0:
+            continue
+        doc = await _fetch_series_doc_by_search(settings, title, y)
+        if not doc:
+            continue
+        if _doc_title_match_score(doc, title, y) < _MIN_TITLE_MATCH_SCORE_TO_USE:
+            continue
+        series_id = await save_series_from_api_doc(settings, doc)
+        if not series_id:
+            continue
+        async with aiosqlite.connect(settings.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT id, kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls, "
+                "description, short_description, is_mini_series, seasons_total, episodes_total, runtime_episode_min, "
+                "status, countries, genres FROM series WHERE id = ? LIMIT 1",
+                (series_id,),
+            )
+            row = await cursor.fetchone()
+        if row:
+            return _series_row_to_dict(row)
+    return None
+
+
+async def get_or_create_series_from_llm(
+    settings: Settings, title: str, year: Optional[int], why: str = ""
+) -> Optional[Dict[str, Any]]:
+    """
+    Возвращает сериал из БД по названию и году (или ±1 год), либо создаёт запись-заглушку
+    из ответа ИИ (name, year, short_description=why). Так мы всегда можем что-то показать;
+    обогащение постером/рейтингом делается отдельно через enrich_series_from_kinopoisk.
+    """
+    title = (title or "").strip()
+    if not title:
+        return None
+    async with aiosqlite.connect(settings.db_path) as db:
+        db.row_factory = aiosqlite.Row
+        for y in (year, year - 1, year + 1, None) if year is not None else (None,):
+            if y is not None and y < 0:
+                continue
+            cursor = await db.execute(
+                "SELECT id, kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls, "
+                "description, short_description, is_mini_series, seasons_total, episodes_total, runtime_episode_min, "
+                "status, countries, genres FROM series WHERE name = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                (title, y, y),
+            )
+            row = await cursor.fetchone()
+            if row:
+                return _series_row_to_dict(row)
+        cursor = await db.execute(
+            """INSERT INTO series (name, year, short_description) VALUES (?, ?, ?)""",
+            (title, year, (why or "").strip() or None),
+        )
+        await db.commit()
+        sid = cursor.lastrowid
+        cursor = await db.execute(
+            "SELECT id, kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls, "
+            "description, short_description, is_mini_series, seasons_total, episodes_total, runtime_episode_min, "
+            "status, countries, genres FROM series WHERE id = ? LIMIT 1",
+            (sid,),
+        )
+        row = await cursor.fetchone()
+        if row:
+            return _series_row_to_dict(row)
+    return None
+
+
+async def update_series_from_api_doc(
+    settings: Settings, series_id: int, doc: Dict[str, Any]
+) -> None:
+    """Обновляет запись series по id данными из ответа API Кинопоиска (постер, рейтинг и т.д.)."""
+    row = _parse_doc_to_series_row(doc)
+    (kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls_json,
+     description, _, is_mini, seasons_total, episodes_total, runtime_episode_min, status, countries, genres) = row
+    async with aiosqlite.connect(settings.db_path) as db:
+        # short_description из API в _parse_doc_to_series_row не парсится (None); сохраняем текущий «почему» от ИИ
+        await db.execute(
+            """UPDATE series SET kinopoisk_id=?, name=?, original_name=?, year=?, rating_kp=?, votes=?,
+               poster_url=?, poster_urls=?, description=?, short_description=COALESCE(NULLIF(?, ''), short_description),
+               is_mini_series=?, seasons_total=?, episodes_total=?, runtime_episode_min=?,
+               status=?, countries=?, genres=?, updated_at=CURRENT_TIMESTAMP WHERE id=?""",
+            (kinopoisk_id, name, original_name, year, rating_kp, votes, poster_url, poster_urls_json,
+             description, None, is_mini, seasons_total, episodes_total, runtime_episode_min,
+             status, countries, genres, series_id),
+        )
+        await db.commit()
+
+
+async def enrich_series_from_kinopoisk(
+    settings: Settings, series_id: int
+) -> bool:
+    """
+    Ищет сериал в API Кинопоиска по name/year из записи series и обновляет запись
+    (постер, рейтинг, описание и т.д.). Возвращает True, если обогащение прошло.
+    """
+    if not settings.kinopoisk_api_key:
+        return False
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute(
+            "SELECT name, year FROM series WHERE id = ? LIMIT 1", (series_id,)
+        )
+        row = await cursor.fetchone()
+    if not row:
+        return False
+    name, year = row[0], row[1]
+    doc = await _fetch_series_doc_by_search(settings, name, year)
+    if not doc:
+        years_to_try = [year - 1, year + 1, None] if year is not None else []
+        for y in years_to_try:
+            if y is not None and y < 0:
+                continue
+            doc = await _fetch_series_doc_by_search(settings, name, y)
+            if doc:
+                break
+    if not doc:
+        return False
+    if _doc_title_match_score(doc, (name or "").strip(), year) < _MIN_TITLE_MATCH_SCORE_TO_USE:
+        return False
+    await update_series_from_api_doc(settings, series_id, doc)
+    return True
+
+
+def _series_row_to_dict(row: Any) -> Dict[str, Any]:
+    """Преобразует строку series (Row) в словарь для флоу."""
+    poster_urls = None
+    if row["poster_urls"]:
+        try:
+            poster_urls = json.loads(row["poster_urls"]) if isinstance(row["poster_urls"], str) else row["poster_urls"]
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return {
+        "id": row["id"],
+        "kinopoisk_id": row["kinopoisk_id"],
+        "name": (row["name"] or "").strip(),
+        "original_name": (row["original_name"] or "").strip(),
+        "year": row["year"],
+        "rating_kp": row["rating_kp"],
+        "votes": row["votes"],
+        "poster_url": row["poster_url"],
+        "poster_urls": poster_urls,
+        "description": (row["description"] or "").strip(),
+        "short_description": (row["short_description"] or "").strip(),
+        "is_mini_series": row["is_mini_series"] or 0,
+        "seasons_total": row["seasons_total"],
+        "episodes_total": row["episodes_total"],
+        "runtime_episode_min": row["runtime_episode_min"],
+        "status": (row["status"] or "").strip(),
+        "countries": (row["countries"] or "").strip(),
+        "genres": (row["genres"] or "").strip(),
+    }
+
+
 async def get_age_rating(settings: Settings, title: str, year: Optional[int] = None) -> Optional[str]:
     """Удобная обёртка: возвращает только возрастной рейтинг (из кэша или API)."""
     info = await get_movie_info(settings, title, year)

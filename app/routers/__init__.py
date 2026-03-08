@@ -1,7 +1,7 @@
 from aiogram import Dispatcher
 
 from ..config import Settings
-from . import start, flow_movie, favorites, report
+from . import start, flow_movie, flow_series, favorites, report
 
 
 def register_routers(dp: Dispatcher, settings: Settings) -> None:
@@ -10,6 +10,7 @@ def register_routers(dp: Dispatcher, settings: Settings) -> None:
     """
     dp.include_router(start.get_router(settings))
     dp.include_router(flow_movie.get_router(settings))
+    dp.include_router(flow_series.get_router(settings))
     dp.include_router(favorites.get_router(settings))
     dp.include_router(report.get_router(settings))
 
