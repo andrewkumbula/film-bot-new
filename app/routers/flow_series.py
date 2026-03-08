@@ -17,6 +17,7 @@ from ..config import Settings, load_settings
 from ..keyboards.main_menu import main_menu_keyboard
 from ..keyboards.series import (
     PREFIX,
+    series_mode_keyboard,
     series_time_keyboard,
     series_format_keyboard,
     series_mood_keyboard,
@@ -24,7 +25,13 @@ from ..keyboards.series import (
     series_card_keyboard,
     series_reco_control_keyboard,
 )
-from ..llm.service import get_series_recommendations_from_llm, get_series_similar_from_llm, LlmError
+from ..llm.service import (
+    get_series_recommendations_from_llm,
+    get_series_similar_from_llm,
+    get_series_similar_multi_from_llm,
+    get_series_by_description_from_llm,
+    LlmError,
+)
 from ..services.kinopoisk import get_or_create_series_from_llm, enrich_series_from_kinopoisk
 from ..services.series import (
     get_filtered_series,
@@ -40,10 +47,13 @@ logger = logging.getLogger(__name__)
 
 
 class SeriesFlow(StatesGroup):
+    mode = State()
     time = State()
     format = State()
     mood = State()
     restrictions = State()
+    similar_input = State()
+    by_description_input = State()
     recommendations = State()
 
 
@@ -118,17 +128,133 @@ def get_router(settings: Settings) -> Router:
                 parts.append(f"💡 {why_text}")
         return "\n\n".join(parts)
 
-    # ---- Вход: кнопка "Подобрать сериал" (в меню с эмодзи: "📺 Подобрать сериал") ----
+    # ---- Вход: кнопка "Подобрать сериал" — выбор режима ----
     @router.message(F.text.endswith("Подобрать сериал"))
     async def start_series_flow(message: Message, state: FSMContext) -> None:
         await state.clear()
-        await state.set_state(SeriesFlow.time)
+        await state.set_state(SeriesFlow.mode)
         await message.answer(
+            "Как подобрать сериал?",
+            reply_markup=series_mode_keyboard(),
+        )
+
+    # ---- Выбор режима: обычный / похожее на / по описанию ----
+    @router.callback_query(SeriesFlow.mode, F.data == f"{PREFIX}mode:ordinary")
+    async def series_mode_ordinary(callback: CallbackQuery, state: FSMContext) -> None:
+        await state.set_state(SeriesFlow.time)
+        await callback.message.edit_text(
             "Сколько времени планируете смотреть?",
             reply_markup=series_time_keyboard(),
         )
+        await callback.answer()
 
-    # ---- Шаг 1: время ----
+    @router.callback_query(SeriesFlow.mode, F.data == f"{PREFIX}mode:similar")
+    async def series_mode_similar(callback: CallbackQuery, state: FSMContext) -> None:
+        await state.set_state(SeriesFlow.similar_input)
+        await callback.message.edit_text(
+            "Введите сериал или несколько сериалов (через запятую), похожие на которые хотите подобрать.",
+        )
+        await callback.answer()
+
+    @router.callback_query(SeriesFlow.mode, F.data == f"{PREFIX}mode:by_description")
+    async def series_mode_by_description(callback: CallbackQuery, state: FSMContext) -> None:
+        await state.set_state(SeriesFlow.by_description_input)
+        await callback.message.edit_text(
+            "Опишите текстом, какой сериал хотите: жанр, настроение, примеры — и я подберу варианты.",
+        )
+        await callback.answer()
+
+    async def _enrich_and_show_series_cards(
+        msg: Message,
+        user_id: int,
+        llm_response: Any,
+        header: str,
+        state: FSMContext,
+    ) -> None:
+        """Общая логика: по списку рекомендаций ИИ — обогащение из Кинопоиска, показ до 3 карточек."""
+        settings = load_settings()
+        watched_ids = await get_series_watched_ids(settings, user_id)
+        candidates: List[Dict[str, Any]] = []
+        for pick in llm_response.recommendations:
+            if len(candidates) >= 3:
+                break
+            if not (getattr(pick, "title", "") or "").strip():
+                continue
+            rec = await get_or_create_series_from_llm(
+                settings, pick.title, getattr(pick, "year", None), getattr(pick, "why", "") or "",
+            )
+            if rec is None or rec.get("id") in watched_ids:
+                continue
+            await enrich_series_from_kinopoisk(settings, rec["id"])
+            refreshed = await get_series_by_id(settings, rec["id"])
+            if refreshed is None:
+                continue
+            refreshed["why"] = getattr(pick, "why", "") or ""
+            candidates.append(refreshed)
+        if not candidates:
+            await state.set_state(SeriesFlow.recommendations)
+            await state.update_data(series_recommendations=[])
+            await msg.answer(
+                "По запросу ничего не нашлось или всё уже в «Уже смотрел». Попробуйте «Подобрать ещё».",
+                reply_markup=series_reco_control_keyboard(),
+            )
+            return
+        await state.set_state(SeriesFlow.recommendations)
+        await state.update_data(series_recommendations=candidates)
+        await msg.answer(header)
+        for i, s in enumerate(candidates):
+            in_fav = await is_series_in_favorites(settings, user_id, s["id"])
+            in_watched = await _is_series_watched(settings, user_id, s["id"])
+            kb = series_card_keyboard(s["id"], i, in_fav, in_watched)
+            await _send_series_card(msg, s, kb)
+        await msg.answer(
+            "Можем подобрать ещё или вернуться в меню 👇",
+            reply_markup=series_reco_control_keyboard(),
+        )
+
+    @router.message(SeriesFlow.similar_input, F.text)
+    async def series_similar_input(message: Message, state: FSMContext) -> None:
+        user_id = message.from_user.id if message.from_user else 0
+        settings = load_settings()
+        text = (message.text or "").strip()
+        if not text:
+            await message.answer("Напишите название сериала или нескольких через запятую.")
+            return
+        await message.answer("Ищу похожие… 🤖")
+        try:
+            llm_response = await get_series_similar_multi_from_llm(settings, text)
+        except LlmError:
+            await message.answer(
+                "Не удалось подобрать похожие сериалы. Проверьте названия и попробуйте снова.",
+                reply_markup=series_reco_control_keyboard(),
+            )
+            return
+        await _enrich_and_show_series_cards(
+            message, user_id, llm_response, "Похожие сериалы 📺", state,
+        )
+
+    @router.message(SeriesFlow.by_description_input, F.text)
+    async def series_by_description_input(message: Message, state: FSMContext) -> None:
+        user_id = message.from_user.id if message.from_user else 0
+        settings = load_settings()
+        text = (message.text or "").strip()
+        if not text:
+            await message.answer("Опишите, какой сериал хотите — жанр, настроение или примеры.")
+            return
+        await message.answer("Подбираю по описанию… 🤖")
+        try:
+            llm_response = await get_series_by_description_from_llm(settings, text)
+        except LlmError:
+            await message.answer(
+                "Не удалось подобрать сериалы по описанию. Попробуйте сформулировать иначе.",
+                reply_markup=series_reco_control_keyboard(),
+            )
+            return
+        await _enrich_and_show_series_cards(
+            message, user_id, llm_response, "Вот подборка по вашему описанию 📺", state,
+        )
+
+    # ---- Шаг 1: время (только для обычного подбора) ----
     @router.callback_query(SeriesFlow.time, F.data.startswith(f"{PREFIX}time:"))
     async def series_time(callback: CallbackQuery, state: FSMContext) -> None:
         time_val = callback.data.split(":", 1)[1]
@@ -446,10 +572,10 @@ def get_router(settings: Settings) -> Router:
     @router.callback_query(SeriesFlow.recommendations, F.data == f"{PREFIX}reco:again")
     async def series_reco_again(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer()
-        await state.set_state(SeriesFlow.time)
+        await state.set_state(SeriesFlow.mode)
         await callback.message.answer(
-            "Сколько времени планируете смотреть?",
-            reply_markup=series_time_keyboard(),
+            "Как подобрать сериал?",
+            reply_markup=series_mode_keyboard(),
         )
 
     @router.callback_query(SeriesFlow.recommendations, F.data == f"{PREFIX}reco:menu")

@@ -6,6 +6,17 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 PREFIX = "s_"
 
 
+def series_mode_keyboard() -> InlineKeyboardMarkup:
+    """Первый шаг: способ подбора — обычный, похожее на, по описанию."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="📋 Обычный подбор", callback_data=f"{PREFIX}mode:ordinary")],
+            [InlineKeyboardButton(text="🔄 Похожее на…", callback_data=f"{PREFIX}mode:similar")],
+            [InlineKeyboardButton(text="✏️ По текстовому описанию", callback_data=f"{PREFIX}mode:by_description")],
+        ]
+    )
+
+
 def series_time_keyboard() -> InlineKeyboardMarkup:
     """Сколько времени есть на просмотр."""
     return InlineKeyboardMarkup(

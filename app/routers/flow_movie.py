@@ -47,7 +47,7 @@ from ..services.not_interested import (
     get_not_interested_movie_ids,
 )
 from ..services.flow_log import log_flow_step
-from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_info, KinopoiskMovieInfo
+from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_info, refresh_movie_from_api, KinopoiskMovieInfo
 from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
 from ..services.oscar import get_filtered_oscar, get_oscar_count, get_oscar_flags, get_movie_id_by_kinopoisk, link_oscar_to_movie
 from ..services.user_settings import get_min_rating_filter_enabled
@@ -644,33 +644,40 @@ def get_router(settings: Settings) -> Router:
         await state.update_data(recommendations=films)
         await callback.message.edit_text("Вот подборка по Оскару 🏆")
         for idx, rec in enumerate(films):
-            # Если нет привязки к Кинопоиску — пробуем подтянуть при выводе
-            if rec.get("movie_id") is None and rec.get("oscar_id"):
+            # Если нет kinopoisk_id и данных из Кинопоиска — пробуем подтянуть при выдаче (и при movie_id, и без)
+            if rec.get("kinopoisk_id") is None and rec.get("oscar_id") and settings.kinopoisk_api_key:
                 title = (rec.get("title") or rec.get("title_from_source") or "").strip()
                 year = rec.get("year") or rec.get("year_from_source")
                 if year is None and rec.get("ceremony_year"):
                     year = int(rec["ceremony_year"]) - 1
-                if title and settings.kinopoisk_api_key:
+                if title:
                     try:
-                        info = await get_movie_info(settings, title, year)
+                        ok = await refresh_movie_from_api(settings, title=title, year=year)
+                        if not ok and year is not None:
+                            ok = await refresh_movie_from_api(settings, title=title, year=year - 1)
+                        if not ok and year is not None:
+                            ok = await refresh_movie_from_api(settings, title=title, year=year + 1)
+                        info = await get_movie_info(settings, title, year) if ok else None
                         if info is None and year is not None:
                             info = await get_movie_info(settings, title, year - 1)
                         if info is None and year is not None:
                             info = await get_movie_info(settings, title, year + 1)
-                        if info and info.kinopoisk_id is not None:
-                            movie_id = await get_movie_id_by_kinopoisk(settings, info.kinopoisk_id)
-                            if movie_id:
-                                await link_oscar_to_movie(settings, rec["oscar_id"], movie_id)
-                                rec["movie_id"] = movie_id
-                                rec["kinopoisk_id"] = info.kinopoisk_id
-                                rec["year"] = rec.get("year") or year
-                                rec["age_rating"] = info.age_rating
-                                rec["rating_kp"] = info.rating_kp
-                                rec["poster_url"] = info.poster_url
-                                rec["poster_urls"] = info.poster_urls
-                                rec["short_description"] = info.short_description
+                        if info:
+                            rec["kinopoisk_id"] = info.kinopoisk_id
+                            rec["age_rating"] = info.age_rating
+                            rec["rating_kp"] = info.rating_kp
+                            rec["poster_url"] = info.poster_url
+                            rec["poster_urls"] = info.poster_urls
+                            rec["short_description"] = info.short_description
+                            if rec.get("year") is None and year is not None:
+                                rec["year"] = year
+                            if rec.get("movie_id") is None and info.kinopoisk_id is not None:
+                                movie_id = await get_movie_id_by_kinopoisk(settings, info.kinopoisk_id)
+                                if movie_id:
+                                    await link_oscar_to_movie(settings, rec["oscar_id"], movie_id)
+                                    rec["movie_id"] = movie_id
                     except Exception as e:
-                        logger.debug("Oscar on-the-fly Kinopoisk lookup for %s: %s", title, e)
+                        logger.debug("Oscar on-the-fly Kinopoisk enrich for %s: %s", title, e)
 
             parts = [f"{idx + 1}. <b>{rec.get('title') or rec.get('title_from_source') or '—'}</b>"]
             if rec.get("year"):

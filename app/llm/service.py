@@ -461,6 +461,44 @@ def _build_series_similar_prompt(series_title: str, series_year: Optional[int] =
     )
 
 
+def _build_series_similar_multi_prompt(titles_text: str) -> str:
+    """Промпт для подбора сериалов, похожих на один или несколько указанных (через запятую)."""
+    parts = [t.strip() for t in (titles_text or "").split(",") if t.strip()]
+    if not parts:
+        parts = [titles_text or "сериал"]
+    list_str = ", ".join(f"«{p}»" for p in parts[:10])
+    return (
+        f"Пользователь хочет сериалы, похожие на: {list_str}. "
+        "Подбери 8–12 других сериалов, похожих по стилю, жанру или настроению на любой из них.\n\n"
+        "Верни ТОЛЬКО один JSON-объект:\n"
+        "{\n"
+        '  "session_summary": "краткая сводка в 1 предложение",\n'
+        '  "recommendations": [\n'
+        '    {"title": "Название", "year": 2020, "why": "Почему похож"},\n'
+        "    ...\n"
+        "  ]\n"
+        "}\n\n"
+        "Требования: только реальные сериалы (не фильмы); title и year как на Кинопоиске/IMDb; без комментариев и Markdown."
+    )
+
+
+def _build_series_by_description_prompt(description: str) -> str:
+    """Промпт для подбора сериалов по свободному текстовому описанию пользователя."""
+    return (
+        f"Пользователь описал, какой сериал хочет:\n\n{description.strip()}\n\n"
+        "По этому описанию подбери 8–12 подходящих сериалов (реальных, с Кинопоиска/IMDb).\n\n"
+        "Верни ТОЛЬКО один JSON-объект:\n"
+        "{\n"
+        '  "session_summary": "краткая сводка в 1 предложение",\n'
+        '  "recommendations": [\n'
+        '    {"title": "Название", "year": 2020, "why": "Почему подходит"},\n'
+        "    ...\n"
+        "  ]\n"
+        "}\n\n"
+        "Требования: только сериалы (не полнометражные фильмы); title и year как при поиске; без комментариев и Markdown."
+    )
+
+
 async def get_series_similar_from_llm(
     settings: Settings, series_title: str, series_year: Optional[int] = None
 ) -> SeriesLlmResponse:
@@ -475,6 +513,42 @@ async def get_series_similar_from_llm(
     except ValidationError as e:
         raise LlmError(
             "Не удалось подобрать похожие сериалы.",
+            debug_detail=str(e),
+        )
+
+
+async def get_series_similar_multi_from_llm(
+    settings: Settings, titles_text: str
+) -> SeriesLlmResponse:
+    """
+    Подбор сериалов, похожих на один или несколько (строка «название1, название2»).
+    """
+    prompt = _build_series_similar_multi_prompt(titles_text)
+    raw = await _request_llm_raw(settings, prompt, timeout_sec=30)
+    text = _strip_code_fences(raw)
+    try:
+        return SeriesLlmResponse.model_validate_json(text)
+    except ValidationError as e:
+        raise LlmError(
+            "Не удалось подобрать похожие сериалы.",
+            debug_detail=str(e),
+        )
+
+
+async def get_series_by_description_from_llm(
+    settings: Settings, description: str
+) -> SeriesLlmResponse:
+    """Подбор сериалов по свободному текстовому описанию пользователя."""
+    if not (description or "").strip():
+        raise LlmError("Описание не задано.", debug_detail="empty")
+    prompt = _build_series_by_description_prompt(description)
+    raw = await _request_llm_raw(settings, prompt, timeout_sec=35)
+    text = _strip_code_fences(raw)
+    try:
+        return SeriesLlmResponse.model_validate_json(text)
+    except ValidationError as e:
+        raise LlmError(
+            "Не удалось подобрать сериалы по описанию.",
             debug_detail=str(e),
         )
 
