@@ -69,8 +69,19 @@ def get_router(settings: Settings) -> Router:
         else:
             await msg.answer(text, reply_markup=kb)
 
+    def _series_completed_label(s: Dict[str, Any]) -> str:
+        """По полю status возвращает подпись для «Завершён»: завершён / идёт / не известно."""
+        raw = (s.get("status") or "").strip().lower()
+        if not raw:
+            return "не известно"
+        if any(x in raw for x in ("завершен", "завершён", "completed", "ended", "закончен", "closed")):
+            return "завершён"
+        if any(x in raw for x in ("продолжается", "ongoing", "в производстве", "running", "в работе")):
+            return "идёт"
+        return raw[:30] if len(raw) <= 30 else raw[:27] + "…"
+
     def _format_series_card(s: Dict[str, Any]) -> str:
-        """Формат карточки по ТЗ: название, год • жанры • рейтинг, описание, серий/длительность/сезонов."""
+        """Формат карточки по ТЗ: название, год • жанры • рейтинг, описание, серий/длительность/сезонов, завершён."""
         parts = [f"<b>{s.get('name') or '—'}</b>"]
         line2 = []
         if s.get("year"):
@@ -95,10 +106,16 @@ def get_router(settings: Settings) -> Router:
             meta.append(f"Длительность: {s['runtime_episode_min']} мин")
         if s.get("seasons_total"):
             meta.append(f"Сезонов: {s['seasons_total']}")
+        meta.append(f"Завершён: {_series_completed_label(s)}")
         if meta:
             parts.append("\n".join(meta))
-        if s.get("why"):
-            parts.append(f"💡 {s['why']}")
+        # Показываем «почему подходит» только если это не дублирует уже выведенное описание
+        why_text = (s.get("why") or "").strip()
+        if why_text:
+            short = (s.get("short_description") or "").strip()
+            long_preview = ((s.get("description") or "").strip()[:300]).strip()
+            if why_text != short and why_text != long_preview:
+                parts.append(f"💡 {why_text}")
         return "\n\n".join(parts)
 
     # ---- Вход: кнопка "Подобрать сериал" (в меню с эмодзи: "📺 Подобрать сериал") ----
