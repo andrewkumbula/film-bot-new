@@ -12,7 +12,7 @@ from .flow_movie import _send_movie_card
 def get_router(settings: Settings) -> Router:
     router = Router(name="favorites")
 
-    @router.message(F.text == "⭐️ Избранное")
+    @router.message(F.text.endswith("Избранное"))
     async def show_favorites(message: Message) -> None:
         favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
 
