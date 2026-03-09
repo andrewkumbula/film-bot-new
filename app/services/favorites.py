@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any, Dict, List, Optional, Set
 
 import aiosqlite
@@ -246,28 +247,9 @@ async def remove_favorite_for_user(user_id: int, movie_id: int) -> bool:
         return cursor.rowcount > 0
 
 
-async def list_favorites_for_user(settings: Settings, user_id: int, limit: int = 10) -> List[Dict[str, Any]]:
-    """
-    Возвращает избранные фильмы пользователя (данные из movies + поля из favorites).
-    """
-    async with aiosqlite.connect(settings.db_path) as db:
-        cursor = await db.execute(
-            """
-            SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
-                   m.poster_url, m.poster_urls,
-                   f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
-            FROM favorites f
-            JOIN movies m ON f.movie_id = m.id
-            WHERE f.user_id = ?
-            ORDER BY f.created_at DESC
-            LIMIT ?
-            """,
-            (user_id, limit),
-        )
-        rows = await cursor.fetchall()
-
-    favorites: List[Dict[str, Any]] = []
-    for row in rows:
+def _parse_favorite_row(row: tuple, has_poster_urls: bool) -> Dict[str, Any]:
+    """Собирает словарь из строки: с poster_urls (12 полей) или без (11 полей)."""
+    if has_poster_urls:
         (movie_id, title, year, age_rating, rating_kp, poster_url, poster_urls_raw,
          why, mood_tags, genres, warnings, similar_if_liked) = row
         poster_urls = None
@@ -280,22 +262,78 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
                 pass
         if not poster_urls and poster_url:
             poster_urls = [poster_url]
-        favorites.append(
-            {
-                "movie_id": movie_id,
-                "title": title,
-                "year": year,
-                "age_rating": age_rating,
-                "rating_kp": rating_kp,
-                "poster_url": poster_url,
-                "poster_urls": poster_urls or [],
-                "why": why,
-                "mood_tags": (mood_tags or "").split(",") if mood_tags else [],
-                "genres": (genres or "").split(",") if genres else [],
-                "warnings": (warnings or "").split(",") if warnings else [],
-                "similar_if_liked": (similar_if_liked or "").split(",") if similar_if_liked else [],
-            }
-        )
+        poster_urls = poster_urls or []
+    else:
+        (movie_id, title, year, age_rating, rating_kp, poster_url,
+         why, mood_tags, genres, warnings, similar_if_liked) = row
+        poster_urls = [poster_url] if poster_url else []
+    return {
+        "movie_id": movie_id,
+        "title": title,
+        "year": year,
+        "age_rating": age_rating,
+        "rating_kp": rating_kp,
+        "poster_url": poster_url,
+        "poster_urls": poster_urls,
+        "why": why,
+        "mood_tags": (mood_tags or "").split(",") if mood_tags else [],
+        "genres": (genres or "").split(",") if genres else [],
+        "warnings": (warnings or "").split(",") if warnings else [],
+        "similar_if_liked": (similar_if_liked or "").split(",") if similar_if_liked else [],
+    }
+
+
+async def list_favorites_for_user(settings: Settings, user_id: int, limit: int = 10) -> List[Dict[str, Any]]:
+    """
+    Возвращает избранные фильмы пользователя (данные из movies + поля из favorites).
+    Если в БД нет колонки poster_urls — использует только poster_url.
+    """
+    base_sql = """
+        SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
+               f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
+        FROM favorites f
+        JOIN movies m ON f.movie_id = m.id
+        WHERE f.user_id = ?
+        ORDER BY f.created_at DESC
+        LIMIT ?
+    """
+    sql_with_posters = """
+        SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
+               m.poster_url, m.poster_urls,
+               f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
+        FROM favorites f
+        JOIN movies m ON f.movie_id = m.id
+        WHERE f.user_id = ?
+        ORDER BY f.created_at DESC
+        LIMIT ?
+    """
+    async with aiosqlite.connect(settings.db_path) as db:
+        rows: list = []
+        has_poster_urls = True
+        try:
+            cursor = await db.execute(sql_with_posters, (user_id, limit))
+            rows = await cursor.fetchall()
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "poster_urls" in str(e) or "no such column" in err_msg:
+                try:
+                    logging.getLogger(__name__).debug(
+                        "list_favorites: poster_urls column missing, using poster_url only: %s", e
+                    )
+                    cursor = await db.execute(
+                        "SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp, m.poster_url, "
+                        "f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked "
+                        "FROM favorites f JOIN movies m ON f.movie_id = m.id WHERE f.user_id = ? ORDER BY f.created_at DESC LIMIT ?",
+                        (user_id, limit),
+                    )
+                    rows = await cursor.fetchall()
+                    has_poster_urls = False
+                except Exception:
+                    raise e
+            else:
+                raise
+
+    favorites = [_parse_favorite_row(row, has_poster_urls) for row in rows]
     return favorites
 
 

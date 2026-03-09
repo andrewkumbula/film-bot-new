@@ -21,9 +21,9 @@ def series_time_keyboard() -> InlineKeyboardMarkup:
     """Сколько времени есть на просмотр."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="1–2 часа", callback_data=f"{PREFIX}time:1-2h")],
             [InlineKeyboardButton(text="2–4 часа", callback_data=f"{PREFIX}time:2-4h")],
             [InlineKeyboardButton(text="Несколько вечеров", callback_data=f"{PREFIX}time:several")],
+            [InlineKeyboardButton(text="Долго и беспощадно", callback_data=f"{PREFIX}time:long")],
             [InlineKeyboardButton(text="Не важно", callback_data=f"{PREFIX}time:any")],
         ]
     )
