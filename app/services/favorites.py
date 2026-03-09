@@ -247,9 +247,9 @@ async def remove_favorite_for_user(user_id: int, movie_id: int) -> bool:
         return cursor.rowcount > 0
 
 
-def _parse_favorite_row(row: tuple, has_poster_urls: bool) -> Dict[str, Any]:
-    """Собирает словарь из строки: с poster_urls (12 полей) или без (11 полей)."""
-    if has_poster_urls:
+def _parse_favorite_row(row: tuple, variant: str) -> Dict[str, Any]:
+    """variant: 'full' (12 полей), 'poster' (11), 'minimal' (10 без постеров)."""
+    if variant == "full":
         (movie_id, title, year, age_rating, rating_kp, poster_url, poster_urls_raw,
          why, mood_tags, genres, warnings, similar_if_liked) = row
         poster_urls = None
@@ -263,10 +263,15 @@ def _parse_favorite_row(row: tuple, has_poster_urls: bool) -> Dict[str, Any]:
         if not poster_urls and poster_url:
             poster_urls = [poster_url]
         poster_urls = poster_urls or []
-    else:
+    elif variant == "poster":
         (movie_id, title, year, age_rating, rating_kp, poster_url,
          why, mood_tags, genres, warnings, similar_if_liked) = row
         poster_urls = [poster_url] if poster_url else []
+    else:
+        (movie_id, title, year, age_rating, rating_kp,
+         why, mood_tags, genres, warnings, similar_if_liked) = row
+        poster_url = None
+        poster_urls = []
     return {
         "movie_id": movie_id,
         "title": title,
@@ -283,57 +288,64 @@ def _parse_favorite_row(row: tuple, has_poster_urls: bool) -> Dict[str, Any]:
     }
 
 
+_SQL_FAVORITES_MINIMAL = """
+    SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
+           f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
+    FROM favorites f
+    JOIN movies m ON f.movie_id = m.id
+    WHERE f.user_id = ?
+    ORDER BY f.created_at DESC
+    LIMIT ?
+"""
+_SQL_FAVORITES_WITH_POSTER = """
+    SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp, m.poster_url,
+           f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
+    FROM favorites f
+    JOIN movies m ON f.movie_id = m.id
+    WHERE f.user_id = ?
+    ORDER BY f.created_at DESC
+    LIMIT ?
+"""
+_SQL_FAVORITES_FULL = """
+    SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
+           m.poster_url, m.poster_urls,
+           f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
+    FROM favorites f
+    JOIN movies m ON f.movie_id = m.id
+    WHERE f.user_id = ?
+    ORDER BY f.created_at DESC
+    LIMIT ?
+"""
+
+
 async def list_favorites_for_user(settings: Settings, user_id: int, limit: int = 10) -> List[Dict[str, Any]]:
     """
     Возвращает избранные фильмы пользователя (данные из movies + поля из favorites).
-    Если в БД нет колонки poster_urls — использует только poster_url.
+    Пробует запрос с постером; при ошибке — минимальный запрос без постеров.
     """
-    base_sql = """
-        SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
-               f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
-        FROM favorites f
-        JOIN movies m ON f.movie_id = m.id
-        WHERE f.user_id = ?
-        ORDER BY f.created_at DESC
-        LIMIT ?
-    """
-    sql_with_posters = """
-        SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
-               m.poster_url, m.poster_urls,
-               f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
-        FROM favorites f
-        JOIN movies m ON f.movie_id = m.id
-        WHERE f.user_id = ?
-        ORDER BY f.created_at DESC
-        LIMIT ?
-    """
+    log = logging.getLogger(__name__)
+    params = (user_id, limit)
+    last_error: Optional[Exception] = None
     async with aiosqlite.connect(settings.db_path) as db:
         rows: list = []
-        has_poster_urls = True
-        try:
-            cursor = await db.execute(sql_with_posters, (user_id, limit))
-            rows = await cursor.fetchall()
-        except Exception as e:
-            err_msg = str(e).lower()
-            if "poster_urls" in str(e) or "no such column" in err_msg:
-                try:
-                    logging.getLogger(__name__).debug(
-                        "list_favorites: poster_urls column missing, using poster_url only: %s", e
-                    )
-                    cursor = await db.execute(
-                        "SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp, m.poster_url, "
-                        "f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked "
-                        "FROM favorites f JOIN movies m ON f.movie_id = m.id WHERE f.user_id = ? ORDER BY f.created_at DESC LIMIT ?",
-                        (user_id, limit),
-                    )
-                    rows = await cursor.fetchall()
-                    has_poster_urls = False
-                except Exception:
-                    raise e
-            else:
-                raise
-
-    favorites = [_parse_favorite_row(row, has_poster_urls) for row in rows]
+        variant = "minimal"
+        for sql, v in [
+            (_SQL_FAVORITES_FULL, "full"),
+            (_SQL_FAVORITES_WITH_POSTER, "poster"),
+            (_SQL_FAVORITES_MINIMAL, "minimal"),
+        ]:
+            try:
+                cursor = await db.execute(sql, params)
+                rows = await cursor.fetchall()
+                variant = v
+                break
+            except Exception as e:
+                last_error = e
+                log.info("list_favorites_for_user: query %s failed: %s", v, e)
+                continue
+        if last_error is not None and not rows:
+            raise last_error
+    favorites = [_parse_favorite_row(row, variant) for row in rows]
     return favorites
 
 

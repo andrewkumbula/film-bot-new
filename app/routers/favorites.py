@@ -25,8 +25,10 @@ def get_router(settings: Settings) -> Router:
             favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
         except Exception as e:
             logger.exception("list_favorites_for_user failed: %s", e)
+            err_short = str(e).strip()[:200]
             await message.answer(
-                "Не удалось загрузить избранное. Попробуй позже или напиши в поддержку.",
+                "Не удалось загрузить избранное. Попробуй позже или напиши в поддержку.\n\n"
+                f"Ошибка для отладки: {err_short}",
                 reply_markup=main_menu_keyboard(),
             )
             return
