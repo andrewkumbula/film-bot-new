@@ -28,7 +28,6 @@ from ..keyboards.flow import (
     source_keyboard,
     mood_keyboard,
     genres_keyboard,
-    duration_keyboard,
     age_keyboard,
     company_keyboard,
     negative_keyboard,
@@ -134,7 +133,6 @@ class MovieFlow(StatesGroup):
     source = State()
     mood = State()
     genres = State()
-    duration = State()
     age = State()
     company = State()
     negative = State()
@@ -403,6 +401,8 @@ def get_router(settings: Settings) -> Router:
                 parts[0] += f" ({rec['year']})"
             if rec.get("genres"):
                 parts.append("🎭 " + (rec["genres"][:80] + "…" if len(rec.get("genres", "")) > 80 else rec["genres"]))
+            if (rec.get("countries") or "").strip():
+                parts.append("Страна: " + (rec["countries"] or "").strip())
             short_desc = (rec.get("short_description") or "").strip()
             if short_desc:
                 parts.append("📝 " + short_desc)
@@ -704,6 +704,7 @@ def get_router(settings: Settings) -> Router:
                             rec["poster_url"] = info.poster_url
                             rec["poster_urls"] = info.poster_urls
                             rec["short_description"] = info.short_description
+                            rec["countries"] = info.countries
                             if rec.get("year") is None and year is not None:
                                 rec["year"] = year
                             if rec.get("movie_id") is None and info.kinopoisk_id is not None:
@@ -731,6 +732,8 @@ def get_router(settings: Settings) -> Router:
             parts.append(f"🔞 {age_str}   ⭐ Кинопоиск: {rating_str}")
             if rec.get("genres"):
                 parts.append("🎭 " + (rec["genres"][:80] + "…" if len(rec.get("genres", "")) > 80 else rec["genres"]))
+            if (rec.get("countries") or "").strip():
+                parts.append("Страна: " + (rec["countries"] or "").strip())
             if rec.get("short_description"):
                 parts.append("📝 " + (rec["short_description"] or "").strip())
             text = "\n".join(parts)
@@ -878,23 +881,28 @@ def get_router(settings: Settings) -> Router:
 
             session_id = data.get("session_id") or uuid.uuid4().hex
             await log_flow_step(callback.from_user.id, session_id, "genres", ",".join(sorted(selected)))
-            await state.set_state(MovieFlow.duration)
+            prefs["duration"] = "any"
+            await state.update_data(preferences=prefs)
+            await state.set_state(MovieFlow.age)
             await callback.message.edit_text(
-                "Супер! Теперь выбери желаемую <b>длительность</b> фильма 🕒",
-                reply_markup=duration_keyboard(),
+                "Какой <b>возрастной рейтинг</b> подходит? 🔞\n\n"
+                "Проверить рейтинг: <a href=\"https://www.kinopoisk.ru\">Кинопоиск</a>",
+                reply_markup=age_keyboard(),
             )
             await callback.answer()
             return
 
         if callback.data == "genres_skip":
             prefs["genres"] = []
+            prefs["duration"] = "any"
             session_id = data.get("session_id") or uuid.uuid4().hex
             await state.update_data(preferences=prefs, session_id=session_id)
             await log_flow_step(callback.from_user.id, session_id, "genres", "skip")
-            await state.set_state(MovieFlow.duration)
+            await state.set_state(MovieFlow.age)
             await callback.message.edit_text(
-                "Супер! Теперь выбери желаемую <b>длительность</b> фильма 🕒",
-                reply_markup=duration_keyboard(),
+                "Какой <b>возрастной рейтинг</b> подходит? 🔞\n\n"
+                "Проверить рейтинг: <a href=\"https://www.kinopoisk.ru\">Кинопоиск</a>",
+                reply_markup=age_keyboard(),
             )
             await callback.answer()
             return
@@ -916,26 +924,7 @@ def get_router(settings: Settings) -> Router:
                     raise
             await callback.answer()
 
-    # 3. Длительность
-    @router.callback_query(MovieFlow.duration, F.data.startswith("dur:"))
-    async def choose_duration(callback: CallbackQuery, state: FSMContext) -> None:
-        dur_code = callback.data.split(":", 1)[1]
-        data = await state.get_data()
-        prefs = data.get("preferences", {})
-        prefs["duration"] = dur_code
-        session_id = data.get("session_id") or uuid.uuid4().hex
-        await state.update_data(preferences=prefs, session_id=session_id)
-        await log_flow_step(callback.from_user.id, session_id, "duration", dur_code)
-
-        await state.set_state(MovieFlow.age)
-        await callback.message.edit_text(
-            "Какой <b>возрастной рейтинг</b> подходит? 🔞\n\n"
-            "Проверить рейтинг: <a href=\"https://www.kinopoisk.ru\">Кинопоиск</a>",
-            reply_markup=age_keyboard(),
-        )
-        await callback.answer()
-
-    # 4. Возраст
+    # 3. Возраст
     @router.callback_query(MovieFlow.age, F.data.startswith("age:"))
     async def choose_age(callback: CallbackQuery, state: FSMContext) -> None:
         age_code = callback.data.split(":", 1)[1]
@@ -1107,6 +1096,8 @@ def get_router(settings: Settings) -> Router:
                     rec_dict["age_rating"] = info.age_rating
                 if info.rating_kp is not None:
                     rec_dict["rating_kp"] = info.rating_kp
+                if info.countries:
+                    rec_dict["countries"] = info.countries
             else:
                 # Фильм не найден в Кинопоиске — всё равно добавляем в movies для ночного дозаполнения (ИИ уточнит название, повторный поиск)
                 mid = await get_or_create_movie(
@@ -1150,6 +1141,8 @@ def get_router(settings: Settings) -> Router:
                 parts.append("📋 Номинант Оскара")
             if info and (info.short_description or "").strip():
                 parts.append("📝 " + (info.short_description or "").strip())
+            if info and (info.countries or "").strip():
+                parts.append("Страна: " + (info.countries or "").strip())
             if rec.genres:
                 parts.append("🎭 Жанры: " + ", ".join(rec.genres))
             if rec.mood_tags:

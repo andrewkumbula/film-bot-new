@@ -102,6 +102,8 @@ def get_router(settings: Settings) -> Router:
             line2.append(f"⭐ {float(s['rating_kp']):.1f}")
         if line2:
             parts.append(" • ".join(line2))
+        if (s.get("countries") or "").strip():
+            parts.append("Страна: " + (s["countries"] or "").strip())
         if s.get("short_description"):
             parts.append(s["short_description"].strip())
         elif s.get("description"):

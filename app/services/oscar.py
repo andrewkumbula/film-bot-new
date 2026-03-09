@@ -74,7 +74,8 @@ async def get_filtered_oscar(
                     m.age_rating,
                     m.poster_url,
                     m.poster_urls,
-                    m.short_description
+                    m.short_description,
+                    m.countries
                 FROM oscar_nominations o
                 LEFT JOIN movies m ON o.movie_id = m.id
                 WHERE o.category = ?
@@ -128,6 +129,7 @@ async def get_filtered_oscar(
             "poster_url": row["poster_url"],
             "poster_urls": poster_urls,
             "short_description": (row["short_description"] or "").strip() if row["short_description"] else None,
+            "countries": (row["countries"] or "").strip() or None,
         })
         if len(result) >= limit:
             break

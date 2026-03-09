@@ -429,7 +429,8 @@ def _row_to_filtered_item(row, has_poster: bool = True, use_index: bool = False)
         "poster_urls": poster_urls,
         "description": _row_get(row, "description", "m.description", 8),
         "short_description": _row_get(row, "short_description", "m.short_description", 9),
-        "position": _row_get(row, "position", "t.position", 10),
+        "countries": _row_get(row, "countries", "m.countries", 10),
+        "position": _row_get(row, "position", "t.position", 11),
     }
 
 
@@ -464,6 +465,7 @@ async def get_filtered_top250(
                     m.poster_urls AS poster_urls,
                     m.description AS description,
                     m.short_description AS short_description,
+                    m.countries AS countries,
                     t.position AS position
                 FROM kinopoisk_top250 t
                 JOIN movies m ON t.movie_id = m.id

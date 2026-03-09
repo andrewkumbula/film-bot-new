@@ -45,6 +45,7 @@ class KinopoiskMovieInfo:
     poster_url: Optional[str] = None
     poster_urls: Optional[List[str]] = None  # все URL постеров от API (1–3 и более)
     short_description: Optional[str] = None  # краткое описание для карточки (генерируется ИИ ночью)
+    countries: Optional[str] = None  # страна происхождения (для вывода «Страна»)
 
 
 async def get_movie_from_db(
@@ -66,12 +67,12 @@ async def get_movie_from_db(
         db.row_factory = aiosqlite.Row
         if kinopoisk_id is not None:
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description FROM movies WHERE kinopoisk_id = ? LIMIT 1",
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description, countries FROM movies WHERE kinopoisk_id = ? LIMIT 1",
                 (kinopoisk_id,),
             )
         else:
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
+                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description, countries FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
                 (title, year, year),
             )
         row = await cursor.fetchone()
@@ -99,6 +100,7 @@ async def get_movie_from_db(
         poster_url=row["poster_url"] or None,
         poster_urls=poster_urls,
         short_description=short_desc,
+        countries=(row["countries"] or "").strip() or None,
     )
 
 
@@ -458,7 +460,7 @@ async def get_movie_info(
             continue
         await save_movie_from_api_doc(settings, doc)
         row = _parse_doc_to_row(doc)
-        kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _poster_urls, _d, _g, _c, votes, _raw = row
+        kinopoisk_id, _title, _year, age_rating, rating_kp, poster_url, _poster_urls, _d, _g, countries, votes, _raw = row
         poster_urls = json.loads(_poster_urls) if _poster_urls and isinstance(_poster_urls, str) else None
         if not isinstance(poster_urls, list):
             poster_urls = None
@@ -469,6 +471,7 @@ async def get_movie_info(
             votes=votes,
             poster_url=poster_url,
             poster_urls=poster_urls,
+            countries=(countries or "").strip() or None,
         )
 
     return None
@@ -864,7 +867,8 @@ async def run_kinopoisk_id_backfill(
         return {"updated": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
     if not getattr(settings, "openrouter_api_key", None):
         return {"updated": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
-    has_tavily = bool(getattr(settings, "tavily_api_key", "") or "").strip()
+    tavily_key = str(getattr(settings, "tavily_api_key", None) or "").strip()
+    has_tavily = bool(tavily_key)
 
     async with aiosqlite.connect(settings.db_path) as db:
         db.row_factory = aiosqlite.Row
