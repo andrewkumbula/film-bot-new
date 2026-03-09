@@ -35,6 +35,8 @@ class Settings:
     report_time: str = "09:00"
     # Сколько постеров показывать в карточке фильма: 1 или 3 (если API отдал несколько)
     show_posters_count: int = 1
+    # Tavily Search API для ночного дозаполнения kinopoisk_id (поиск «название год кинопоиск» → ИИ извлекает точное название)
+    tavily_api_key: str = ""
 
 
 def load_settings() -> Settings:
@@ -65,6 +67,7 @@ def load_settings() -> Settings:
     report_time = os.getenv("REPORT_TIME", "09:00").strip() or "09:00"
     show_posters_raw = os.getenv("SHOW_POSTERS_COUNT", "1").strip()
     show_posters_count = 3 if show_posters_raw == "3" else 1
+    tavily_api_key = os.getenv("TAVILY_API_KEY", "").strip()
 
     return Settings(
         bot_token=bot_token,
@@ -81,5 +84,6 @@ def load_settings() -> Settings:
         report_chat_id=report_chat_id,
         report_time=report_time,
         show_posters_count=show_posters_count,
+        tavily_api_key=tavily_api_key,
     )
 

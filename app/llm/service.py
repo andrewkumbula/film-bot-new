@@ -99,6 +99,7 @@ def _build_prompt(preferences: Dict[str, Any], negative: str) -> str:
         "Требования:\n"
         "- Дай от 12 до 15 фильмов за один раз (часть может отфильтроваться — «уже смотрел», «не интересно» и т.п.).\n"
         "- Используй реальные фильмы.\n"
+        "- В поле title пиши название так, как оно указано на Кинопоиске (kinopoisk.ru): орфография (например ё, а не е), официальное написание — это нужно для поиска постера и рейтинга.\n"
         "- Не добавляй комментарии вне JSON, без пояснений, без Markdown, без ```.\n"
         "- Все поля должны быть заполнены корректными типами.\n"
         "- Если чего-то не знаешь точно (год, жанр) — оцени максимально правдоподобно.\n"
@@ -327,21 +328,51 @@ async def shorten_description_for_card(
     return text
 
 
-async def get_kinopoisk_corrected_title(
-    settings: Settings, title: str, year: Optional[int] = None
+def _format_search_results_for_prompt(results: list) -> str:
+    """Форматирует результаты поиска (Tavily) в текст для промпта."""
+    lines = []
+    for i, r in enumerate(results, 1):
+        title = (r.get("title") or "").strip()
+        url = (r.get("url") or "").strip()
+        content = (r.get("content") or "").strip()
+        if title or url or content:
+            parts = [f"[{i}]"]
+            if title:
+                parts.append(f"Заголовок: {title}")
+            if url:
+                parts.append(f"URL: {url}")
+            if content:
+                parts.append(f"Содержание: {content[:800]}" + ("…" if len(content) > 800 else ""))
+            lines.append("\n".join(parts))
+    return "\n\n".join(lines) if lines else ""
+
+
+async def get_kinopoisk_title_from_search_results(
+    settings: Settings,
+    title: str,
+    year: Optional[int],
+    search_results: list,
 ) -> Optional[str]:
     """
-    Спрашивает ИИ: как именно записан этот фильм на Кинопоиске (ё/е, кавычки и т.д.).
-    Возвращает уточнённое название для повторного поиска в API, или None при ошибке.
+    По результатам поиска в интернете (Tavily: «название год кинопоиск») просит ИИ
+    извлечь точное название фильма как на Кинопоиске (ё/е и т.д.). ИИ опирается только
+    на переданные результаты, а не на свои знания.
     """
     if not (title or "").strip():
         return None
-    year_part = f" ({year})" if year else ""
+    text = _format_search_results_for_prompt(search_results)
+    if not text.strip():
+        return None
+    year_part = f", год {year}" if year else ""
     prompt = (
-        f"Фильм с названием «{(title or '').strip()}»{year_part}. "
-        "Как именно он записан на сайте Кинопоиск (kinopoisk.ru)? "
-        "Учти русскую орфографию (например ё вместо е), официальное написание. "
-        "Ответь только точным названием для поиска, без кавычек, без года, без пояснений."
+        "Ниже — фрагменты страниц Кинопоиска (kinopoisk.ru) по запросу про фильм «"
+        + (title or "").strip()
+        + f"»{year_part}.\n\n"
+        "Извлеки из этих фрагментов одно точное название фильма так, как оно записано на Кинопоиске: учти орфографию (например ё вместо е), официальное написание. "
+        "Ориентируйся на заголовки страниц и текст с них.\n\n"
+        "Ответь только одним названием, без кавычек, без года, без пояснений.\n\n"
+        "Фрагменты со страниц Кинопоиска:\n\n"
+        f"{text}"
     )
     url = f"{settings.openrouter_base_url.rstrip('/')}/chat/completions"
     headers = {

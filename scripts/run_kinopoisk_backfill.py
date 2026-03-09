@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
 Ручной запуск дозаполнения kinopoisk_id для фильмов без него.
-ИИ уточняет название (ё/е и т.д.), повторный поиск в Кинопоиске.
+Поиск через Tavily по запросу «название год кинопоиск», результаты отдаются в ИИ
+для извлечения точного названия, затем повторный поиск в Кинопоиске.
 То же, что делает планировщик в 03:30.
 
 Запуск из корня проекта:
   python scripts/run_kinopoisk_backfill.py        # по умолчанию до 50 фильмов
   python scripts/run_kinopoisk_backfill.py 100     # обработать до 100
 
-Нужны OPENROUTER_API_KEY и KINOPOISK_API_KEY в .env.
+Нужны OPENROUTER_API_KEY, KINOPOISK_API_KEY в .env. Для уточнения названия по поиску — TAVILY_API_KEY.
 """
 import asyncio
 import logging

@@ -17,7 +17,8 @@ import aiosqlite
 import httpx
 
 from ..config import Settings
-from ..llm.service import get_kinopoisk_corrected_title
+from ..llm.service import get_kinopoisk_title_from_search_results
+from ..services.tavily import tavily_search
 
 logger = logging.getLogger(__name__)
 
@@ -841,6 +842,13 @@ def _mpaa_to_age(mpaa: str) -> Optional[str]:
     return None
 
 
+def _is_kinopoisk_url(url: str) -> bool:
+    """Проверяет, что URL ведёт на домен Кинопоиска (kinopoisk.ru и поддомены)."""
+    if not url or not isinstance(url, str):
+        return False
+    return "kinopoisk.ru" in url.lower()
+
+
 async def run_kinopoisk_id_backfill(
     settings: Settings, limit: int = 50
 ) -> Dict[str, Any]:
@@ -856,6 +864,7 @@ async def run_kinopoisk_id_backfill(
         return {"updated": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
     if not getattr(settings, "openrouter_api_key", None):
         return {"updated": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
+    has_tavily = bool(getattr(settings, "tavily_api_key", "") or "").strip()
 
     async with aiosqlite.connect(settings.db_path) as db:
         db.row_factory = aiosqlite.Row
@@ -875,8 +884,24 @@ async def run_kinopoisk_id_backfill(
             continue
         processed += 1
         try:
-            corrected = await get_kinopoisk_corrected_title(settings, title, year)
-            search_title = (corrected or title).strip()
+            search_title = title
+            if has_tavily:
+                query = f"{title} {year} кинопоиск" if year is not None else f"{title} кинопоиск"
+                query = query.strip()
+                search_results = await tavily_search(
+                    settings,
+                    query,
+                    max_results=8,
+                    log_context={"movie_id": movie_id, "title": title, "year": year},
+                )
+                # В ИИ отдаём только результаты с домена Кинопоиска — по ним извлекаем точное название
+                kinopoisk_only = [r for r in search_results if _is_kinopoisk_url((r.get("url") or ""))]
+                if kinopoisk_only:
+                    corrected = await get_kinopoisk_title_from_search_results(
+                        settings, title, year, kinopoisk_only
+                    )
+                    if corrected:
+                        search_title = corrected.strip()
             doc = await _fetch_movie_doc_by_search(settings, search_title, year)
             if not doc:
                 await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC * 2)
