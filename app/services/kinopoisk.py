@@ -235,6 +235,7 @@ async def update_movie_by_id_from_api_doc(
     """
     Обновляет существующую запись movies по id данными из ответа API Кинопоиска.
     Используется при ночном дозаполнении: фильм был без kinopoisk_id, нашли по уточнённому названию.
+    Название (title) всегда заменяется на официальное с Кинопоиска (doc["name"]).
     """
     row = _parse_doc_to_row(doc)
     (
@@ -917,9 +918,10 @@ async def run_kinopoisk_id_backfill(
             ok = await update_movie_by_id_from_api_doc(settings, movie_id, doc)
             if ok:
                 updated += 1
+                api_title = (doc.get("name") or doc.get("alternativeName") or "").strip()
                 logger.info(
-                    "kinopoisk_backfill: movie_id=%s title=%r -> found (score=%s)",
-                    movie_id, title, score,
+                    "kinopoisk_backfill: movie_id=%s %r -> %r (score=%s)",
+                    movie_id, title, api_title or title, score,
                 )
         except Exception as e:
             errors.append(f"id={movie_id}: {e}")

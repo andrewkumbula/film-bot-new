@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -370,7 +371,10 @@ async def get_kinopoisk_title_from_search_results(
         + f"»{year_part}.\n\n"
         "Извлеки из этих фрагментов одно точное название фильма так, как оно записано на Кинопоиске: учти орфографию (например ё вместо е), официальное написание. "
         "Ориентируйся на заголовки страниц и текст с них.\n\n"
-        "Ответь только одним названием, без кавычек, без года, без пояснений.\n\n"
+        "Важно: ответь только названием фильма, без года. Год мы передаём в поиск отдельно. "
+        "Если в результатах название идёт с годом в скобках или через пробел (например «Довод (2020)» или «Довод 2020») — в ответ включи только название, без года. "
+        "Год в ответ добавляй только если он часть официального названия (например «2001: Космическая одиссея»).\n\n"
+        "Ответь одним названием, без кавычек, без пояснений.\n\n"
         "Фрагменты со страниц Кинопоиска:\n\n"
         f"{text}"
     )
@@ -396,6 +400,11 @@ async def get_kinopoisk_title_from_search_results(
     except (KeyError, IndexError, TypeError):
         return None
     corrected = (content or "").strip().strip('"').strip("'").strip()
+    if not corrected:
+        return None
+    # Убираем год в конце, если ИИ всё же вернул «Название 2020» или «Название (2020)» — год передаётся в поиск отдельно
+    corrected = re.sub(r"\s*\(\s*(19|20)\d{2}\s*\)\s*$", "", corrected).strip()
+    corrected = re.sub(r"\s+(19|20)\d{2}\s*$", "", corrected).strip()
     return corrected if corrected else None
 
 
