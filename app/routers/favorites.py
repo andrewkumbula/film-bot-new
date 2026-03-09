@@ -43,7 +43,6 @@ def get_router(settings: Settings) -> Router:
 
         await message.answer("Твои сохранённые фильмы ⭐️:")
 
-        settings = load_settings()
         for idx, rec in enumerate(favorites, start=1):
             parts = []
             title_line = f"{idx}. <b>{rec['title']}</b>"
