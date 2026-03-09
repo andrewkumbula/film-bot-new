@@ -1,0 +1,688 @@
+2026-03-09 14:16:04,215 [INFO] app.bot: Starting bot polling...
+2026-03-09 14:16:04,216 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 14:16:04,217 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 14:16:04,217 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 14:16:04,217 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 14:16:04,217 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 14:16:04,217 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 14:16:04,376 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 14:30:00,101 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 14:30:00,103 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 14:30:00,104 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 14:30:02,988 [INFO] app.bot: Starting bot polling...
+2026-03-09 14:30:02,989 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 14:30:02,989 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 14:30:02,989 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 14:30:02,990 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 14:30:02,990 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 14:30:02,990 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 14:30:03,154 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 16:57:40,976 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 16:57:40,980 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 16:57:40,980 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 16:57:43,637 [INFO] app.bot: Starting bot polling...
+2026-03-09 16:57:43,638 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 16:57:43,638 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 16:57:43,638 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 16:57:43,639 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 16:57:43,639 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 16:57:43,639 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 16:57:43,801 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 16:58:05,674 [INFO] aiogram.event: Update id=461755226 is not handled. Duration 1 ms by bot id=8578128819
+2026-03-09 16:58:05,674 [ERROR] aiogram.event: Cause exception while process update id=461755226 by bot id=8578128819
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 320, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 164, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 58, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 43, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 189, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 181, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 17, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 16:58:13,637 [INFO] aiogram.event: Update id=461755227 is not handled. Duration 1 ms by bot id=8578128819
+2026-03-09 16:58:13,637 [ERROR] aiogram.event: Cause exception while process update id=461755227 by bot id=8578128819
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 320, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 164, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 58, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 43, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 189, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 181, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 17, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:01:11,492 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 17:01:11,492 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:01:11,492 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 17:01:14,243 [INFO] app.bot: Starting bot polling...
+2026-03-09 17:01:14,244 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 17:01:14,244 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 17:01:14,245 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 17:01:14,245 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 17:01:14,245 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 17:01:14,245 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 17:01:14,397 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:01:30,137 [INFO] aiogram.event: Update id=461755228 is not handled. Duration 1 ms by bot id=8578128819
+2026-03-09 17:01:30,137 [ERROR] aiogram.event: Cause exception while process update id=461755228 by bot id=8578128819
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 320, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 164, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 58, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 43, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 189, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 181, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 17, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:01:33,140 [INFO] aiogram.event: Update id=461755229 is not handled. Duration 0 ms by bot id=8578128819
+2026-03-09 17:01:33,140 [ERROR] aiogram.event: Cause exception while process update id=461755229 by bot id=8578128819
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 320, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 164, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 58, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 43, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 189, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 181, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 17, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:01:33,964 [INFO] aiogram.event: Update id=461755230 is not handled. Duration 0 ms by bot id=8578128819
+2026-03-09 17:01:33,964 [ERROR] aiogram.event: Cause exception while process update id=461755230 by bot id=8578128819
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 320, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 164, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 58, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 43, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 189, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 181, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 17, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:01:35,018 [INFO] aiogram.event: Update id=461755231 is not handled. Duration 0 ms by bot id=8578128819
+2026-03-09 17:01:35,018 [ERROR] aiogram.event: Cause exception while process update id=461755231 by bot id=8578128819
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 320, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 164, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 27, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 58, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 43, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 283, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 189, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 161, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 153, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 181, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 126, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/.venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 71, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 17, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:05:35,606 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 17:05:35,611 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:05:35,611 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 17:05:38,456 [INFO] app.bot: Starting bot polling...
+2026-03-09 17:05:38,457 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 17:05:38,458 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 17:05:38,458 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 17:05:38,458 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 17:05:38,458 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 17:05:38,458 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 17:05:38,626 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:05:38,840 [ERROR] app.routers.favorites: list_favorites_for_user failed: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 25, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:05:39,001 [INFO] aiogram.event: Update id=461755232 is handled. Duration 161 ms by bot id=8578128819
+2026-03-09 17:05:41,963 [ERROR] app.routers.favorites: list_favorites_for_user failed: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 25, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:05:42,058 [INFO] aiogram.event: Update id=461755233 is handled. Duration 94 ms by bot id=8578128819
+2026-03-09 17:05:58,164 [INFO] aiogram.event: Update id=461755234 is not handled. Duration 1 ms by bot id=8578128819
+2026-03-09 17:10:02,602 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 17:10:02,603 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:10:02,603 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 17:10:05,776 [INFO] app.bot: Starting bot polling...
+2026-03-09 17:10:05,777 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 17:10:05,777 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 17:10:05,777 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 17:10:05,778 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 17:10:05,778 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 17:10:05,778 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 17:10:05,928 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:10:09,578 [ERROR] app.routers.favorites: list_favorites_for_user failed: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 25, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:10:09,750 [INFO] aiogram.event: Update id=461755235 is handled. Duration 173 ms by bot id=8578128819
+2026-03-09 17:10:11,408 [ERROR] app.routers.favorites: list_favorites_for_user failed: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 25, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:10:11,498 [INFO] aiogram.event: Update id=461755236 is handled. Duration 91 ms by bot id=8578128819
+2026-03-09 17:10:17,627 [ERROR] app.routers.favorites: list_favorites_for_user failed: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 25, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:10:17,702 [INFO] aiogram.event: Update id=461755237 is handled. Duration 75 ms by bot id=8578128819
+2026-03-09 17:13:34,312 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 17:13:34,315 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:13:34,315 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 17:13:37,086 [INFO] app.bot: Starting bot polling...
+2026-03-09 17:13:37,087 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 17:13:37,088 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 17:13:37,088 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 17:13:37,088 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 17:13:37,088 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 17:13:37,088 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 17:13:37,253 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:13:37,306 [ERROR] app.routers.favorites: list_favorites_for_user failed: cannot access local variable 'settings' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/apps/film-bot-new/app/routers/favorites.py", line 25, in show_favorites
+    favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+                                              ^^^^^^^^
+UnboundLocalError: cannot access local variable 'settings' where it is not associated with a value
+2026-03-09 17:13:37,474 [INFO] aiogram.event: Update id=461755238 is handled. Duration 168 ms by bot id=8578128819
+2026-03-09 17:16:16,832 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 17:16:16,835 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:16:16,835 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 17:16:19,874 [INFO] app.bot: Starting bot polling...
+2026-03-09 17:16:19,876 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 17:16:19,877 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 17:16:19,877 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 17:16:19,877 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 17:16:19,878 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 17:16:19,878 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 17:16:20,025 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:16:21,390 [INFO] aiogram.event: Update id=461755239 is handled. Duration 1009 ms by bot id=8578128819
+2026-03-09 17:17:53,361 [INFO] aiogram.event: Update id=461755240 is handled. Duration 165 ms by bot id=8578128819
+2026-03-09 17:17:55,109 [INFO] aiogram.event: Update id=461755241 is handled. Duration 140 ms by bot id=8578128819
+2026-03-09 17:18:03,659 [INFO] aiogram.event: Update id=461755242 is handled. Duration 163 ms by bot id=8578128819
+2026-03-09 17:18:04,984 [INFO] aiogram.event: Update id=461755243 is handled. Duration 126 ms by bot id=8578128819
+2026-03-09 17:18:07,258 [INFO] aiogram.event: Update id=461755244 is handled. Duration 290 ms by bot id=8578128819
+2026-03-09 17:18:09,185 [INFO] aiogram.event: Update id=461755245 is handled. Duration 113 ms by bot id=8578128819
+2026-03-09 17:18:11,094 [INFO] aiogram.event: Update id=461755246 is handled. Duration 314 ms by bot id=8578128819
+2026-03-09 17:18:14,281 [INFO] aiogram.event: Update id=461755247 is handled. Duration 129 ms by bot id=8578128819
+2026-03-09 17:18:16,859 [INFO] aiogram.event: Update id=461755248 is handled. Duration 131 ms by bot id=8578128819
+2026-03-09 17:18:19,839 [INFO] aiogram.event: Update id=461755249 is handled. Duration 137 ms by bot id=8578128819
+2026-03-09 17:18:20,867 [INFO] aiogram.event: Update id=461755250 is handled. Duration 118 ms by bot id=8578128819
+2026-03-09 17:18:21,575 [INFO] aiogram.event: Update id=461755251 is handled. Duration 172 ms by bot id=8578128819
+2026-03-09 17:18:22,733 [INFO] aiogram.event: Update id=461755252 is handled. Duration 140 ms by bot id=8578128819
+2026-03-09 17:18:23,296 [INFO] aiogram.event: Update id=461755253 is handled. Duration 133 ms by bot id=8578128819
+2026-03-09 17:18:23,987 [INFO] aiogram.event: Update id=461755254 is handled. Duration 118 ms by bot id=8578128819
+2026-03-09 17:18:26,566 [INFO] httpx: HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-09 17:18:35,840 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=llm duration_sec=10.69 count=15
+2026-03-09 17:18:36,190 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D1%83%D0%BD-%D0%A4%D1%83+%D0%9F%D0%B0%D0%BD%D0%B4%D0%B0+2008&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:36,191 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Кун-Фу Панда 2008
+2026-03-09 17:18:36,367 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D1%8D%D0%B4%D0%B0%D0%B3%D0%B0%D1%81%D0%BA%D0%B0%D1%80+2005&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:36,368 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Мэдагаскар 2005
+2026-03-09 17:18:36,494 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A8%D1%80%D0%B5%D0%BA+2+2004&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:36,495 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Шрек 2 2004
+2026-03-09 17:18:36,610 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A2%D0%B0%D1%87%D0%BA%D0%B8+2006&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:36,611 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Тачки 2006
+2026-03-09 17:18:36,730 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D1%8D%D0%B4%D0%B0%D0%B3%D0%B0%D1%81%D0%BA%D0%B0%D1%80+2+2008&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:36,732 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Мэдагаскар 2 2008
+2026-03-09 17:18:36,926 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%82+%D0%B2+%D1%81%D0%B0%D0%BF%D0%BE%D0%B3%D0%B0%D1%85+2011&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:36,927 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Кот в сапогах 2011
+2026-03-09 17:18:37,106 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A8%D1%80%D0%B5%D0%BA+2001&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:37,107 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Шрек 2001
+2026-03-09 17:18:37,231 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A1%D0%BC%D0%B5%D1%88%D0%B0%D1%80%D0%B8%D0%BA%D0%B8+2006&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:37,232 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Смешарики 2006
+2026-03-09 17:18:37,410 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D1%83%D0%BD-%D0%A4%D1%83+%D0%9F%D0%B0%D0%BD%D0%B4%D0%B0+2007&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:37,411 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Кун-Фу Панда 2007
+2026-03-09 17:18:37,581 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D1%8D%D0%B4%D0%B0%D0%B3%D0%B0%D1%81%D0%BA%D0%B0%D1%80+2004&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:37,582 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Мэдагаскар 2004
+2026-03-09 17:18:37,755 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A8%D1%80%D0%B5%D0%BA+2+2003&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:37,756 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Шрек 2 2003
+2026-03-09 17:18:37,930 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A2%D0%B0%D1%87%D0%BA%D0%B8+2005&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:37,930 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Тачки 2005
+2026-03-09 17:18:38,057 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D1%8D%D0%B4%D0%B0%D0%B3%D0%B0%D1%81%D0%BA%D0%B0%D1%80+2+2007&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,058 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Мэдагаскар 2 2007
+2026-03-09 17:18:38,239 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%82+%D0%B2+%D1%81%D0%B0%D0%BF%D0%BE%D0%B3%D0%B0%D1%85+2010&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,240 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Кот в сапогах 2010
+2026-03-09 17:18:38,373 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A8%D1%80%D0%B5%D0%BA+2000&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,374 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Шрек 2000
+2026-03-09 17:18:38,554 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A1%D0%BC%D0%B5%D1%88%D0%B0%D1%80%D0%B8%D0%BA%D0%B8+2005&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,555 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Смешарики 2005
+2026-03-09 17:18:38,674 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D1%83%D0%BD-%D0%A4%D1%83+%D0%9F%D0%B0%D0%BD%D0%B4%D0%B0+2009&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,675 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Кун-Фу Панда 2009
+2026-03-09 17:18:38,853 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D1%8D%D0%B4%D0%B0%D0%B3%D0%B0%D1%81%D0%BA%D0%B0%D1%80+2006&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,855 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Мэдагаскар 2006
+2026-03-09 17:18:38,980 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A8%D1%80%D0%B5%D0%BA+2+2005&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:38,982 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Шрек 2 2005
+2026-03-09 17:18:39,173 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A2%D0%B0%D1%87%D0%BA%D0%B8+2007&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:39,174 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Тачки 2007
+2026-03-09 17:18:39,312 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D1%8D%D0%B4%D0%B0%D0%B3%D0%B0%D1%81%D0%BA%D0%B0%D1%80+2+2009&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:39,313 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Мэдагаскар 2 2009
+2026-03-09 17:18:39,496 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%82+%D0%B2+%D1%81%D0%B0%D0%BF%D0%BE%D0%B3%D0%B0%D1%85+2012&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:39,497 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Кот в сапогах 2012
+2026-03-09 17:18:44,736 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A8%D1%80%D0%B5%D0%BA+2002&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:18:44,737 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Шрек 2002
+2026-03-09 17:18:52,783 [WARNING] app.services.kinopoisk: Kinopoisk API search error for query=Смешарики 2007: 
+2026-03-09 17:18:52,783 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=kinopoisk_gather duration_sec=16.85 count=15
+2026-03-09 17:18:52,786 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_rating duration_sec=0.00 after=15
+2026-03-09 17:18:52,842 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_ni_watched duration_sec=0.06 after=15
+2026-03-09 17:18:52,845 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_recently duration_sec=0.00 after=14
+2026-03-09 17:18:52,872 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=movie_id_resolve_and_state duration_sec=0.03 count=5
+2026-03-09 17:18:52,881 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=top250_positions duration_sec=0.00 
+2026-03-09 17:18:53,417 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=build_and_send_cards duration_sec=0.54 count=5
+2026-03-09 17:18:53,425 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=total duration_sec=28.36 films_shown=5
+2026-03-09 17:18:53,425 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 summary: total_sec=28.36 (llm + kinopoisk + filters + cards)
+2026-03-09 17:18:53,500 [INFO] aiogram.event: Update id=461755255 is handled. Duration 28504 ms by bot id=8578128819
+2026-03-09 17:19:12,346 [INFO] aiogram.event: Update id=461755256 is handled. Duration 116 ms by bot id=8578128819
+2026-03-09 17:19:16,456 [INFO] aiogram.event: Update id=461755257 is handled. Duration 64 ms by bot id=8578128819
+2026-03-09 17:19:31,506 [INFO] aiogram.event: Update id=461755258 is handled. Duration 61 ms by bot id=8578128819
+2026-03-09 17:19:42,200 [INFO] httpx: HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-09 17:19:53,610 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=llm duration_sec=12.70 count=14
+2026-03-09 17:19:53,943 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9B%D0%B5%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D0%B9+%D0%BF%D0%B5%D1%80%D0%B8%D0%BE%D0%B4+2002&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:53,944 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Ледниковый период 2002
+2026-03-09 17:19:54,117 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D1%8C+%D0%BB%D0%B5%D0%B2+2019&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:54,117 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Король лев 2019
+2026-03-09 17:19:54,252 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D0%BE%D0%B0%D0%BD%D0%B0+2016&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:54,254 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Моана 2016
+2026-03-09 17:19:54,435 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B5+%D0%BF%D1%83%D1%82%D0%B5%D1%88%D0%B5%D1%81%D1%82%D0%B2%D0%B8%D0%B5+2019&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:54,435 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Большое путешествие 2019
+2026-03-09 17:19:54,609 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9B%D0%B5%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D0%B9+%D0%BF%D0%B5%D1%80%D0%B8%D0%BE%D0%B4+2001&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:54,610 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Ледниковый период 2001
+2026-03-09 17:19:54,782 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D1%8C+%D0%BB%D0%B5%D0%B2+2018&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:54,784 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Король лев 2018
+2026-03-09 17:19:54,961 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D0%BE%D0%B0%D0%BD%D0%B0+2015&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:54,962 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Моана 2015
+2026-03-09 17:19:55,135 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B5+%D0%BF%D1%83%D1%82%D0%B5%D1%88%D0%B5%D1%81%D1%82%D0%B2%D0%B8%D0%B5+2018&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:55,136 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Большое путешествие 2018
+2026-03-09 17:19:55,267 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9B%D0%B5%D0%B4%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D1%8B%D0%B9+%D0%BF%D0%B5%D1%80%D0%B8%D0%BE%D0%B4+2003&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:55,268 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Ледниковый период 2003
+2026-03-09 17:19:55,402 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D1%8C+%D0%BB%D0%B5%D0%B2+2020&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:55,403 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Король лев 2020
+2026-03-09 17:19:55,583 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9C%D0%BE%D0%B0%D0%BD%D0%B0+2017&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:19:55,584 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Моана 2017
+2026-03-09 17:20:00,718 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B5+%D0%BF%D1%83%D1%82%D0%B5%D1%88%D0%B5%D1%81%D1%82%D0%B2%D0%B8%D0%B5+2020&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:20:00,719 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Большое путешествие 2020
+2026-03-09 17:20:00,719 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=kinopoisk_gather duration_sec=6.98 count=14
+2026-03-09 17:20:00,721 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_rating duration_sec=0.00 after=14
+2026-03-09 17:20:00,767 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_ni_watched duration_sec=0.05 after=11
+2026-03-09 17:20:00,769 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_recently duration_sec=0.00 after=9
+2026-03-09 17:20:00,789 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=movie_id_resolve_and_state duration_sec=0.02 count=5
+2026-03-09 17:20:00,799 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=top250_positions duration_sec=0.00 
+2026-03-09 17:20:01,458 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=build_and_send_cards duration_sec=0.66 count=5
+2026-03-09 17:20:01,466 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=total duration_sec=20.62 films_shown=5
+2026-03-09 17:20:01,466 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 summary: total_sec=20.62 (llm + kinopoisk + filters + cards)
+2026-03-09 17:20:01,594 [INFO] aiogram.event: Update id=461755259 is handled. Duration 20826 ms by bot id=8578128819
+2026-03-09 17:20:15,034 [INFO] aiogram.event: Update id=461755260 is handled. Duration 76 ms by bot id=8578128819
+2026-03-09 17:20:32,112 [INFO] aiogram.event: Update id=461755261 is handled. Duration 106 ms by bot id=8578128819
+2026-03-09 17:20:36,490 [INFO] aiogram.event: Update id=461755262 is handled. Duration 79 ms by bot id=8578128819
+2026-03-09 17:20:41,445 [INFO] aiogram.event: Update id=461755263 is handled. Duration 79 ms by bot id=8578128819
+2026-03-09 17:20:50,217 [INFO] httpx: HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-09 17:21:01,787 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=llm duration_sec=12.45 count=15
+2026-03-09 17:21:09,932 [WARNING] app.services.kinopoisk: Kinopoisk API search error for query=Человек-паук: Через многомерные миры 2023: 
+2026-03-09 17:21:17,963 [WARNING] app.services.kinopoisk: Kinopoisk API search error for query=Карлсон вернулся 1970: 
+2026-03-09 17:21:23,142 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A1%D0%B8%D0%BD%D0%B4%D0%B1%D0%B0%D0%B4%3A+%D0%9B%D0%B5%D0%B3%D0%B5%D0%BD%D0%B4%D0%B0+%D1%81%D0%B5%D0%BC%D0%B8+%D0%BC%D0%BE%D1%80%D0%B5%D0%B9+2003&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:23,144 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Синдбад: Легенда семи морей 2003
+2026-03-09 17:21:23,345 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A0%D1%83%D1%81%D0%B0%D0%BB%D0%BE%D1%87%D0%BA%D0%B0+1989&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:23,346 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Русалочка 1989
+2026-03-09 17:21:23,461 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%91%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B5+%D0%BC%D1%83%D0%B7%D1%8B%D0%BA%D0%B0%D0%BD%D1%82%D1%8B+1969&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:23,463 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Бременские музыканты 1969
+2026-03-09 17:21:23,583 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A2%D0%B0%D1%87%D0%BA%D0%B8+2006&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:23,584 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Тачки 2006
+2026-03-09 17:21:23,708 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A7%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D0%BA-%D0%BF%D0%B0%D1%83%D0%BA%3A+%D0%A7%D0%B5%D1%80%D0%B5%D0%B7+%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%D0%BC%D0%B5%D1%80%D0%BD%D1%8B%D0%B5+%D0%BC%D0%B8%D1%80%D1%8B+2022&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:23,710 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Человек-паук: Через многомерные миры 2022
+2026-03-09 17:21:23,843 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD+%D0%B2%D0%B5%D1%80%D0%BD%D1%83%D0%BB%D1%81%D1%8F+1969&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:23,844 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Карлсон вернулся 1969
+2026-03-09 17:21:24,027 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A1%D0%B8%D0%BD%D0%B4%D0%B1%D0%B0%D0%B4%3A+%D0%9B%D0%B5%D0%B3%D0%B5%D0%BD%D0%B4%D0%B0+%D1%81%D0%B5%D0%BC%D0%B8+%D0%BC%D0%BE%D1%80%D0%B5%D0%B9+2002&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,027 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Синдбад: Легенда семи морей 2002
+2026-03-09 17:21:24,195 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A0%D1%83%D1%81%D0%B0%D0%BB%D0%BE%D1%87%D0%BA%D0%B0+1988&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,197 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Русалочка 1988
+2026-03-09 17:21:24,322 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%91%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B5+%D0%BC%D1%83%D0%B7%D1%8B%D0%BA%D0%B0%D0%BD%D1%82%D1%8B+1968&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,323 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Бременские музыканты 1968
+2026-03-09 17:21:24,442 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A2%D0%B0%D1%87%D0%BA%D0%B8+2005&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,443 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Тачки 2005
+2026-03-09 17:21:24,569 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A7%D0%B5%D0%BB%D0%BE%D0%B2%D0%B5%D0%BA-%D0%BF%D0%B0%D1%83%D0%BA%3A+%D0%A7%D0%B5%D1%80%D0%B5%D0%B7+%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE%D0%BC%D0%B5%D1%80%D0%BD%D1%8B%D0%B5+%D0%BC%D0%B8%D1%80%D1%8B+2024&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,569 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Человек-паук: Через многомерные миры 2024
+2026-03-09 17:21:24,755 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%B0%D1%80%D0%BB%D1%81%D0%BE%D0%BD+%D0%B2%D0%B5%D1%80%D0%BD%D1%83%D0%BB%D1%81%D1%8F+1971&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,756 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Карлсон вернулся 1971
+2026-03-09 17:21:24,877 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A1%D0%B8%D0%BD%D0%B4%D0%B1%D0%B0%D0%B4%3A+%D0%9B%D0%B5%D0%B3%D0%B5%D0%BD%D0%B4%D0%B0+%D1%81%D0%B5%D0%BC%D0%B8+%D0%BC%D0%BE%D1%80%D0%B5%D0%B9+2004&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:24,878 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Синдбад: Легенда семи морей 2004
+2026-03-09 17:21:25,045 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A0%D1%83%D1%81%D0%B0%D0%BB%D0%BE%D1%87%D0%BA%D0%B0+1990&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:25,046 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Русалочка 1990
+2026-03-09 17:21:25,163 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%91%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B5+%D0%BC%D1%83%D0%B7%D1%8B%D0%BA%D0%B0%D0%BD%D1%82%D1%8B+1970&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:25,164 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Бременские музыканты 1970
+2026-03-09 17:21:25,303 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A2%D0%B0%D1%87%D0%BA%D0%B8+2007&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:21:25,303 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Тачки 2007
+2026-03-09 17:21:25,304 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=kinopoisk_gather duration_sec=23.42 count=15
+2026-03-09 17:21:25,306 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_rating duration_sec=0.00 after=15
+2026-03-09 17:21:25,355 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_ni_watched duration_sec=0.05 after=14
+2026-03-09 17:21:25,357 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_recently duration_sec=0.00 after=10
+2026-03-09 17:21:25,374 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=movie_id_resolve_and_state duration_sec=0.02 count=5
+2026-03-09 17:21:25,382 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=top250_positions duration_sec=0.00 
+2026-03-09 17:21:26,264 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=build_and_send_cards duration_sec=0.88 count=5
+2026-03-09 17:21:26,271 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=total duration_sec=37.01 films_shown=5
+2026-03-09 17:21:26,271 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 summary: total_sec=37.01 (llm + kinopoisk + filters + cards)
+2026-03-09 17:21:26,427 [INFO] aiogram.event: Update id=461755264 is handled. Duration 37275 ms by bot id=8578128819
+2026-03-09 17:21:35,005 [INFO] aiogram.event: Update id=461755265 is handled. Duration 58 ms by bot id=8578128819
+2026-03-09 17:21:41,991 [INFO] aiogram.event: Update id=461755266 is handled. Duration 68 ms by bot id=8578128819
+2026-03-09 17:22:06,828 [INFO] aiogram.event: Update id=461755267 is handled. Duration 289 ms by bot id=8578128819
+2026-03-09 17:22:10,321 [INFO] aiogram.event: Update id=461755268 is handled. Duration 129 ms by bot id=8578128819
+2026-03-09 17:22:17,324 [INFO] aiogram.event: Update id=461755269 is handled. Duration 164 ms by bot id=8578128819
+2026-03-09 17:22:18,882 [INFO] aiogram.event: Update id=461755270 is handled. Duration 135 ms by bot id=8578128819
+2026-03-09 17:22:19,640 [INFO] aiogram.event: Update id=461755271 is handled. Duration 138 ms by bot id=8578128819
+2026-03-09 17:22:21,276 [INFO] aiogram.event: Update id=461755272 is handled. Duration 131 ms by bot id=8578128819
+2026-03-09 17:22:22,991 [INFO] aiogram.event: Update id=461755273 is handled. Duration 145 ms by bot id=8578128819
+2026-03-09 17:22:25,514 [INFO] httpx: HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-09 17:22:36,154 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=llm duration_sec=11.64 count=15
+2026-03-09 17:22:36,655 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A0%D0%B0%D0%BB%D1%8C%D1%84+%D0%BB%D0%BE%D0%BC%D0%B0%D0%B5%D1%82+%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82+2018&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:36,656 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Ральф ломает интернет 2018
+2026-03-09 17:22:36,786 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F+%D0%B8%D0%B3%D1%80%D1%83%D1%88%D0%B5%D0%BA+1995&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:36,787 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=История игрушек 1995
+2026-03-09 17:22:36,965 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D1%8C+%D0%BB%D0%B5%D0%B2+1994&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:36,966 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Король лев 1994
+2026-03-09 17:22:37,150 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9D%D0%B0%D0%B2%D1%81%D0%B8%D0%BA%D0%B0%D1%8F+%D0%B8%D0%B7+%D0%94%D0%BE%D0%BB%D0%B8%D0%BD%D1%8B+%D0%92%D0%B5%D1%82%D1%80%D0%BE%D0%B2+1984&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:37,151 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Навсикая из Долины Ветров 1984
+2026-03-09 17:22:37,288 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A0%D0%B0%D0%BB%D1%8C%D1%84+%D0%BB%D0%BE%D0%BC%D0%B0%D0%B5%D1%82+%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82+2017&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:37,289 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Ральф ломает интернет 2017
+2026-03-09 17:22:37,424 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F+%D0%B8%D0%B3%D1%80%D1%83%D1%88%D0%B5%D0%BA+1994&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:37,425 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=История игрушек 1994
+2026-03-09 17:22:37,595 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D1%8C+%D0%BB%D0%B5%D0%B2+1993&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:37,596 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Король лев 1993
+2026-03-09 17:22:37,767 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9D%D0%B0%D0%B2%D1%81%D0%B8%D0%BA%D0%B0%D1%8F+%D0%B8%D0%B7+%D0%94%D0%BE%D0%BB%D0%B8%D0%BD%D1%8B+%D0%92%D0%B5%D1%82%D1%80%D0%BE%D0%B2+1983&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:37,768 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Навсикая из Долины Ветров 1983
+2026-03-09 17:22:37,933 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%A0%D0%B0%D0%BB%D1%8C%D1%84+%D0%BB%D0%BE%D0%BC%D0%B0%D0%B5%D1%82+%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%BD%D0%B5%D1%82+2019&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:37,934 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Ральф ломает интернет 2019
+2026-03-09 17:22:38,112 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%98%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F+%D0%B8%D0%B3%D1%80%D1%83%D1%88%D0%B5%D0%BA+1996&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:38,113 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=История игрушек 1996
+2026-03-09 17:22:38,238 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D1%8C+%D0%BB%D0%B5%D0%B2+1995&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:38,239 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Король лев 1995
+2026-03-09 17:22:38,360 [INFO] httpx: HTTP Request: GET https://api.poiskkino.dev/v1.4/movie/search?query=%D0%9D%D0%B0%D0%B2%D1%81%D0%B8%D0%BA%D0%B0%D1%8F+%D0%B8%D0%B7+%D0%94%D0%BE%D0%BB%D0%B8%D0%BD%D1%8B+%D0%92%D0%B5%D1%82%D1%80%D0%BE%D0%B2+1985&limit=10 "HTTP/1.1 403 Forbidden"
+2026-03-09 17:22:38,361 [WARNING] app.services.kinopoisk: Kinopoisk API search: status 403 for query=Навсикая из Долины Ветров 1985
+2026-03-09 17:22:38,362 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=kinopoisk_gather duration_sec=1.90 count=15
+2026-03-09 17:22:38,364 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_rating duration_sec=0.00 after=15
+2026-03-09 17:22:38,413 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_ni_watched duration_sec=0.05 after=12
+2026-03-09 17:22:38,415 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=filter_recently duration_sec=0.00 after=6
+2026-03-09 17:22:38,442 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=movie_id_resolve_and_state duration_sec=0.03 count=5
+2026-03-09 17:22:38,451 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=top250_positions duration_sec=0.00 
+2026-03-09 17:22:38,863 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=build_and_send_cards duration_sec=0.41 count=5
+2026-03-09 17:22:38,870 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 stage=total duration_sec=14.43 films_shown=5
+2026-03-09 17:22:38,871 [INFO] app.routers.flow_movie: movie_flow_timing user_id=62852939 summary: total_sec=14.43 (llm + kinopoisk + filters + cards)
+2026-03-09 17:22:38,951 [INFO] aiogram.event: Update id=461755274 is handled. Duration 14575 ms by bot id=8578128819
+2026-03-09 17:30:39,549 [INFO] aiogram.event: Update id=461755275 is not handled. Duration 1 ms by bot id=8578128819
+2026-03-09 17:30:52,902 [INFO] aiogram.event: Update id=461755276 is handled. Duration 504 ms by bot id=8578128819
+2026-03-09 17:50:29,017 [WARNING] aiogram.dispatcher: Received SIGTERM signal
+2026-03-09 17:50:29,022 [INFO] aiogram.dispatcher: Polling stopped for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:50:29,022 [INFO] aiogram.dispatcher: Polling stopped
+2026-03-09 17:50:31,937 [INFO] app.bot: Starting bot polling...
+2026-03-09 17:50:31,938 [INFO] aiogram.dispatcher: Start polling
+2026-03-09 17:50:31,939 [INFO] app.scheduler: Daily report scheduler started, will send at 09:00:00 to chat 62852939
+2026-03-09 17:50:31,939 [INFO] app.scheduler: Movie mapping cleanup scheduler started, will run daily at 02:30:00
+2026-03-09 17:50:31,939 [INFO] app.scheduler: Short descriptions backfill scheduler started, will run daily at 03:00:00
+2026-03-09 17:50:31,939 [INFO] app.scheduler: Kinopoisk ID backfill scheduler started, will run daily at 03:30:00
+2026-03-09 17:50:31,939 [INFO] app.scheduler: Top250 refresh scheduler started, will run on 1st of each month at 04:00:00
+2026-03-09 17:50:32,084 [INFO] aiogram.dispatcher: Run polling for bot @filmograme_bot id=8578128819 - 'Film_bot'
+2026-03-09 17:51:11,149 [INFO] aiogram.event: Update id=461755277 is handled. Duration 1048 ms by bot id=8578128819
+2026-03-09 17:51:41,255 [INFO] aiogram.event: Update id=461755278 is handled. Duration 174 ms by bot id=8578128819

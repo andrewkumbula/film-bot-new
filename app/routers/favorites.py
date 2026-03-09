@@ -18,11 +18,12 @@ def get_router(settings: Settings) -> Router:
 
     @router.message(F.text.contains("Избранное"))
     async def show_favorites(message: Message) -> None:
+        s = settings  # явная привязка из замыкания, чтобы не было UnboundLocalError при любом порядке выполнения
         if not message.from_user:
             await message.answer("Не удалось определить пользователя.")
             return
         try:
-            favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+            favorites = await list_favorites_for_user(s, message.from_user.id, limit=10)
         except Exception as e:
             logger.exception("list_favorites_for_user failed: %s", e)
             err_short = str(e).strip()[:200]
@@ -82,7 +83,7 @@ def get_router(settings: Settings) -> Router:
                 )
             urls = rec.get("poster_urls") or ([rec["poster_url"]] if rec.get("poster_url") else [])
             try:
-                await _send_movie_card(message, urls, "\n".join(parts), kb or InlineKeyboardMarkup(inline_keyboard=[]), settings)
+                await _send_movie_card(message, urls, "\n".join(parts), kb or InlineKeyboardMarkup(inline_keyboard=[]), s)
             except Exception:
                 await message.answer("\n".join(parts), reply_markup=kb)
 

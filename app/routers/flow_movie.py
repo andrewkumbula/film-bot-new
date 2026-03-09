@@ -59,7 +59,7 @@ from ..services.not_interested import (
     get_not_interested_movie_ids,
 )
 from ..services.flow_log import log_flow_step
-from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_info, refresh_movie_from_api, KinopoiskMovieInfo
+from ..services.kinopoisk import ensure_movie_details_by_id, get_movie_from_db, get_movie_info, refresh_movie_from_api, KinopoiskMovieInfo
 from ..services.top250 import get_filtered_top250, get_top250_count, get_top250_positions_map, match_picks_to_candidates
 from ..services.oscar import get_filtered_oscar, get_oscar_count, get_oscar_flags, get_movie_id_by_kinopoisk, link_oscar_to_movie
 from ..services.user_settings import get_min_rating_filter_enabled
@@ -1004,14 +1004,13 @@ def get_router(settings: Settings) -> Router:
 
         await responder.answer(f"📝 <b>Кратко о твоих предпочтениях</b>:\n{llm_response.session_summary}\n")
 
-        # Параллельно запрашиваем данные из API Кинопоиска (рейтинг и возраст)
+        # Сначала только из БД (без запросов в API): рейтинг/возраст для фильтра и для выдачи, если уже есть
         t0 = time.perf_counter()
-        kinopoisk_tasks = [
-            get_movie_info(settings, rec.title, rec.year)
-            for rec in llm_response.recommendations
-        ]
-        kinopoisk_infos: List[Optional[KinopoiskMovieInfo]] = await asyncio.gather(*kinopoisk_tasks)
-        _log_stage(user_id, "kinopoisk_gather", time.perf_counter() - t0, count=len(kinopoisk_tasks))
+        db_infos: List[Optional[KinopoiskMovieInfo]] = await asyncio.gather(
+            *[get_movie_from_db(settings, title=rec.title, year=rec.year) for rec in llm_response.recommendations]
+        )
+        kinopoisk_infos = db_infos
+        _log_stage(user_id, "kinopoisk_db_only", time.perf_counter() - t0, count=len(kinopoisk_infos))
 
         # Фильтр по рейтингу: только если у пользователя включена настройка (нет рейтинга = показываем)
         t0 = time.perf_counter()
@@ -1080,6 +1079,16 @@ def get_router(settings: Settings) -> Router:
         # Показываем не более 5 фильмов; если после фильтров осталось больше — берём первые 5
         RECOMMENDATIONS_TO_SHOW = 5
         pairs_to_show = filtered_pairs[:RECOMMENDATIONS_TO_SHOW]
+
+        # В API Кинопоиска идём только по выбранным для выдачи и только если в БД ещё нет kinopoisk_id
+        t0 = time.perf_counter()
+        enriched_pairs: List[tuple] = []
+        for rec, info in pairs_to_show:
+            if info is None or info.kinopoisk_id is None:
+                info = await get_movie_info(settings, rec.title, rec.year)
+            enriched_pairs.append((rec, info))
+        pairs_to_show = enriched_pairs
+        _log_stage(user_id, "kinopoisk_gather", time.perf_counter() - t0, count=len(pairs_to_show))
 
         # Сохраняем в состоянии только то, что показываем (до 5)
         t0 = time.perf_counter()
@@ -1175,7 +1184,6 @@ def get_router(settings: Settings) -> Router:
                 ]
             )
             urls = (info.poster_urls or ([info.poster_url] if info and info.poster_url else [])) if info else []
-            settings = load_settings()
             await _send_movie_card(responder, urls, text, kb, settings)
 
         _log_stage(user_id, "build_and_send_cards", time.perf_counter() - t0_cards, count=len(pairs_to_show))
