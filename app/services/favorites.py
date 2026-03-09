@@ -9,6 +9,9 @@ import aiosqlite
 from ..config import Settings, load_settings
 from .kinopoisk import get_movie_info
 
+# Нормализация названия для поиска (ё/е/э), как в kinopoisk — чтобы «Шрек» и «Шрэк» находили одну запись
+_NORM_TITLE_WHERE = "REPLACE(REPLACE(LOWER(TRIM(COALESCE(title,''))), 'ё', 'е'), 'э', 'е') = REPLACE(REPLACE(LOWER(TRIM(?)), 'ё', 'е'), 'э', 'е')"
+
 
 async def _get_movie_id(
     *,
@@ -28,8 +31,8 @@ async def _get_movie_id(
             if row:
                 return row[0]
         cursor = await db.execute(
-            "SELECT id FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
-            (title, year, year),
+            f"SELECT id FROM movies WHERE (year IS NULL AND ? IS NULL OR year = ?) AND {_NORM_TITLE_WHERE} LIMIT 1",
+            (year, year, title),
         )
         row = await cursor.fetchone()
         return row[0] if row else None
@@ -151,8 +154,8 @@ async def get_or_create_movie(
                 return row[0]
 
         cursor = await db.execute(
-            "SELECT id FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
-            (title, year, year),
+            f"SELECT id FROM movies WHERE (year IS NULL AND ? IS NULL OR year = ?) AND {_NORM_TITLE_WHERE} LIMIT 1",
+            (year, year, title),
         )
         row = await cursor.fetchone()
         if row:

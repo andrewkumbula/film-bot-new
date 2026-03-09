@@ -437,9 +437,10 @@ async def _migrate_old_favorites_if_needed(settings: Settings) -> None:
             (user_id, title, year, genres, why, mood_tags, warnings, similar_if_liked, age_rating, rating_kp) = row
             if not title:
                 continue
+            norm_where = "REPLACE(REPLACE(LOWER(TRIM(COALESCE(title,''))), 'ё', 'е'), 'э', 'е') = REPLACE(REPLACE(LOWER(TRIM(?)), 'ё', 'е'), 'э', 'е')"
             cursor = await db.execute(
-                "SELECT id FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
-                (title.strip(), year, year),
+                f"SELECT id FROM movies WHERE (year IS NULL AND ? IS NULL OR year = ?) AND {norm_where} LIMIT 1",
+                (year, year, title.strip()),
             )
             movie_row = await cursor.fetchone()
             if movie_row:

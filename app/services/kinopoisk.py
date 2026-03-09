@@ -10,8 +10,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import aiosqlite
 import httpx
@@ -35,6 +36,12 @@ def _get_kinopoisk_semaphore() -> asyncio.Semaphore:
     return _KINOPOISK_API_SEMAPHORE
 
 
+# Нормализация названия для поиска: ё→е, э→е, чтобы «Шрек» и «Шрэк», «е» и «ё» находили одну запись
+def _norm_title_sql(column: str = "title") -> str:
+    """SQL-выражение: нормализованное название для сравнения (LOWER, TRIM, ё→е, э→е)."""
+    return f"REPLACE(REPLACE(LOWER(TRIM(COALESCE({column},''))), 'ё', 'е'), 'э', 'е')"
+
+
 @dataclass
 class KinopoiskMovieInfo:
     """Данные по фильму/сериалу из API Кинопоиска или из кэша (movies)."""
@@ -56,8 +63,8 @@ async def get_movie_from_db(
     year: Optional[int] = None,
 ) -> Optional[KinopoiskMovieInfo]:
     """
-    Возвращает данные из таблицы movies, если запись есть. Поиск по kinopoisk_id или по точному совпадению (title, year).
-    В API не ходит. По названию — только точное совпадение, так что по запросу «Летающие ножи» не вернётся «Летающие звери».
+    Возвращает данные из таблицы movies, если запись есть. Поиск по kinopoisk_id или по названию+год.
+    По названию используется нормализация ё/е/э, чтобы «Шрек» и «Шрэк» считались одним фильмом.
     """
     title = (title or "").strip() if title else None
     if not title and kinopoisk_id is None:
@@ -71,9 +78,10 @@ async def get_movie_from_db(
                 (kinopoisk_id,),
             )
         else:
+            n = _norm_title_sql("title")
             cursor = await db.execute(
-                "SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description, countries FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
-                (title, year, year),
+                f"SELECT kinopoisk_id, age_rating, rating_kp, votes, poster_url, poster_urls, short_description, countries FROM movies WHERE (year IS NULL AND ? IS NULL OR year = ?) AND {n} = REPLACE(REPLACE(LOWER(TRIM(?)), 'ё', 'е'), 'э', 'е') LIMIT 1",
+                (year, year, title),
             )
         row = await cursor.fetchone()
     if not row:
@@ -207,9 +215,10 @@ async def save_movie_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> No
             cursor = await db.execute("SELECT id FROM movies WHERE kinopoisk_id = ? LIMIT 1", (kinopoisk_id,))
             existing = await cursor.fetchone()
         else:
+            n = _norm_title_sql("title")
             cursor = await db.execute(
-                "SELECT id FROM movies WHERE title = ? AND (year IS NULL AND ? IS NULL OR year = ?) LIMIT 1",
-                (title, year, year),
+                f"SELECT id FROM movies WHERE (year IS NULL AND ? IS NULL OR year = ?) AND {n} = REPLACE(REPLACE(LOWER(TRIM(?)), 'ё', 'е'), 'э', 'е') LIMIT 1",
+                (year, year, title),
             )
             existing = await cursor.fetchone()
 
@@ -853,21 +862,139 @@ def _is_kinopoisk_url(url: str) -> bool:
     return "kinopoisk.ru" in url.lower()
 
 
+# Извлечение kinopoisk_id из URL вида https://www.kinopoisk.ru/film/430/ или .../film/430
+_KP_FILM_ID_RE = re.compile(r"/film/(\d+)", re.I)
+
+
+def _extract_kinopoisk_id_from_url(url: str) -> Optional[int]:
+    """Извлекает id фильма из ссылки Кинопоиска (film/430)."""
+    if not url or not isinstance(url, str):
+        return None
+    m = _KP_FILM_ID_RE.search(url)
+    if not m:
+        return None
+    try:
+        return int(m.group(1))
+    except (ValueError, IndexError):
+        return None
+
+
+async def _find_existing_movie_for_backfill(
+    settings: Settings,
+    *,
+    search_title: str,
+    year: Optional[int],
+    kinopoisk_id_from_url: Optional[int] = None,
+) -> Optional[Tuple[int, Optional[int]]]:
+    """
+    Ищет в БД фильм по kinopoisk_id (если передан) или по нормализованному названию+год.
+    Возвращает (id записи в movies, kinopoisk_id этой записи) или None.
+    """
+    search_title = (search_title or "").strip()
+    if not search_title and kinopoisk_id_from_url is None:
+        return None
+    async with aiosqlite.connect(settings.db_path) as db:
+        if kinopoisk_id_from_url is not None:
+            cursor = await db.execute(
+                "SELECT id, kinopoisk_id FROM movies WHERE kinopoisk_id = ? LIMIT 1",
+                (kinopoisk_id_from_url,),
+            )
+            row = await cursor.fetchone()
+            if row:
+                return (row[0], row[1])
+        if not search_title:
+            return None
+        n = _norm_title_sql("title")
+        cursor = await db.execute(
+            f"SELECT id, kinopoisk_id FROM movies WHERE (year IS NULL AND ? IS NULL OR year = ?) AND {n} = REPLACE(REPLACE(LOWER(TRIM(?)), 'ё', 'е'), 'э', 'е') LIMIT 1",
+            (year, year, search_title),
+        )
+        row = await cursor.fetchone()
+        if row:
+            return (row[0], row[1])
+    return None
+
+
+async def merge_duplicate_movie_into_main(
+    settings: Settings, *, duplicate_movie_id: int, main_movie_id: int
+) -> None:
+    """
+    Переносит все связи с дубликата на основную запись и удаляет дубликат.
+    duplicate_movie_id — запись без kinopoisk_id (или лишняя), main_movie_id — основная запись.
+    """
+    if duplicate_movie_id == main_movie_id:
+        return
+    async with aiosqlite.connect(settings.db_path) as db:
+        # favorites: переносим строки на main, затем удаляем по duplicate
+        await db.execute(
+            """INSERT OR IGNORE INTO favorites (user_id, movie_id, why, mood_tags, genres, warnings, similar_if_liked)
+               SELECT f.user_id, ?, f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
+               FROM favorites f WHERE f.movie_id = ?""",
+            (main_movie_id, duplicate_movie_id),
+        )
+        await db.execute("DELETE FROM favorites WHERE movie_id = ?", (duplicate_movie_id,))
+        # watched
+        await db.execute(
+            "INSERT OR IGNORE INTO watched (user_id, movie_id) SELECT user_id, ? FROM watched WHERE movie_id = ?",
+            (main_movie_id, duplicate_movie_id),
+        )
+        await db.execute("DELETE FROM watched WHERE movie_id = ?", (duplicate_movie_id,))
+        # not_interested (таблица может отсутствовать в старых БД — игнорируем ошибку)
+        try:
+            await db.execute(
+                "INSERT OR IGNORE INTO not_interested (user_id, movie_id) SELECT user_id, ? FROM not_interested WHERE movie_id = ?",
+                (main_movie_id, duplicate_movie_id),
+            )
+            await db.execute("DELETE FROM not_interested WHERE movie_id = ?", (duplicate_movie_id,))
+        except Exception:
+            pass
+        # kinopoisk_top250, oscar_nominations, shown_recently — просто перекидываем ссылку
+        try:
+            await db.execute(
+                "UPDATE kinopoisk_top250 SET movie_id = ? WHERE movie_id = ?",
+                (main_movie_id, duplicate_movie_id),
+            )
+        except Exception:
+            pass
+        try:
+            await db.execute(
+                "UPDATE oscar_nominations SET movie_id = ? WHERE movie_id = ?",
+                (main_movie_id, duplicate_movie_id),
+            )
+        except Exception:
+            pass
+        try:
+            await db.execute(
+                "UPDATE shown_recently SET movie_id = ? WHERE movie_id = ?",
+                (main_movie_id, duplicate_movie_id),
+            )
+        except Exception:
+            pass
+        await db.execute("DELETE FROM movies WHERE id = ?", (duplicate_movie_id,))
+        await db.commit()
+    logger.info(
+        "kinopoisk_backfill: merged duplicate movie_id=%s into main movie_id=%s",
+        duplicate_movie_id, main_movie_id,
+    )
+
+
 async def run_kinopoisk_id_backfill(
     settings: Settings, limit: int = 50
 ) -> Dict[str, Any]:
     """
-    Ночной джоб: для всех фильмов без kinopoisk_id уточняет название через ИИ
-    (например ё/е) и повторно ищет в Кинопоиске. Обновляет запись при успешном совпадении.
-    Возвращает {"updated": N, "processed": M, "errors": [...]}.
+    Ночной джоб: для всех фильмов без kinopoisk_id уточняет название через Tavily + ИИ,
+    затем проверяет, нет ли уже такого фильма в БД. Если есть с kinopoisk_id — склеивает дубль.
+    Если нет — идёт в API Кинопоиска и обновляет запись.
+    Возвращает {"updated": N, "merged": M, "processed": K, "errors": [...]}.
     """
     updated = 0
+    merged = 0
     processed = 0
     errors: List[str] = []
     if not settings.kinopoisk_api_key:
-        return {"updated": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
+        return {"updated": 0, "merged": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
     if not getattr(settings, "openrouter_api_key", None):
-        return {"updated": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
+        return {"updated": 0, "merged": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
     tavily_key = str(getattr(settings, "tavily_api_key", None) or "").strip()
     has_tavily = bool(tavily_key)
 
@@ -890,6 +1017,7 @@ async def run_kinopoisk_id_backfill(
         processed += 1
         try:
             search_title = title
+            kinopoisk_id_from_url: Optional[int] = None
             if has_tavily:
                 query = f"{title} {year} кинопоиск" if year is not None else f"{title} кинопоиск"
                 query = query.strip()
@@ -899,14 +1027,48 @@ async def run_kinopoisk_id_backfill(
                     max_results=8,
                     log_context={"movie_id": movie_id, "title": title, "year": year},
                 )
-                # В ИИ отдаём только результаты с домена Кинопоиска — по ним извлекаем точное название
                 kinopoisk_only = [r for r in search_results if _is_kinopoisk_url((r.get("url") or ""))]
                 if kinopoisk_only:
+                    first_url = kinopoisk_only[0].get("url") or ""
+                    kinopoisk_id_from_url = _extract_kinopoisk_id_from_url(first_url)
                     corrected = await get_kinopoisk_title_from_search_results(
                         settings, title, year, kinopoisk_only
                     )
                     if corrected:
                         search_title = corrected.strip()
+
+            # Сначала ищем в БД: возможно фильм уже есть (с кинопоиск id или дубль без id)
+            existing = await _find_existing_movie_for_backfill(
+                settings,
+                search_title=search_title,
+                year=year,
+                kinopoisk_id_from_url=kinopoisk_id_from_url,
+            )
+            if existing:
+                existing_id, existing_kp_id = existing
+                if existing_id != movie_id:
+                    if existing_kp_id is not None:
+                        # Основная запись с данными Кинопоиска — текущая запись дубль, склеиваем
+                        await merge_duplicate_movie_into_main(
+                            settings, duplicate_movie_id=movie_id, main_movie_id=existing_id
+                        )
+                        merged += 1
+                        logger.info(
+                            "kinopoisk_backfill: merged movie_id=%s into existing movie_id=%s (kp_id=%s)",
+                            movie_id, existing_id, existing_kp_id,
+                        )
+                    else:
+                        # В БД нашлась ещё одна запись без kinopoisk_id — дубль; склеиваем в текущую
+                        await merge_duplicate_movie_into_main(
+                            settings, duplicate_movie_id=existing_id, main_movie_id=movie_id
+                        )
+                        # Дальше идём в API и обновим текущую запись (movie_id)
+
+            # Если не склеили с записью, у которой уже есть kinopoisk_id — идём в API
+            if existing and existing[1] is not None:
+                await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC)
+                continue
+
             doc = await _fetch_movie_doc_by_search(settings, search_title, year)
             if not doc:
                 await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC * 2)
@@ -928,4 +1090,4 @@ async def run_kinopoisk_id_backfill(
             logger.warning("kinopoisk_backfill error for movie_id=%s: %s", movie_id, e)
         await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC * 2)
 
-    return {"updated": updated, "processed": processed, "errors": errors}
+    return {"updated": updated, "merged": merged, "processed": processed, "errors": errors}
