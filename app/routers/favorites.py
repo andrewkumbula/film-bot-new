@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -8,13 +10,26 @@ from ..keyboards.main_menu import main_menu_keyboard
 from ..services.favorites import list_favorites_for_user, remove_favorite_for_user
 from .flow_movie import _send_movie_card
 
+logger = logging.getLogger(__name__)
+
 
 def get_router(settings: Settings) -> Router:
     router = Router(name="favorites")
 
-    @router.message(F.text.endswith("Избранное"))
+    @router.message(F.text.contains("Избранное"))
     async def show_favorites(message: Message) -> None:
-        favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+        if not message.from_user:
+            await message.answer("Не удалось определить пользователя.")
+            return
+        try:
+            favorites = await list_favorites_for_user(settings, message.from_user.id, limit=10)
+        except Exception as e:
+            logger.exception("list_favorites_for_user failed: %s", e)
+            await message.answer(
+                "Не удалось загрузить избранное. Попробуй позже или напиши в поддержку.",
+                reply_markup=main_menu_keyboard(),
+            )
+            return
 
         if not favorites:
             await message.answer(
