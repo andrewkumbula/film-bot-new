@@ -17,6 +17,7 @@ import aiosqlite
 import httpx
 
 from ..config import Settings
+from ..llm.service import get_kinopoisk_corrected_title
 
 logger = logging.getLogger(__name__)
 
@@ -223,6 +224,34 @@ async def save_movie_from_api_doc(settings: Settings, doc: Dict[str, Any]) -> No
                 (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, poster_urls_json, description, genres, countries, votes, raw_json),
             )
         await db.commit()
+
+
+async def update_movie_by_id_from_api_doc(
+    settings: Settings, movie_id: int, doc: Dict[str, Any]
+) -> bool:
+    """
+    Обновляет существующую запись movies по id данными из ответа API Кинопоиска.
+    Используется при ночном дозаполнении: фильм был без kinopoisk_id, нашли по уточнённому названию.
+    """
+    row = _parse_doc_to_row(doc)
+    (
+        kinopoisk_id, title, year, age_rating, rating_kp, poster_url, poster_urls_json,
+        description, genres, countries, votes, raw_json,
+    ) = row
+    if not title and not kinopoisk_id:
+        return False
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute("SELECT 1 FROM movies WHERE id = ? LIMIT 1", (movie_id,))
+        if not await cursor.fetchone():
+            return False
+        await db.execute(
+            """UPDATE movies SET kinopoisk_id = ?, title = ?, year = ?, age_rating = ?, rating_kp = ?,
+               poster_url = ?, poster_urls = ?, description = ?, genres = ?, countries = ?, votes = ?, raw_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
+            (kinopoisk_id, title, year, age_rating, rating_kp, poster_url, poster_urls_json,
+             description, genres, countries, votes, raw_json, movie_id),
+        )
+        await db.commit()
+    return True
 
 
 async def _fetch_movie_doc_by_id(settings: Settings, kinopoisk_id: int) -> Optional[Dict[str, Any]]:
@@ -810,3 +839,62 @@ def _mpaa_to_age(mpaa: str) -> Optional[str]:
     if "R" in m or "NC-17" in m:
         return "18"
     return None
+
+
+async def run_kinopoisk_id_backfill(
+    settings: Settings, limit: int = 50
+) -> Dict[str, Any]:
+    """
+    Ночной джоб: для всех фильмов без kinopoisk_id уточняет название через ИИ
+    (например ё/е) и повторно ищет в Кинопоиске. Обновляет запись при успешном совпадении.
+    Возвращает {"updated": N, "processed": M, "errors": [...]}.
+    """
+    updated = 0
+    processed = 0
+    errors: List[str] = []
+    if not settings.kinopoisk_api_key:
+        return {"updated": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
+    if not getattr(settings, "openrouter_api_key", None):
+        return {"updated": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
+
+    async with aiosqlite.connect(settings.db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            """SELECT id, title, year FROM movies
+               WHERE kinopoisk_id IS NULL AND title IS NOT NULL AND TRIM(title) != ''
+               ORDER BY id LIMIT ?""",
+            (limit,),
+        )
+        rows = await cursor.fetchall()
+
+    for row in rows:
+        movie_id = row["id"]
+        title = (row["title"] or "").strip()
+        year = row["year"]
+        if not title:
+            continue
+        processed += 1
+        try:
+            corrected = await get_kinopoisk_corrected_title(settings, title, year)
+            search_title = (corrected or title).strip()
+            doc = await _fetch_movie_doc_by_search(settings, search_title, year)
+            if not doc:
+                await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC * 2)
+                continue
+            score = _doc_title_match_score(doc, search_title, year)
+            if score < _MIN_TITLE_MATCH_SCORE_TO_USE:
+                await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC)
+                continue
+            ok = await update_movie_by_id_from_api_doc(settings, movie_id, doc)
+            if ok:
+                updated += 1
+                logger.info(
+                    "kinopoisk_backfill: movie_id=%s title=%r -> found (score=%s)",
+                    movie_id, title, score,
+                )
+        except Exception as e:
+            errors.append(f"id={movie_id}: {e}")
+            logger.warning("kinopoisk_backfill error for movie_id=%s: %s", movie_id, e)
+        await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC * 2)
+
+    return {"updated": updated, "processed": processed, "errors": errors}

@@ -327,6 +327,47 @@ async def shorten_description_for_card(
     return text
 
 
+async def get_kinopoisk_corrected_title(
+    settings: Settings, title: str, year: Optional[int] = None
+) -> Optional[str]:
+    """
+    Спрашивает ИИ: как именно записан этот фильм на Кинопоиске (ё/е, кавычки и т.д.).
+    Возвращает уточнённое название для повторного поиска в API, или None при ошибке.
+    """
+    if not (title or "").strip():
+        return None
+    year_part = f" ({year})" if year else ""
+    prompt = (
+        f"Фильм с названием «{(title or '').strip()}»{year_part}. "
+        "Как именно он записан на сайте Кинопоиск (kinopoisk.ru)? "
+        "Учти русскую орфографию (например ё вместо е), официальное написание. "
+        "Ответь только точным названием для поиска, без кавычек, без года, без пояснений."
+    )
+    url = f"{settings.openrouter_base_url.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "Content-Type": "application/json",
+    }
+    model = getattr(settings, "model_short_desc", None) or settings.model
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
+    except httpx.RequestError:
+        return None
+    if response.status_code >= 400:
+        return None
+    try:
+        content = response.json()["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError):
+        return None
+    corrected = (content or "").strip().strip('"').strip("'").strip()
+    return corrected if corrected else None
+
+
 async def get_top250_picks_from_llm(
     settings: Settings,
     mood: str,

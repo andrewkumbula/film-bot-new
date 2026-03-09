@@ -11,6 +11,7 @@ from aiogram import Bot
 
 from .config import Settings
 from .routers.report import send_daily_report_to_chat
+from .services.kinopoisk import run_kinopoisk_id_backfill
 from .services.movie_mapping_cleanup import run_cleanup_level1
 from .services.short_descriptions import backfill_short_descriptions
 from .services.top250 import refresh_top250
@@ -23,6 +24,8 @@ TOP250_REFRESH_TIME = time(4, 0)
 SHORT_DESC_BACKFILL_TIME = time(3, 0)
 # Маппинг пустых записей movies на полные (100% название + год ±1): в 02:30
 MOVIE_CLEANUP_TIME = time(2, 30)
+# Дозаполнение kinopoisk_id по уточнённому ИИ названию (ё/е и т.д.): в 03:30
+KINOPOISK_BACKFILL_TIME = time(3, 30)
 
 
 def _parse_report_time(report_time: str) -> time:
@@ -112,6 +115,29 @@ async def short_descriptions_backfill_scheduler(settings: Settings) -> None:
                 logger.info("Short descriptions backfill: %s movies updated", n)
         except Exception as e:
             logger.exception("Short descriptions backfill failed: %s", e)
+        await asyncio.sleep(60)
+
+
+async def kinopoisk_id_backfill_scheduler(settings: Settings) -> None:
+    """
+    Раз в сутки в KINOPOISK_BACKFILL_TIME: для фильмов без kinopoisk_id
+    ИИ уточняет название (ё/е и т.д.), повторный поиск в Кинопоиске, обновление записи.
+    """
+    logger.info("Kinopoisk ID backfill scheduler started, will run daily at %s", KINOPOISK_BACKFILL_TIME)
+    while True:
+        delay = _seconds_until(KINOPOISK_BACKFILL_TIME)
+        if delay < 0:
+            delay = 0
+        if delay > 0:
+            await asyncio.sleep(delay)
+        try:
+            result = await run_kinopoisk_id_backfill(settings, limit=50)
+            if result["updated"]:
+                logger.info("Kinopoisk ID backfill: %s movies updated, %s processed", result["updated"], result["processed"])
+            if result["errors"]:
+                logger.warning("Kinopoisk ID backfill: %s errors", len(result["errors"]))
+        except Exception as e:
+            logger.exception("Kinopoisk ID backfill failed: %s", e)
         await asyncio.sleep(60)
 
 

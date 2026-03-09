@@ -54,6 +54,7 @@ async def start_polling(settings: Settings) -> None:
     import asyncio
     from .scheduler import (
         daily_report_scheduler,
+        kinopoisk_id_backfill_scheduler,
         movie_mapping_cleanup_scheduler,
         short_descriptions_backfill_scheduler,
         top250_refresh_scheduler,
@@ -61,6 +62,7 @@ async def start_polling(settings: Settings) -> None:
     asyncio.create_task(daily_report_scheduler(bot, settings))
     asyncio.create_task(movie_mapping_cleanup_scheduler(settings))
     asyncio.create_task(short_descriptions_backfill_scheduler(settings))
+    asyncio.create_task(kinopoisk_id_backfill_scheduler(settings))
     asyncio.create_task(top250_refresh_scheduler(settings))
 
     logger.info("Starting bot polling...")

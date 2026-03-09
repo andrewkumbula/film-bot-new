@@ -44,6 +44,7 @@ from ..services.favorites import (
     add_favorite_by_movie_id,
     add_watched_for_user,
     add_watched_by_movie_id,
+    get_or_create_movie,
     get_watched_kinopoisk_ids,
     get_watched_movie_ids,
     is_favorite,
@@ -1106,6 +1107,17 @@ def get_router(settings: Settings) -> Router:
                     rec_dict["age_rating"] = info.age_rating
                 if info.rating_kp is not None:
                     rec_dict["rating_kp"] = info.rating_kp
+            else:
+                # Фильм не найден в Кинопоиске — всё равно добавляем в movies для ночного дозаполнения (ИИ уточнит название, повторный поиск)
+                mid = await get_or_create_movie(
+                    kinopoisk_id=None,
+                    title=rec.title,
+                    year=rec.year,
+                    age_rating=None,
+                    rating_kp=None,
+                )
+                if mid is not None:
+                    rec_dict["movie_id"] = mid
             recs_for_state.append(rec_dict)
         await state.update_data(recommendations=recs_for_state)
         _log_stage(user_id, "movie_id_resolve_and_state", time.perf_counter() - t0, count=len(pairs_to_show))
