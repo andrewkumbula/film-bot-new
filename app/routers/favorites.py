@@ -3,9 +3,10 @@ from __future__ import annotations
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
-from ..config import Settings
+from ..config import Settings, load_settings
 from ..keyboards.main_menu import main_menu_keyboard
 from ..services.favorites import list_favorites_for_user, remove_favorite_for_user
+from .flow_movie import _send_movie_card
 
 
 def get_router(settings: Settings) -> Router:
@@ -25,6 +26,7 @@ def get_router(settings: Settings) -> Router:
 
         await message.answer("Твои сохранённые фильмы ⭐️:")
 
+        settings = load_settings()
         for idx, rec in enumerate(favorites, start=1):
             parts = []
             title_line = f"{idx}. <b>{rec['title']}</b>"
@@ -62,7 +64,11 @@ def get_router(settings: Settings) -> Router:
                         [InlineKeyboardButton(text="🗑 Удалить из избранного", callback_data=f"fav_remove:{movie_id}")],
                     ]
                 )
-            await message.answer("\n".join(parts), reply_markup=kb)
+            urls = rec.get("poster_urls") or ([rec["poster_url"]] if rec.get("poster_url") else [])
+            try:
+                await _send_movie_card(message, urls, "\n".join(parts), kb or InlineKeyboardMarkup(inline_keyboard=[]), settings)
+            except Exception:
+                await message.answer("\n".join(parts), reply_markup=kb)
 
     @router.callback_query(F.data.startswith("fav_remove:"))
     async def remove_from_favorites(callback: CallbackQuery) -> None:

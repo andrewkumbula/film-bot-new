@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any, Dict, List, Optional, Set
 
 import aiosqlite
@@ -253,6 +254,7 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
         cursor = await db.execute(
             """
             SELECT m.id, m.title, m.year, m.age_rating, m.rating_kp,
+                   m.poster_url, m.poster_urls,
                    f.why, f.mood_tags, f.genres, f.warnings, f.similar_if_liked
             FROM favorites f
             JOIN movies m ON f.movie_id = m.id
@@ -266,7 +268,18 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
 
     favorites: List[Dict[str, Any]] = []
     for row in rows:
-        movie_id, title, year, age_rating, rating_kp, why, mood_tags, genres, warnings, similar_if_liked = row
+        (movie_id, title, year, age_rating, rating_kp, poster_url, poster_urls_raw,
+         why, mood_tags, genres, warnings, similar_if_liked) = row
+        poster_urls = None
+        if poster_urls_raw and isinstance(poster_urls_raw, str):
+            try:
+                parsed = json.loads(poster_urls_raw)
+                if isinstance(parsed, list):
+                    poster_urls = parsed
+            except (TypeError, json.JSONDecodeError):
+                pass
+        if not poster_urls and poster_url:
+            poster_urls = [poster_url]
         favorites.append(
             {
                 "movie_id": movie_id,
@@ -274,6 +287,8 @@ async def list_favorites_for_user(settings: Settings, user_id: int, limit: int =
                 "year": year,
                 "age_rating": age_rating,
                 "rating_kp": rating_kp,
+                "poster_url": poster_url,
+                "poster_urls": poster_urls or [],
                 "why": why,
                 "mood_tags": (mood_tags or "").split(",") if mood_tags else [],
                 "genres": (genres or "").split(",") if genres else [],
