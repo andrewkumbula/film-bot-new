@@ -1,9 +1,12 @@
 """
 Отчёт по логам флоу за сутки: команда /daily_report и отправка по расписанию.
+Выгрузка файла логов приложения: команда /logs (только для REPORT_CHAT_ID).
 """
 from __future__ import annotations
 
 import logging
+import os
+from datetime import datetime
 
 from aiogram import Bot, Router
 from aiogram.filters import Command
@@ -51,6 +54,62 @@ def get_router(settings: Settings) -> Router:
 
         doc = BufferedInputFile(csv_bytes, filename=filename)
         await message.answer_document(doc, caption="📊 Лог движений пользователей за сутки (flow_log)")
+
+    @router.message(Command("logs"))
+    async def cmd_export_logs(message: Message) -> None:
+        """Выгрузка файла логов приложения (последние ~500 КБ). Только для админа (REPORT_CHAT_ID)."""
+        if not settings.report_chat_id:
+            await message.answer("Команда /logs отключена: REPORT_CHAT_ID не задан.")
+            return
+        try:
+            allowed_id = int(settings.report_chat_id)
+        except ValueError:
+            await message.answer("Команда /logs недоступна.")
+            return
+        if message.from_user and message.from_user.id != allowed_id:
+            await message.answer("У вас нет доступа к этой команде.")
+            return
+
+        log_path = os.getenv("LOG_PATH", "").strip() or os.getenv("LOG_FILE", "").strip()
+        if not log_path:
+            await message.answer(
+                "Файловые логи не настроены. Задайте в .env переменную LOG_PATH (путь к файлу), "
+                "перезапустите бота — тогда можно будет выгрузить логи через /logs."
+            )
+            return
+
+        await message.answer("Читаю файл логов…")
+        max_bytes = 500_000  # последние ~500 КБ
+        try:
+            with open(log_path, "r", encoding="utf-8", errors="replace") as f:
+                f.seek(0, 2)
+                size = f.tell()
+                if size <= max_bytes:
+                    f.seek(0)
+                    content = f.read()
+                else:
+                    f.seek(max(size - max_bytes, 0))
+                    content = f.read()
+                    if f.tell() > 0:
+                        content = "...(обрезано, показаны последние ~500 КБ)\n\n" + content
+        except FileNotFoundError:
+            await message.answer(f"Файл логов не найден: {log_path}")
+            return
+        except Exception as e:
+            logger.exception("Export logs read failed")
+            await message.answer(f"Ошибка при чтении логов: {e}")
+            return
+
+        if not content or not content.strip():
+            await message.answer("Файл логов пуст.")
+            return
+
+        filename = f"bot_log_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.txt"
+        doc = BufferedInputFile(content.encode("utf-8"), filename=filename)
+        await message.answer_document(
+            doc,
+            caption=f"📄 Файл логов (последние {len(content):,} символов). LOG_PATH={log_path}",
+        )
 
     @router.message(Command("export_films"))
     async def cmd_export_films(message: Message) -> None:

@@ -68,6 +68,27 @@ async def add_not_interested(user_id: int, rec: Dict[str, Any]) -> bool:
     return True
 
 
+async def add_not_interested_by_movie_id(user_id: int, movie_id: int) -> bool:
+    """Добавляет в «Не интересно» по movie_id (для кнопок со старых карточек)."""
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute("SELECT 1 FROM movies WHERE id = ? LIMIT 1", (movie_id,))
+        if not await cursor.fetchone():
+            return False
+        cursor = await db.execute(
+            "SELECT 1 FROM not_interested WHERE user_id = ? AND movie_id = ? LIMIT 1",
+            (user_id, movie_id),
+        )
+        if await cursor.fetchone():
+            return False
+        await db.execute(
+            "INSERT INTO not_interested (user_id, movie_id) VALUES (?, ?)",
+            (user_id, movie_id),
+        )
+        await db.commit()
+    return True
+
+
 async def get_not_interested_movie_ids(user_id: int) -> Set[int]:
     """Возвращает множество movie_id, отмеченных пользователем как «Не интересно»."""
     settings = load_settings()

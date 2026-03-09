@@ -322,3 +322,45 @@ async def add_watched_for_user(user_id: int, rec: Dict[str, Any]) -> bool:
         )
         await db.commit()
     return True
+
+
+async def add_favorite_by_movie_id(user_id: int, movie_id: int) -> bool:
+    """Добавляет в избранное по movie_id (для кнопок со старых карточек, когда state уже сброшен)."""
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute("SELECT 1 FROM movies WHERE id = ? LIMIT 1", (movie_id,))
+        if not await cursor.fetchone():
+            return False
+        cursor = await db.execute(
+            "SELECT 1 FROM favorites WHERE user_id = ? AND movie_id = ? LIMIT 1",
+            (user_id, movie_id),
+        )
+        if await cursor.fetchone():
+            return False
+        await db.execute(
+            "INSERT INTO favorites (user_id, movie_id, why, mood_tags, genres, warnings, similar_if_liked) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (user_id, movie_id, "", "", "", "", ""),
+        )
+        await db.commit()
+    return True
+
+
+async def add_watched_by_movie_id(user_id: int, movie_id: int) -> bool:
+    """Добавляет в «Смотрел» по movie_id (для кнопок со старых карточек)."""
+    settings = load_settings()
+    async with aiosqlite.connect(settings.db_path) as db:
+        cursor = await db.execute("SELECT 1 FROM movies WHERE id = ? LIMIT 1", (movie_id,))
+        if not await cursor.fetchone():
+            return False
+        cursor = await db.execute(
+            "SELECT 1 FROM watched WHERE user_id = ? AND movie_id = ? LIMIT 1",
+            (user_id, movie_id),
+        )
+        if await cursor.fetchone():
+            return False
+        await db.execute(
+            "INSERT INTO watched (user_id, movie_id) VALUES (?, ?)",
+            (user_id, movie_id),
+        )
+        await db.commit()
+    return True
