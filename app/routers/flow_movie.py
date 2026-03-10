@@ -1076,9 +1076,13 @@ def get_router(settings: Settings) -> Router:
             await state.update_data(recommendations=[])
             return
 
-        # Показываем не более 5 фильмов; если после фильтров осталось больше — берём первые 5
+        # Сначала выбираем 5 из тех, что уже в БД с kinopoisk_id (группа A), остальное добираем из группы B
         RECOMMENDATIONS_TO_SHOW = 5
-        pairs_to_show = filtered_pairs[:RECOMMENDATIONS_TO_SHOW]
+        pairs_a = [(rec, info) for rec, info in filtered_pairs if info is not None and info.kinopoisk_id is not None]
+        pairs_b = [(rec, info) for rec, info in filtered_pairs if not (info is not None and info.kinopoisk_id is not None)]
+        pairs_to_show = pairs_a[:RECOMMENDATIONS_TO_SHOW]
+        if len(pairs_to_show) < RECOMMENDATIONS_TO_SHOW:
+            pairs_to_show = pairs_to_show + pairs_b[: RECOMMENDATIONS_TO_SHOW - len(pairs_to_show)]
 
         # В API Кинопоиска идём только по выбранным для выдачи и только если в БД ещё нет kinopoisk_id
         t0 = time.perf_counter()
@@ -1089,6 +1093,22 @@ def get_router(settings: Settings) -> Router:
             enriched_pairs.append((rec, info))
         pairs_to_show = enriched_pairs
         _log_stage(user_id, "kinopoisk_gather", time.perf_counter() - t0, count=len(pairs_to_show))
+
+        # Остальные кандидаты ИИ, которых ещё нет в БД, добавляем в movies (kinopoisk_id=NULL) для ночного дозаполнения
+        t0 = time.perf_counter()
+        added = 0
+        for rec, info in zip(llm_response.recommendations, kinopoisk_infos):
+            if info is None:
+                mid = await get_or_create_movie(
+                    kinopoisk_id=None,
+                    title=rec.title,
+                    year=rec.year,
+                    age_rating=None,
+                    rating_kp=None,
+                )
+                if mid is not None:
+                    added += 1
+        _log_stage(user_id, "save_rest_to_db", time.perf_counter() - t0, count=added)
 
         # Сохраняем в состоянии только то, что показываем (до 5)
         t0 = time.perf_counter()
