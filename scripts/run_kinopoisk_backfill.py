@@ -5,6 +5,7 @@
 точное название → проверяем, нет ли уже такого фильма в БД (по id или по названию).
 Если есть запись с данными Кинопоиска — склеиваем дубль (переносим избранное/смотрел и т.д., удаляем дубль).
 Если нет — идём в API Кинопоиска и обновляем запись.
+Если ИИ по результатам поиска отвечает, что фильма в выдаче нет (NOT_FOUND), — запись удаляется.
 То же, что делает планировщик в 03:30.
 
 Запуск из корня проекта:
@@ -37,7 +38,7 @@ async def main():
     settings = load_settings()
     print(f"Запуск дозаполнения kinopoisk_id (до {limit} фильмов)…")
     result = await run_kinopoisk_id_backfill(settings, limit=limit)
-    print(f"Обработано: {result['processed']}, обновлено из API: {result['updated']}, склеено дублей: {result.get('merged', 0)}")
+    print(f"Обработано: {result['processed']}, обновлено из API: {result['updated']}, склеено дублей: {result.get('merged', 0)}, удалено (ИИ: не найден): {result.get('deleted', 0)}")
     if result["errors"]:
         print(f"Ошибки: {len(result['errors'])}")
         for e in result["errors"][:5]:

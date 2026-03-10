@@ -323,7 +323,7 @@ def _normalize_title(s: str) -> str:
 def _doc_title_match_score(doc: Dict[str, Any], requested_title: str, requested_year: Optional[int]) -> int:
     """
     Оценка совпадения doc с запрошенным названием и годом. Больше = лучше.
-    Приоритет: точное совпадение названия > год совпадает > первое в списке.
+    Приоритет: точное совпадение названия > запрос входит в doc > doc входит в запрос (с защитой от «Семейка» vs «Семейка Крудс»).
     """
     doc_name = _normalize_title(doc.get("name") or doc.get("alternativeName") or "")
     doc_year = doc.get("year")
@@ -341,7 +341,15 @@ def _doc_title_match_score(doc: Dict[str, Any], requested_title: str, requested_
         return 100
     if req_title in doc_name and year_ok:
         return 80
+    # doc входит в запрос — даём 60 только если это не «короткое другое произведение» (напр. «Семейка» при запросе «Семейка Крудс: Новая эра»)
     if doc_name in req_title and year_ok:
+        req_words = req_title.split()
+        doc_words = doc_name.split()
+        if len(doc_words) >= 2 or len(doc_name) >= len(req_title) * 0.5:
+            return 60
+        # Одно слово в запросе из нескольких — скорее другой фильм/сериал
+        if len(req_words) > 1:
+            return 10
         return 60
     # Совпадение по словам (например "летающие ножи" vs "ножи летающие")
     req_words = set(req_title.split())
@@ -978,6 +986,35 @@ async def merge_duplicate_movie_into_main(
     )
 
 
+async def delete_movie_record(settings: Settings, movie_id: int) -> None:
+    """
+    Удаляет запись о фильме и все ссылки на неё (избранное, смотрел, не интересно и т.д.).
+    Используется в бэкфилле, когда ИИ по результатам поиска решил, что этого фильма в выдаче нет.
+    """
+    async with aiosqlite.connect(settings.db_path) as db:
+        await db.execute("DELETE FROM favorites WHERE movie_id = ?", (movie_id,))
+        await db.execute("DELETE FROM watched WHERE movie_id = ?", (movie_id,))
+        try:
+            await db.execute("DELETE FROM not_interested WHERE movie_id = ?", (movie_id,))
+        except Exception:
+            pass
+        try:
+            await db.execute("UPDATE kinopoisk_top250 SET movie_id = NULL WHERE movie_id = ?", (movie_id,))
+        except Exception:
+            pass
+        try:
+            await db.execute("UPDATE oscar_nominations SET movie_id = NULL WHERE movie_id = ?", (movie_id,))
+        except Exception:
+            pass
+        try:
+            await db.execute("UPDATE shown_recently SET movie_id = NULL WHERE movie_id = ?", (movie_id,))
+        except Exception:
+            pass
+        await db.execute("DELETE FROM movies WHERE id = ?", (movie_id,))
+        await db.commit()
+    logger.info("kinopoisk_backfill: deleted movie_id=%s (LLM: not found in search results)", movie_id)
+
+
 async def run_kinopoisk_id_backfill(
     settings: Settings, limit: int = 50
 ) -> Dict[str, Any]:
@@ -985,16 +1022,18 @@ async def run_kinopoisk_id_backfill(
     Ночной джоб: для всех фильмов без kinopoisk_id уточняет название через Tavily + ИИ,
     затем проверяет, нет ли уже такого фильма в БД. Если есть с kinopoisk_id — склеивает дубль.
     Если нет — идёт в API Кинопоиска и обновляет запись.
-    Возвращает {"updated": N, "merged": M, "processed": K, "errors": [...]}.
+    Если ИИ по результатам поиска отвечает NOT_FOUND — запись удаляется.
+    Возвращает {"updated": N, "merged": M, "deleted": D, "processed": K, "errors": [...]}.
     """
     updated = 0
     merged = 0
+    deleted = 0
     processed = 0
     errors: List[str] = []
     if not settings.kinopoisk_api_key:
-        return {"updated": 0, "merged": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
+        return {"updated": 0, "merged": 0, "deleted": 0, "processed": 0, "errors": ["KINOPOISK_API_KEY not set"]}
     if not getattr(settings, "openrouter_api_key", None):
-        return {"updated": 0, "merged": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
+        return {"updated": 0, "merged": 0, "deleted": 0, "processed": 0, "errors": ["OPENROUTER_API_KEY not set"]}
     tavily_key = str(getattr(settings, "tavily_api_key", None) or "").strip()
     has_tavily = bool(tavily_key)
 
@@ -1031,9 +1070,15 @@ async def run_kinopoisk_id_backfill(
                 if kinopoisk_only:
                     first_url = kinopoisk_only[0].get("url") or ""
                     kinopoisk_id_from_url = _extract_kinopoisk_id_from_url(first_url)
-                    corrected = await get_kinopoisk_title_from_search_results(
+                    corrected, found = await get_kinopoisk_title_from_search_results(
                         settings, title, year, kinopoisk_only
                     )
+                    if not found:
+                        # ИИ считает, что в результатах нет этого фильма — удаляем запись
+                        await delete_movie_record(settings, movie_id)
+                        deleted += 1
+                        await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC)
+                        continue
                     if corrected:
                         search_title = corrected.strip()
 
@@ -1090,4 +1135,4 @@ async def run_kinopoisk_id_backfill(
             logger.warning("kinopoisk_backfill error for movie_id=%s: %s", movie_id, e)
         await asyncio.sleep(_KINOPOISK_REQUEST_DELAY_SEC * 2)
 
-    return {"updated": updated, "merged": merged, "processed": processed, "errors": errors}
+    return {"updated": updated, "merged": merged, "deleted": deleted, "processed": processed, "errors": errors}

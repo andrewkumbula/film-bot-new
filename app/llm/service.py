@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 from pydantic import ValidationError
@@ -99,7 +99,7 @@ def _build_prompt(preferences: Dict[str, Any], negative: str) -> str:
         "}\n\n"
         "Требования:\n"
         "- Дай от 12 до 15 фильмов за один раз (часть может отфильтроваться — «уже смотрел», «не интересно» и т.п.).\n"
-        "- Используй реальные фильмы.\n"
+        "- Рекомендуй только реально существующие фильмы, вышедшие в прокат. Не придумывай названия, не выдумывай фильмы — каждое название должно соответствовать конкретному существующему фильму.\n"
         "- В поле title пиши название так, как оно указано на Кинопоиске (kinopoisk.ru): орфография (например ё, а не е), официальное написание — это нужно для поиска постера и рейтинга.\n"
         "- Не добавляй комментарии вне JSON, без пояснений, без Markdown, без ```.\n"
         "- Все поля должны быть заполнены корректными типами.\n"
@@ -348,33 +348,42 @@ def _format_search_results_for_prompt(results: list) -> str:
     return "\n\n".join(lines) if lines else ""
 
 
+# Ответ ИИ «в результатах нет этого фильма» — по нему в бэкфилле запись удаляют
+LLM_NOT_FOUND_MARKER = "NOT_FOUND"
+
+
 async def get_kinopoisk_title_from_search_results(
     settings: Settings,
     title: str,
     year: Optional[int],
     search_results: list,
-) -> Optional[str]:
+) -> Tuple[Optional[str], bool]:
     """
-    По результатам поиска в интернете (Tavily: «название год кинопоиск») просит ИИ
-    извлечь точное название фильма как на Кинопоиске (ё/е и т.д.). ИИ опирается только
-    на переданные результаты, а не на свои знания.
+    По результатам поиска (Tavily) просит ИИ: 1) есть ли в результатах этот фильм;
+    2) если да — точное название с Кинопоиска (ё/е и т.д.).
+    Возвращает (название или None, found).
+    - (title, True): ИИ нашёл фильм в результатах, title — точное название.
+    - (None, False): ИИ считает, что в результатах нет этого фильма (ничего подходящего) → в бэкфилле запись удаляют.
+    - (None, True): ошибка/пустой ответ → вызывающий код может продолжить с исходным названием, запись не удалять.
     """
     if not (title or "").strip():
-        return None
+        return (None, True)
     text = _format_search_results_for_prompt(search_results)
     if not text.strip():
-        return None
+        return (None, True)
     year_part = f", год {year}" if year else ""
     prompt = (
-        "Ниже — фрагменты страниц Кинопоиска (kinopoisk.ru) по запросу про фильм «"
+        "Мы ищем в результатах поиска один конкретный фильм: «"
         + (title or "").strip()
         + f"»{year_part}.\n\n"
-        "Извлеки из этих фрагментов одно точное название фильма так, как оно записано на Кинопоиске: учти орфографию (например ё вместо е), официальное написание. "
-        "Ориентируйся на заголовки страниц и текст с них.\n\n"
-        "Важно: ответь только названием фильма, без года. Год мы передаём в поиск отдельно. "
-        "Если в результатах название идёт с годом в скобках или через пробел (например «Довод (2020)» или «Довод 2020») — в ответ включи только название, без года. "
-        "Год в ответ добавляй только если он часть официального названия (например «2001: Космическая одиссея»).\n\n"
-        "Ответь одним названием, без кавычек, без пояснений.\n\n"
+        "Ниже — фрагменты страниц Кинопоиска (kinopoisk.ru) по запросу про этот фильм.\n\n"
+        "Правила ответа:\n"
+        "1) Если в результатах есть страница именно этого фильма (тот же фильм, не ремейк и не другой фильм с похожим названием) — "
+        "ответь одной строкой: точное название фильма так, как на Кинопоиске (орфография: ё/е, официальное написание). "
+        "Без года в ответе (год передаём отдельно). Если в тексте название с годом в скобках — пиши только название.\n"
+        "2) Если в результатах нет этого фильма (другие фильмы, не тот год, только похожее название, или ничего подходящего) — "
+        "ответь ровно одной строкой: NOT_FOUND\n\n"
+        "Ответь только одной строкой: либо названием фильма, либо NOT_FOUND. Без кавычек и пояснений.\n\n"
         "Фрагменты со страниц Кинопоиска:\n\n"
         f"{text}"
     )
@@ -392,20 +401,21 @@ async def get_kinopoisk_title_from_search_results(
         async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.post(url, headers=headers, json=payload)
     except httpx.RequestError:
-        return None
+        return (None, True)
     if response.status_code >= 400:
-        return None
+        return (None, True)
     try:
         content = response.json()["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError):
-        return None
-    corrected = (content or "").strip().strip('"').strip("'").strip()
-    if not corrected:
-        return None
-    # Убираем год в конце, если ИИ всё же вернул «Название 2020» или «Название (2020)» — год передаётся в поиск отдельно
-    corrected = re.sub(r"\s*\(\s*(19|20)\d{2}\s*\)\s*$", "", corrected).strip()
+        return (None, True)
+    raw = (content or "").strip().strip('"').strip("'").strip()
+    if not raw:
+        return (None, True)
+    if raw.upper() == LLM_NOT_FOUND_MARKER:
+        return (None, False)
+    corrected = re.sub(r"\s*\(\s*(19|20)\d{2}\s*\)\s*$", "", raw).strip()
     corrected = re.sub(r"\s+(19|20)\d{2}\s*$", "", corrected).strip()
-    return corrected if corrected else None
+    return (corrected if corrected else None, True)
 
 
 async def get_top250_picks_from_llm(
@@ -495,6 +505,7 @@ def _build_series_prompt(
         "}\n\n"
         "Требования:\n"
         "- Дай от 8 до 12 сериалов (реальных, с Кинопоиска/IMDb). Часть может отфильтроваться.\n"
+        "- Рекомендуй только реально существующие сериалы. Не придумывай названия и не выдумывай сериалы.\n"
         "- Используй только сериалы (не полнометражные фильмы).\n"
         "- title — оригинальное или русское название, как чаще ищут; year — год первого сезона.\n"
         "- Без комментариев вне JSON, без Markdown, без ```.\n"
@@ -538,7 +549,7 @@ def _build_series_similar_prompt(series_title: str, series_year: Optional[int] =
         "    ...\n"
         "  ]\n"
         "}\n\n"
-        "Требования: только реальные сериалы (не фильмы); title и year как на Кинопоиске/IMDb; без комментариев и Markdown."
+        "Требования: только реальные сериалы (не фильмы); не придумывай названия — каждое должно быть существующим сериалом; title и year как на Кинопоиске/IMDb; без комментариев и Markdown."
     )
 
 
@@ -559,7 +570,7 @@ def _build_series_similar_multi_prompt(titles_text: str) -> str:
         "    ...\n"
         "  ]\n"
         "}\n\n"
-        "Требования: только реальные сериалы (не фильмы); title и year как на Кинопоиске/IMDb; без комментариев и Markdown."
+        "Требования: только реальные сериалы (не фильмы); не придумывай названия; title и year как на Кинопоиске/IMDb; без комментариев и Markdown."
     )
 
 
@@ -576,7 +587,7 @@ def _build_series_by_description_prompt(description: str) -> str:
         "    ...\n"
         "  ]\n"
         "}\n\n"
-        "Требования: только сериалы (не полнометражные фильмы); title и year как при поиске; без комментариев и Markdown."
+        "Требования: только сериалы (не полнометражные фильмы); не придумывай названия — только существующие сериалы; title и year как при поиске; без комментариев и Markdown."
     )
 
 
